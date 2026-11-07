@@ -1,0 +1,69 @@
+name: "ALLSTARS | Produzir episodio completo"
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 13 * * 1"
+permissions:
+  contents: write
+concurrency:
+  group: allstars-production
+  cancel-in-progress: false
+jobs:
+  full-episode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Escolher historia inédita
+        run: python engine/produce_select.py
+      - name: Instalar programas
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          python -m pip install -r requirements.txt
+      - name: Baixar voz pt-BR
+        run: python -m piper.download_voices pt_BR-faber-medium --data-dir voice
+      - name: Gerar MP3 e Reel
+        run: |
+          python engine/speech.py --episode output/selected.json --model pt_BR-faber-medium --data-dir voice --output output/narracao.wav
+          python engine/render.py --episode output/selected.json --audio output/narracao.wav
+          ffmpeg -y -loglevel error -i output/narracao.wav -codec:a libmp3lame -qscale:a 3 output/narracao.mp3
+      - name: Copia de seguranca
+        uses: actions/upload-artifact@v4
+        with:
+          name: allstars-producao-${{ github.run_number }}
+          path: |
+            output/allstars_reel.mp4
+            output/narracao.mp3
+            output/legenda_instagram.txt
+            output/roteiro.txt
+            output/fontes.txt
+          retention-days: 30
+      - name: Publicar links para download
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: episodio-${{ github.run_number }}
+        run: |
+          gh release create "$RELEASE_TAG" \
+            output/allstars_reel.mp4#allstars_reel.mp4 \
+            output/narracao.mp3#narracao.mp3 \
+            output/legenda_instagram.txt#legenda_instagram.txt \
+            output/roteiro.txt#roteiro.txt \
+            output/fontes.txt#fontes.txt \
+            --repo "${{ github.repository }}" \
+            --title "ALLSTARS - episodio ${{ github.run_number }}" \
+            --notes "PREVIA EDITORIAL: confira fontes, narracao e direitos de uso antes de postar." \
+            --latest
+      - name: Atualizar downloads do site
+        env:
+          RELEASE_TAG: episodio-${{ github.run_number }}
+        run: |
+          python engine/publish_manifest.py
+          git config user.name "allstars-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add latest.json data/history.json data/drafts/
+          git commit -m "content: episodio disponivel para download" || true
+          git push
