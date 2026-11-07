@@ -24,10 +24,5 @@
       ]
     }
   ],
-  "rewrites": [
-    {
-      "source": "/",
-      "destination": "/index-vercel.html"
-    }
-  ]
+  "outputDirectory": "public"
 }
