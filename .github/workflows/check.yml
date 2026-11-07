@@ -18,6 +18,8 @@ jobs:
           node-version: '22'
       - name: Testar sintaxe do backend seguro
         run: npm run test:syntax
+      - name: Testar login e geração sem utilizar tokens reais
+        run: node --test tests/backend.test.js
       - name: Validar JavaScript do painel web
         run: |
           python - <<'PY'
