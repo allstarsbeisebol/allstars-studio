@@ -27,8 +27,8 @@ O workflow também está agendado para **segunda-feira às 10h de Brasília**. O
 2. Atualize atleta, título, narração, textos, fontes e legenda. Se estiver usando um rascunho, copie seu conteúdo para esse arquivo.
 3. Salve via **Commit changes**.
 4. Acesse **Actions → ALLSTARS | Gerar audio e Reel MP4**: https://github.com/liuhelpme/allstars-studio/actions/workflows/render.yml
-5. Depois de conferir os fatos e os direitos, marque a confirmação de revisão e clique em **Run workflow**.
-6. Quando ficar verde, abra a execução e baixe o **Artifact `allstars-episodio-pronto`**. Contém `.mp4`, `.mp3`, legenda, roteiro e fontes.
+3. Selecione **ultimo-rascunho** (ou **episodio-principal**, se você editou manualmente o arquivo principal). Depois de conferir os fatos e os direitos, marque a confirmação de revisão e clique em **Run workflow**.
+4. Quando ficar verde, abra a execução e baixe o **Artifact `allstars-episodio-pronto`**. Contém `.mp4`, `.mp3`, legenda, roteiro e fontes.
 
 **Atenção:** a caixa de confirmação documenta sua revisão; o programa não substitui a pesquisa humana. Não há upload direto do editor web para o repositório, por segurança. O editor salva localmente e exporta JSON.
 
