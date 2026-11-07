@@ -1,0 +1,45 @@
+name: "ALLSTARS | Gerar audio e Reel MP4"
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_review:
+        description: "Confirmo que revisei fatos, fontes e direitos antes de gerar"
+        required: true
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  render:
+    if: ${{ inputs.confirm_review == true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar programas gratuitos
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          python -m pip install -r requirements.txt
+      - name: Baixar modelo de voz pt-BR
+        run: python -m piper.download_voices pt_BR-faber-medium --data-dir voice
+      - name: Gerar narração com Piper
+        run: python engine/speech.py --model pt_BR-faber-medium --data-dir voice --output output/narracao.wav
+      - name: Renderizar vídeo 1080x1920
+        run: python engine/render.py --audio output/narracao.wav
+      - name: Converter narração para MP3
+        run: ffmpeg -y -loglevel error -i output/narracao.wav -codec:a libmp3lame -qscale:a 3 output/narracao.mp3
+      - name: Entregar arquivos
+        uses: actions/upload-artifact@v4
+        with:
+          name: allstars-episodio-pronto
+          path: |
+            output/allstars_reel.mp4
+            output/narracao.mp3
+            output/legenda_instagram.txt
+            output/roteiro.txt
+            output/fontes.txt
+          retention-days: 30
