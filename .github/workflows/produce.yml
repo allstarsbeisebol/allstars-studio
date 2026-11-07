@@ -3,11 +3,6 @@ on:
   workflow_dispatch:
   issues:
     types: [opened]
-  push:
-    paths:
-      - ".github/production-trigger.txt"
-  schedule:
-    - cron: "0 13 * * 1"
 permissions:
   contents: write
   issues: write
