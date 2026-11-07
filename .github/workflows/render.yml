@@ -2,8 +2,16 @@ name: "ALLSTARS | Gerar audio e Reel MP4"
 on:
   workflow_dispatch:
     inputs:
+      episode_source:
+        description: "Qual episódio produzir?"
+        required: true
+        type: choice
+        options:
+          - "ultimo-rascunho"
+          - "episodio-principal"
+        default: "ultimo-rascunho"
       confirm_review:
-        description: "Confirmo que revisei fatos, fontes e direitos antes de gerar"
+        description: "Li e conferi roteiro, fatos, fontes e direitos de uso"
         required: true
         type: boolean
         default: false
@@ -13,12 +21,16 @@ jobs:
   render:
     if: ${{ inputs.confirm_review == true }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Selecionar episódio
+        env:
+          EPISODE_SOURCE: ${{ inputs.episode_source }}
+        run: python engine/select_episode.py
       - name: Instalar programas gratuitos
         run: |
           sudo apt-get update -qq
@@ -27,9 +39,9 @@ jobs:
       - name: Baixar modelo de voz pt-BR
         run: python -m piper.download_voices pt_BR-faber-medium --data-dir voice
       - name: Gerar narração com Piper
-        run: python engine/speech.py --model pt_BR-faber-medium --data-dir voice --output output/narracao.wav
+        run: python engine/speech.py --episode output/selected.json --model pt_BR-faber-medium --data-dir voice --output output/narracao.wav
       - name: Renderizar vídeo 1080x1920
-        run: python engine/render.py --audio output/narracao.wav
+        run: python engine/render.py --episode output/selected.json --audio output/narracao.wav
       - name: Converter narração para MP3
         run: ffmpeg -y -loglevel error -i output/narracao.wav -codec:a libmp3lame -qscale:a 3 output/narracao.mp3
       - name: Entregar arquivos
@@ -42,4 +54,5 @@ jobs:
             output/legenda_instagram.txt
             output/roteiro.txt
             output/fontes.txt
+            output/selected.json
           retention-days: 30
