@@ -13,6 +13,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Testar sintaxe do backend seguro
+        run: npm run test:syntax
       - name: Conferir scripts, dados e histórico
         run: python engine/check.py
       - name: Conferir fontes de pesquisa
