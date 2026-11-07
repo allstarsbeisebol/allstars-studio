@@ -1,5 +1,20 @@
 # ⚾ ALLSTARS STUDIO — ALÉM DO JOGO
 
+## Uso simples — produção completa automática
+
+1. Abra https://liuhelpme.github.io/allstars-studio/
+2. Clique **Produzir episódio completo**. O GitHub pedirá que você entre na sua conta e clique **Run workflow → Run workflow**. **Ainda não é literalmente um clique**: o GitHub Pages não pode executar ações autenticadas diretamente sem um backend seguro.
+3. Ao terminar, retorne ao painel e clique **Atualizar downloads**.
+4. Baixe o MP4, MP3, legenda e referências nos botões do site.
+
+**Automático:** toda segunda-feira, às 10h (Brasília, sem horário de verão), o workflow tentará gerar o próximo episódio sem intervenção manual. Os arquivos ficam nos [GitHub Releases](https://github.com/liuhelpme/allstars-studio/releases) e o último é apontado por `latest.json`.
+
+**Avisos:** O sistema usa uma biblioteca pequena de roteiros pré-escritos, não faz pesquisa factual independente em tempo real. O vídeo produzido é **prévia editorial**: revisão dos fatos, direitos e qualidade da narração continua obrigatória antes de postar. Quando a fila de histórias acabar, a execução falhará intencionalmente em vez de repetir atletas. O serviço gratuito pode ter limites e a execução não foi validada ponta a ponta nesta versão.
+
+---
+
+
+
 Painel editorial para produzir vídeos verticais de beisebol, com **GitHub Pages + GitHub Actions + Piper TTS + FFmpeg**, sem API de áudio paga.
 
 **Status:** primeira versão publicada no repositório. A execução dos workflows no GitHub e a publicação Pages precisam ser ativadas/testadas na conta. Não há publicação automática no Instagram nem verificação factual automática.
