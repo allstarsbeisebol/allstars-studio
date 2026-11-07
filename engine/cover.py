@@ -143,8 +143,8 @@ if logo.is_file():
         art.alpha_composite(src,(plate,1742))
         ImageDraw.Draw(art).text((W//2-145,1878),"AQUI VOCÊ BRILHA!",font=font(25),fill=GOLD)
 else:
-    d.text((130,1790),"ALLSTARS BEISEBOL",font=font(70),fill=WHITE)
-    d.text((345,1870),"AQUI VOCÊ BRILHA!",font=font(30),fill=GOLD)
+    d.text((210,1790),"ALÉM DO JOGO",font=font(65),fill=WHITE)
+    d.text((300,1870),"AQUI VOCÊ BRILHA!",font=font(30),fill=GOLD)
 
 im=Image.alpha_composite(im,art).convert("RGB")
 output=Path(args.output);output.parent.mkdir(parents=True,exist_ok=True)
