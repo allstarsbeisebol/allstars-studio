@@ -1,14 +1,16 @@
 {
   "available": true,
-  "tag": "episodio-1",
-  "updated_at": "2026-11-07T21:09:42.982730+00:00",
-  "athlete": "Roberto Clemente",
-  "title": "A REBATIDA 3.000 FOI HISTÓRICA. SUA ÚLTIMA MISSÃO, MAIOR AINDA.",
+  "tag": "episodio-4",
+  "updated_at": "2026-11-07T21:39:40.437011+00:00",
+  "athlete": "Roy Campanella",
+  "title": "QUANDO O CAMPO DEIXOU DE SER UMA OPÇÃO.",
   "status": "PRÉVIA EDITORIAL — confira informações históricas, voz e direitos de uso antes de publicar",
-  "video": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-1/allstars_reel.mp4",
-  "audio": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-1/narracao.mp3",
-  "caption": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-1/legenda_instagram.txt",
-  "script": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-1/roteiro.txt",
-  "sources": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-1/fontes.txt",
-  "release": "https://github.com/liuhelpme/allstars-studio/releases/tag/episodio-1"
+  "cover": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-4/capa.png",
+  "video": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-4/allstars_reel.mp4",
+  "audio": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-4/narracao.mp3",
+  "caption": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-4/legenda_instagram.txt",
+  "script": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-4/roteiro.txt",
+  "sources": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-4/fontes.txt",
+  "research": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-4/pesquisa.json",
+  "release": "https://github.com/liuhelpme/allstars-studio/releases/tag/episodio-4"
 }
