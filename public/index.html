@@ -1,0 +1,131 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#1A3566">
+<title>ALLSTARS Studio — Crie seu Reel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--navy:#1A3566;--blue:#315FAC;--red:#CE233E;--gold:#F0C040;--fg:#fff;--muted:#c1cee6;font-family:Barlow,Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 90% -20%,#315FAC88,transparent 50%),#071632;color:var(--fg)}button,input{font:inherit}button,a{touch-action:manipulation}a{color:var(--gold)}
+header{background:var(--navy);border-bottom:3px solid var(--red);padding:18px 22px}.wrap{max-width:980px;margin:auto}.brand{font-family:'Barlow Condensed',Impact,sans-serif;font-weight:900;letter-spacing:1px;font-size:28px}.brand span{color:var(--gold)}.sub{font-size:12px;color:#b9ccec;letter-spacing:1.3px}
+main{max-width:980px;margin:0 auto;padding:32px 18px 60px}.eyebrow{font-weight:800;letter-spacing:1.4px;color:var(--gold);font-size:12px}h1,h2{font-family:'Barlow Condensed',Impact,sans-serif;line-height:1.07}h1{font-size:clamp(40px,7vw,68px);margin:10px 0 18px}h2{font-size:clamp(27px,4vw,36px);margin:0 0 10px}p{line-height:1.55}p.muted,.muted{color:var(--muted)}
+.hero{padding:22px 4px 10px}.cards{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}.panel{background:#10284e;border:1px solid #49648e;border-radius:17px;padding:24px}.option{display:flex;flex-direction:column;gap:12px;min-height:270px}.option h2{margin:0}.option p{margin:0;color:#c7d6ed}.grow{flex:1} .icon{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:12px;background:#315FAC33;font-size:28px}
+button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold);font-weight:800;color:#071730;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;line-height:1.2;min-height:49px}button:disabled{opacity:.57;cursor:not-allowed}.secondary{background:var(--blue);color:white;border:1px solid #7f9ece}.outline{background:transparent;color:var(--gold);border:1px solid #aa9a68}label{display:block;font-size:14px;font-weight:700;margin:7px 0 8px}input{background:#081a36;color:#fff;padding:13px;border:1px solid #8197b9;width:100%;border-radius:9px;font-size:15px}input:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.note{color:#aac1e2;font-size:13px}.notice{background:#16345a;border-left:3px solid var(--gold);padding:12px 14px;border-radius:7px;color:#e0ebf9}.status{font-size:15px;margin:10px 0 15px}.result{display:grid;grid-template-columns:minmax(180px,280px) 1fr;gap:24px;align-items:start}.result img,.result video{width:100%;aspect-ratio:9/16;object-fit:contain;border-radius:12px;border:2px solid var(--gold);background:#08162e}.links{display:flex;gap:10px;flex-wrap:wrap}.links a{font-size:14px}.chip{display:inline-block;padding:5px 11px;border:1px solid #7888a6;border-radius:20px;font-size:12px;color:#c9d9f1}.hidden,[hidden]{display:none!important}.login{max-width:440px;margin:16px auto}.login label{text-align:left}.login p{font-size:14px}.extras{display:flex;gap:14px;flex-wrap:wrap;color:#acbfd9;font-size:13px}.extras a{color:#d2ddf0}footer{text-align:center;padding:30px;color:#acbfda;font-size:12px}
+@media(max-width:680px){.cards,.result{grid-template-columns:1fr}.panel{padding:19px}.option{min-height:225px}h1{font-size:46px}.links a{width:100%}.result img{max-width:230px;margin:auto}.cards button{width:100%}}
+</style></head><body>
+<header><div class="wrap"><div class="brand">⚾ ALLSTARS <span>STUDIO</span></div><div class="sub">ALÉM DO JOGO · HISTÓRIAS REAIS DO BEISEBOL</div></div></header>
+<main>
+<section class="hero"><div class="eyebrow">ESTÚDIO DE PRODUÇÃO</div><h1>Seu próximo Reel.<br><span style="color:var(--gold)">Você escolhe quando criar.</span></h1><p class="muted">Selecione uma das duas opções. O estúdio prepara a narração, o vídeo vertical, a capa e a legenda para você baixar. Nenhuma programação semanal obrigatória.</p></section>
+<section class="panel login hidden" id="login"><h2>Entrar no estúdio</h2><p class="muted">Acesso de produção reservado à administração ALLSTARS. Entre uma vez neste navegador.</p>
+<form id="login-form"><label for="password">Senha do estúdio</label><input id="password" type="password" autocomplete="current-password" required maxlength="300" placeholder="Sua senha de acesso"><button style="width:100%;margin-top:15px" type="submit">Entrar e continuar</button></form><p id="login-message" role="status" class="note"></p></section>
+<section id="setup" class="panel hidden"><h2>Conexão inicial pendente</h2><p class="muted">O aplicativo visual já está preparado. Falta configurar as credenciais seguras do serviço de produção uma única vez. Nenhum dado secreto deve ser colocado no código ou na página pública.</p></section>
+<section class="cards" id="options">
+<article class="panel option"><div class="icon">✦</div><h2>Gerar automaticamente</h2><p>Selecionar uma nova história de superação da biblioteca ALLSTARS, sem repetir atletas já produzidos.</p><div class="grow"></div><button id="auto" type="button">✦ Gerar meu episódio</button></article>
+<article class="panel option"><div class="icon">🔗</div><h2>Gerar a partir de link</h2><p>Cole uma matéria ou biografia pública. O roteiro será baseado naquela referência.</p><label for="article">Link de referência</label><input id="article" type="url" autocomplete="url" placeholder="https://baseballhall.org/..." inputmode="url"><div class="grow"></div><button class="secondary" id="from-link" type="button">Gerar com este link</button></article>
+</section>
+<section class="panel hidden" id="progress" aria-live="polite"><div class="eyebrow">EM PRODUÇÃO</div><h2 id="progress-title">Criando o episódio...</h2><p id="progress-message" class="muted">Preparando o pedido...</p><p class="note">Você pode deixar esta página aberta. O histórico de produção será mantido neste navegador.</p><button class="secondary" id="refresh" type="button">↻ Verificar andamento</button></section>
+<section class="panel" id="downloads"><div class="eyebrow">ARQUIVOS PRODUZIDOS</div><h2 id="result-title">Último episódio disponível</h2><p class="muted" id="result-message">Consultando os downloads...</p>
+<div id="result" class="result hidden"><div><img id="cover" alt="Capa do episódio ALLSTARS" loading="lazy"></div><div><video id="video" controls preload="none" playsinline aria-label="Assista ao Reel"></video><p class="note">Prévia editorial. Confira fatos históricos, voz e direitos das imagens antes de publicar.</p><div class="links" id="files"></div></div></div>
+</section>
+<section class="extras"><span>Identidade: <strong>ALLSTARS · Bíblia Visual 2026</strong></span><a href="https://baseballhall.org/" target="_blank" rel="noopener">Hall of Fame</a><a href="https://www.mlb.com/players" target="_blank" rel="noopener">MLB Players</a><a href="https://www.baseball-reference.com/" target="_blank" rel="noopener">Baseball-Reference</a><a href="https://www.statmuse.com/mlb/players" target="_blank" rel="noopener">StatMuse</a></section>
+</main><footer>ALLSTARS Beisebol · Aqui você brilha! · Conteúdo para revisão antes da publicação</footer>
+<script type="module">
+const $=id=>document.getElementById(id);
+let authenticated=false,configured=false,pending=Number(localStorage.getItem('allstars-pending-issue')||0),timer=null;
+function errorMessage(text){$('progress').classList.remove('hidden');$('progress-title').textContent='Não foi possível concluir';$('progress-message').textContent=text;}
+async function request(path,options={}){
+ const response=await fetch(path,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json'},...options});
+ let data;try{data=await response.json()}catch{throw Error('O serviço não respondeu corretamente.')}
+ if(!response.ok)throw Error(data.error||'Não foi possível concluir esta ação.');
+ return data;
+}
+async function init(){
+ try{
+  const state=await request('/api/login');
+  authenticated=state.authenticated;configured=state.configured;
+  $('setup').classList.toggle('hidden',configured);
+  $('login').classList.toggle('hidden',!configured||authenticated);
+  for(const id of ['auto','from-link'])$(id).disabled=!configured;
+  if(authenticated&&pending)await poll();
+ }catch{$('setup').classList.remove('hidden');$('setup').querySelector('p').textContent='Não foi possível conectar ao serviço de geração. O painel de downloads permanece disponível.'}
+ await loadLatest();
+}
+$('login-form').addEventListener('submit',async event=>{
+ event.preventDefault();
+ $('login-message').textContent='Validando acesso...';
+ try{
+  await request('/api/login',{method:'POST',body:JSON.stringify({password:$('password').value})});
+  authenticated=true;$('login').classList.add('hidden');$('password').value='';$('login-message').textContent='';
+  if(pending)await poll();
+ }catch(e){$('login-message').textContent=e.message;}
+});
+async function create(mode){
+ if(!authenticated){$('login').classList.remove('hidden');$('login').scrollIntoView({behavior:'smooth'});return;}
+ let url='';
+ if(mode==='link'){
+  url=$('article').value.trim();
+  try{const u=new URL(url);if(u.protocol!=='https:'||u.username||u.password)throw Error('invalid');}catch{errorMessage('Cole um link válido começando com https://');return;}
+ }
+ for(const id of ['auto','from-link'])$(id).disabled=true;
+ $('progress').classList.remove('hidden');$('progress-title').textContent='Enviando pedido...';$('progress-message').textContent='Preparando a produção segura.';
+ $('progress').scrollIntoView({behavior:'smooth'});
+ try{
+  const data=await request('/api/generate',{method:'POST',body:JSON.stringify({mode,url})});
+  pending=data.request_id;localStorage.setItem('allstars-pending-issue',String(pending));
+  $('progress-title').textContent='Episódio solicitado';
+  await poll();
+ }catch(e){errorMessage(e.message);}
+ finally{for(const id of ['auto','from-link'])$(id).disabled=!configured;}
+}
+$('auto').addEventListener('click',()=>create('auto'));$('from-link').addEventListener('click',()=>create('link'));
+async function poll(){
+ if(!pending||!authenticated)return;
+ try{
+  const data=await request('/api/status?id='+encodeURIComponent(pending));
+  if(data.state==='ready'){
+   clearTimeout(timer);timer=null;
+   $('progress-title').textContent='Seu episódio está pronto!';
+   $('progress-message').textContent='Use os botões abaixo para baixar.';
+   localStorage.removeItem('allstars-pending-issue');pending=0;
+   renderFiles(data.assets||{},data.athlete||'Novo episódio');
+   $('downloads').scrollIntoView({behavior:'smooth'});
+   return;
+  }
+  if(data.state==='error'){
+   clearTimeout(timer);timer=null;localStorage.removeItem('allstars-pending-issue');pending=0;
+   errorMessage(data.message);return;
+  }
+  $('progress-title').textContent='Produzindo seu Reel...';
+  $('progress-message').textContent=data.message||'Montando os arquivos.';
+ }catch(e){$('progress-message').textContent=e.message;}
+ clearTimeout(timer);timer=setTimeout(poll,16000);
+}
+$('refresh').addEventListener('click',poll);
+const labels=[['allstars_reel.mp4','↓ Vídeo MP4'],['capa.png','↓ Capa PNG'],['narracao.mp3','↓ Áudio MP3'],['legenda_instagram.txt','↓ Legenda'],['roteiro.txt','↓ Roteiro'],['fontes.txt','↓ Fontes'],['pesquisa.json','↓ Pesquisa']];
+function renderFiles(assets,title){
+ $('result-title').textContent=title;
+ $('result-message').textContent='Arquivos disponíveis para baixar.';
+ $('files').replaceChildren();
+ for(const [filename,label] of labels){
+  const url=assets[filename];
+  if(typeof url!=='string'||!url.startsWith('https://github.com/liuhelpme/allstars-studio/releases/download/'))continue;
+  const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';a.className='btn '+(filename==='allstars_reel.mp4'?'':'secondary');a.textContent=label;$('files').append(a);
+ }
+ $('cover').src=assets['capa.png']||'';$('cover').hidden=!assets['capa.png'];
+ $('video').src=assets['allstars_reel.mp4']||'';$('video').hidden=!assets['allstars_reel.mp4'];
+ $('result').classList.remove('hidden');
+}
+async function loadLatest(){
+ try{
+  const res=await fetch('./latest.json?version='+Date.now(),{cache:'no-store'});
+  if(!res.ok)throw Error('indisponível');
+  const data=await res.json();
+  if(!data.available){$('result-message').textContent='Ainda não há episódio pronto.';return;}
+  const files={'allstars_reel.mp4':data.video};
+  // Os demais campos são vinculados por seus nomes reais.
+  files['capa.png']=data.cover;files['narracao.mp3']=data.audio;files['legenda_instagram.txt']=data.caption;
+  files['roteiro.txt']=data.script;files['fontes.txt']=data.sources;files['pesquisa.json']=data.research;
+  renderFiles(files,data.athlete+' — '+data.title);
+ }catch{$('result-message').textContent='Quando uma produção terminar, seus arquivos aparecerão aqui.';}
+}
+init();
+</script></body></html>
