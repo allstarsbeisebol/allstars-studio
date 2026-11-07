@@ -1,5 +1,12 @@
 # ⚾ ALLSTARS STUDIO — ALÉM DO JOGO
 
+## Criar um episódio extra pelo site
+
+No [ALLSTARS Studio](https://liuhelpme.github.io/allstars-studio/), clique **Criar novo episódio**. O botão abre um pedido já preenchido no GitHub. Entre na conta **liuhelpme** e clique **Submit new issue**. Esse pedido aciona o mesmo gerador de capa, narração e MP4 utilizado semanalmente; o link de download aparece no site após o término da produção. Não precisa entrar em Actions. O sistema evita consumir minutos a partir de pedidos de terceiros: somente pedidos criados pela conta proprietária iniciam o gerador. O pedido é marcado como concluído quando a produção termina com sucesso.
+
+As quatro fontes prioritárias foram cadastradas em [data/research_sources.json](data/research_sources.json): [Baseball-Reference](https://www.baseball-reference.com/), [MLB Players](https://www.mlb.com/players), [StatMuse MLB](https://www.statmuse.com/mlb/players) e [National Baseball Hall of Fame](https://baseballhall.org/). Cada produção inclui `pesquisa.json` com links de pesquisa associados ao atleta. **Isso ainda não faz navegação automática nem checagem com IA**, apenas organiza o levantamento editorial. Acesso automatizado a sites deve respeitar licenças e limites; Baseball-Reference restringe tráfego de bots. Uma integração futura com busca fundamentada por IA poderá aprofundar a pesquisa, após avaliar custos e regras.
+
+
 ## Identidade visual oficial ALLSTARS 2026
 
 Referência obrigatória: [ALLSTARS - Bíblia Visual 2026.md](ALLSTARS%20-%20B%C3%ADblia%20Visual%202026.md) e 14 pranchas JPG da raiz do repositório. A paleta foi centralizada em [`brand/identity.json`](brand/identity.json), com azul `#315FAC`, azul escuro `#1A3566`, vermelho `#CE233E`, dourado `#F0C040` e branco `#FFFFFF`. O renderizador agora utiliza a paleta e as diretrizes de composição. As pranchas NÃO são inseridas automaticamente nos vídeos, porque são referências visuais e podem conter demonstrações do logotipo. Não redesenhar nem deformar a marca. As fontes Barlow Condensed, Oswald e Barlow são as oficiais, mas a renderização atual usa a fonte condensada de fallback até a instalação segura das famílias oficiais.
