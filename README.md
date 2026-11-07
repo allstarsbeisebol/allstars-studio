@@ -1,5 +1,10 @@
 # ⚾ ALLSTARS STUDIO — ALÉM DO JOGO
 
+## Identidade visual oficial ALLSTARS 2026
+
+Referência obrigatória: [ALLSTARS - Bíblia Visual 2026.md](ALLSTARS%20-%20B%C3%ADblia%20Visual%202026.md) e 14 pranchas JPG da raiz do repositório. A paleta foi centralizada em [`brand/identity.json`](brand/identity.json), com azul `#315FAC`, azul escuro `#1A3566`, vermelho `#CE233E`, dourado `#F0C040` e branco `#FFFFFF`. O renderizador agora utiliza a paleta e as diretrizes de composição. As pranchas NÃO são inseridas automaticamente nos vídeos, porque são referências visuais e podem conter demonstrações do logotipo. Não redesenhar nem deformar a marca. As fontes Barlow Condensed, Oswald e Barlow são as oficiais, mas a renderização atual usa a fonte condensada de fallback até a instalação segura das famílias oficiais.
+
+
 ## Uso simples — produção completa automática
 
 1. Abra https://liuhelpme.github.io/allstars-studio/
