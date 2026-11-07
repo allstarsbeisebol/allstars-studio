@@ -29,11 +29,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: gemini-2.5-flash
         run: |
-          if [ "$GITHUB_EVENT_NAME" = "issues" ] && grep -qi '^LINK:' "$GITHUB_EVENT_PATH"; then
-            python engine/from_link.py
-          else
-            python engine/produce_select.py
-          fi
+          python engine/request_select.py
       - name: Instalar programas
         run: |
           sudo apt-get update -qq
