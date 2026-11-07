@@ -88,6 +88,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh issue comment "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --body "Não foi possível gerar este episódio. O pedido não foi substituído por outra história. Confira a execução em https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}. Para links, é preciso usar artigo HTTPS acessível e configurar a chave GEMINI_API_KEY gratuita dentro dos limites do serviço."
+          gh issue close "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --reason "not planned"
 
       - name: Registrar resultado no pedido iniciado pelo site
         if: success() && github.event_name == 'issues'
