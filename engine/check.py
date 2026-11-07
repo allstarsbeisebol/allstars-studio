@@ -9,7 +9,7 @@ for script in scripts:
     py_compile.compile(str(root/script), doraise=True)
     print("OK Python:",script)
 
-required=["index.html","data/episode.json","data/history.json",".github/workflows/weekly.yml",".github/workflows/render.yml"]
+required=["index.html","brand/identity.json","ALLSTARS - Bíblia Visual 2026.md","data/episode.json","data/history.json",".github/workflows/weekly.yml",".github/workflows/render.yml"]
 for filename in required:
     if not (root/filename).is_file():
         raise SystemExit("Arquivo obrigatório ausente: "+filename)
