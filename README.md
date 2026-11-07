@@ -1,93 +1,42 @@
 # ⚾ ALLSTARS STUDIO — ALÉM DO JOGO
 
-## Criar um episódio extra pelo site
+Aplicativo [ALLSTARS Studio](https://liuhelpme.github.io/allstars-studio/) para criar Reels verticais com narração, capa e legenda, sob demanda, sem instalar programas.
 
-No [ALLSTARS Studio](https://liuhelpme.github.io/allstars-studio/), clique **Criar novo episódio**. O botão abre um pedido já preenchido no GitHub. Entre na conta **liuhelpme** e clique **Submit new issue**. Esse pedido aciona o mesmo gerador de capa, narração e MP4 utilizado semanalmente; o link de download aparece no site após o término da produção. Não precisa entrar em Actions. O sistema evita consumir minutos a partir de pedidos de terceiros: somente pedidos criados pela conta proprietária iniciam o gerador. O pedido é marcado como concluído quando a produção termina com sucesso.
+## Como usar
 
-As quatro fontes prioritárias foram cadastradas em [data/research_sources.json](data/research_sources.json): [Baseball-Reference](https://www.baseball-reference.com/), [MLB Players](https://www.mlb.com/players), [StatMuse MLB](https://www.statmuse.com/mlb/players) e [National Baseball Hall of Fame](https://baseballhall.org/). Cada produção inclui `pesquisa.json` com links de pesquisa associados ao atleta. **Isso ainda não faz navegação automática nem checagem com IA**, apenas organiza o levantamento editorial. Acesso automatizado a sites deve respeitar licenças e limites; Baseball-Reference restringe tráfego de bots. Uma integração futura com busca fundamentada por IA poderá aprofundar a pesquisa, após avaliar custos e regras.
+**Sem link**: abra o site, clique **Criar episódio → Criar sem link** e confirme **Submit new issue** no GitHub autenticado como `liuhelpme`. O sistema escolhe uma história inédita da biblioteca atual.
 
+**Com link**: cole um endereço HTTPS de artigo público, clique **Criar episódio com este link** e confirme **Submit new issue** no GitHub. O workflow lê o artigo e utiliza Gemini para preparar um rascunho **baseado naquela fonte**. Se não houver texto legível, a chave Gemini não estiver configurada ou o atleta já estiver no histórico, o fluxo para com erro; nunca substitui automaticamente o link por outra história.
 
-## Identidade visual oficial ALLSTARS 2026
+Ao concluir, volte ao site e clique **Ver último episódio** / **Atualizar**. Baixe MP4, MP3, capa PNG, legenda e arquivo de fontes. O site utiliza links do GitHub Releases; os vídeos são prévias para revisão antes da publicação no Instagram.
 
-Referência obrigatória: [ALLSTARS - Bíblia Visual 2026.md](ALLSTARS%20-%20B%C3%ADblia%20Visual%202026.md) e 14 pranchas JPG da raiz do repositório. A paleta foi centralizada em [`brand/identity.json`](brand/identity.json), com azul `#315FAC`, azul escuro `#1A3566`, vermelho `#CE233E`, dourado `#F0C040` e branco `#FFFFFF`. O renderizador agora utiliza a paleta e as diretrizes de composição. As pranchas NÃO são inseridas automaticamente nos vídeos, porque são referências visuais e podem conter demonstrações do logotipo. Não redesenhar nem deformar a marca. As fontes Barlow Condensed, Oswald e Barlow são as oficiais, mas a renderização atual usa a fonte condensada de fallback até a instalação segura das famílias oficiais.
+**Não existe agendamento semanal ativo**. A produção acontece somente mediante solicitação manual. Para proteger a conta, o GitHub Pages (site estático) ainda requer uma confirmação de pedido no GitHub. Um acionamento estritamente com um clique, sem sair do site, depende de um backend autenticado.
 
+## Configuração única para gerar a partir de links
 
-## Uso simples — produção completa automática
+O modo por link exige uma chave do Google AI Studio. No repositório, abra [Settings → Secrets and variables → Actions](https://github.com/liuhelpme/allstars-studio/settings/secrets/actions), crie um **Repository secret** chamado exatamente `GEMINI_API_KEY` e cole sua chave. **Nunca** inclua a chave no site, no código ou em issues. Consulte as cotas e os modelos gratuitos disponíveis no Google; o uso gratuito não é ilimitado.
 
-1. Abra https://liuhelpme.github.io/allstars-studio/
-2. Clique **Produzir episódio completo**. O GitHub pedirá que você entre na sua conta e clique **Run workflow → Run workflow**. **Ainda não é literalmente um clique**: o GitHub Pages não pode executar ações autenticadas diretamente sem um backend seguro.
-3. Ao terminar, retorne ao painel e clique **Atualizar downloads**.
-4. Baixe o MP4, MP3, legenda e referências nos botões do site.
+Alguns sites bloqueiam leitura automatizada, exigem login ou não disponibilizam texto. Nesses casos, o sistema reporta a falha em vez de fabricar conteúdo. A geração de texto é assistida por IA, **não é checagem histórica independente**.
 
-**Automático:** toda segunda-feira, às 10h (Brasília, sem horário de verão), o workflow tentará gerar o próximo episódio sem intervenção manual. Os arquivos ficam nos [GitHub Releases](https://github.com/liuhelpme/allstars-studio/releases) e o último é apontado por `latest.json`.
+## Fontes prioritárias
 
-**Avisos:** O sistema usa uma biblioteca pequena de roteiros pré-escritos, não faz pesquisa factual independente em tempo real. O vídeo produzido é **prévia editorial**: revisão dos fatos, direitos e qualidade da narração continua obrigatória antes de postar. Quando a fila de histórias acabar, a execução falhará intencionalmente em vez de repetir atletas. O serviço gratuito pode ter limites e a execução não foi validada ponta a ponta nesta versão.
+Registradas em [data/research_sources.json](data/research_sources.json):
 
----
+- [Baseball-Reference](https://www.baseball-reference.com/)
+- [MLB Players](https://www.mlb.com/players)
+- [StatMuse MLB](https://www.statmuse.com/mlb/players)
+- [National Baseball Hall of Fame](https://baseballhall.org/)
 
+As fontes complementares são entregues como sugestões de pesquisa, não como provas de que alegações foram verificadas. Respeitar licenças e restrições de acesso dos sites.
 
+## Identidade da marca
 
-Painel editorial para produzir vídeos verticais de beisebol, com **GitHub Pages + GitHub Actions + Piper TTS + FFmpeg**, sem API de áudio paga.
+A [Bíblia Visual ALLSTARS 2026](ALLSTARS%20-%20B%C3%ADblia%20Visual%202026.md) e as 14 pranchas JPG são referências. O [arquivo de identidade](brand/identity.json) centraliza as cores e regras. Para inserir a marca original na capa, disponibilizar `brand/logo.png` com transparência e proporções preservadas. O gerador não cria logotipo alternativo. Fotografias de atletas exigem licença e metadados de autorização.
 
-**Status:** primeira versão publicada no repositório. A execução dos workflows no GitHub e a publicação Pages precisam ser ativadas/testadas na conta. Não há publicação automática no Instagram nem verificação factual automática.
+## Tecnologia
 
-## 1. Ativar site (somente uma vez)
+GitHub Pages (painel), GitHub Actions (produção), Piper TTS (narração local), Pillow (capa), FFmpeg (Reel e MP3), Gemini opcional (roteiro a partir de link). A execução em GitHub Actions está sujeita aos limites e políticas do GitHub.
 
-1. Acesse **Settings → Pages**: https://github.com/liuhelpme/allstars-studio/settings/pages
-2. Em **Build and deployment → Source** escolha **Deploy from a branch**.
-3. Em **Branch** escolha **main** e pasta **/(root)**.
-4. Clique em **Save**.
-5. Após a publicação, acesse **https://liuhelpme.github.io/allstars-studio/**.
+Arquivos essenciais: `index.html`, `.github/workflows/produce.yml`, `engine/request_select.py`, `engine/from_link.py`, `engine/produce_select.py`, `engine/cover.py`, `engine/speech.py`, `engine/render.py`, `engine/publish_manifest.py`, `latest.json`.
 
-## 2. Gerar um novo rascunho (sem API)
-
-1. Acesse **Actions → ALLSTARS | Novo rascunho semanal**.
-2. Clique **Run workflow → Run workflow**.
-3. Quando terminar, o rascunho estará em `data/drafts/`; o histórico fica em `data/history.json`.
-4. Revise todas as afirmações em fontes confiáveis antes de aproveitar.
-
-O workflow também está agendado para **segunda-feira às 10h de Brasília**. O processamento depende dos limites e disponibilidade do GitHub Actions. **A fila inicial tem seis histórias distintas**; ao terminar, a tarefa falhará em vez de inventar uma repetição. Ampliaremos essa biblioteca editorial.
-
-## 3. Gerar áudio e vídeo
-
-1. Acesse `data/episode.json` e clique no lápis **Edit**: https://github.com/liuhelpme/allstars-studio/edit/main/data/episode.json
-2. Atualize atleta, título, narração, textos, fontes e legenda. Se estiver usando um rascunho, copie seu conteúdo para esse arquivo.
-3. Salve via **Commit changes**.
-4. Acesse **Actions → ALLSTARS | Gerar audio e Reel MP4**: https://github.com/liuhelpme/allstars-studio/actions/workflows/render.yml
-3. Selecione **ultimo-rascunho** (ou **episodio-principal**, se você editou manualmente o arquivo principal). Depois de conferir os fatos e os direitos, marque a confirmação de revisão e clique em **Run workflow**.
-4. Quando ficar verde, abra a execução e baixe o **Artifact `allstars-episodio-pronto`**. Contém `.mp4`, `.mp3`, legenda, roteiro e fontes.
-
-**Atenção:** a caixa de confirmação documenta sua revisão; o programa não substitui a pesquisa humana. Não há upload direto do editor web para o repositório, por segurança. O editor salva localmente e exporta JSON.
-
-## 4. Ferramentas gratuitas
-
-- [OHF Piper](https://github.com/OHF-Voice/piper1-gpl) — TTS local (software GPL-3.0).
-- Voz `pt_BR-faber-medium` — [MODEL_CARD](https://huggingface.co/rhasspy/piper-voices/blob/main/pt/pt_BR/faber/medium/MODEL_CARD); dataset indicado CC0. Conferir a licença atual antes de uso.
-- [FFmpeg](https://ffmpeg.org/) — processamento multimídia; verificar a licença da compilação e dos codecs.
-- [Pillow](https://python-pillow.github.io/) — cartelas gráficas.
-- [Wikimedia Commons](https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia) — fotos individuais **somente com licenças verificadas**.
-
-As capas e cartelas gráficas do MVP são desenhadas automaticamente: **não contém fotografias de arquivo**. Não use imagens da MLB, AP ou Getty sem licença.
-
-## 5. Limitações da versão inicial
-
-- GitHub Pages só hospeda o painel. O trabalho pesado roda nos Actions.
-- O site **não tem um botão com acesso direto seguro à API privada do GitHub**. Os botões abrem os workflows, exigindo seu login e a confirmação no próprio GitHub.
-- O histórico de rascunhos é registrado no repositório e evita escolher o mesmo atleta da fila. Ainda não deduplica similaridade semântica.
-- O editor do site não sincroniza sozinho os campos com `data/episode.json`.
-- Não existe ainda pesquisa automática de fatos na web, legendagem palavra a palavra, geração de fotos históricas nem publicação no Instagram.
-- O GitHub Actions e serviços externos têm cotas. Em repositório público, ações com runners padrão costumam ser gratuitas, mas acompanhe as políticas e limites atuais.
-- A aplicação gera roteiro, voz, vídeo e legenda a partir de dados cadastrados; o piloto exige revisão antes de uso.
-
-## Estrutura
-
-- `index.html` — painel web / GitHub Pages
-- `data/episode.json` — conteúdo ativo para renderização
-- `data/history.json` — exclusão de atletas já abordados e rascunhados
-- `engine/generate.py` — fila de rascunhos sem créditos de API
-- `engine/speech.py` — voz pt-BR com Piper
-- `engine/render.py` — vídeo vertical com Pillow + FFmpeg
-- `.github/workflows/weekly.yml` — criação semanal de rascunhos
-- `.github/workflows/render.yml` — áudio + vídeo quando solicitado
-
-Projeto inicial ALLSTARS Beisebol. Uso comercial e publicação condicionados à checagem de direitos e fatos.
+**Status:** o fluxo anterior de produção sem link foi validado. O fluxo por link ainda requer teste de execução real com `GEMINI_API_KEY`. Todo vídeo continua sujeito a revisão de fatos, direitos e qualidade.
