@@ -75,7 +75,7 @@ for i,message in enumerate(scenes):
     d.rectangle((76,1660,1000,1664),fill=red)
     d.text((76,1700),f"EPISÓDIO ALLSTARS  •  {i+1:02d}/{len(scenes):02d}",font=find_font(body_fonts,30),fill=white)
     d.text((76,1780),"AQUI VOCÊ BRILHA!",font=find_font(body_fonts,32),fill=gold)
-    path=out/f"cena_{i:02}.png";im.save(path,optimize=True)
+    path=out/f"cena_{i:02}.png"\n    if i==0 and (out/"capa.png").is_file():\n        with Image.open(out/"capa.png") as cover:\n            cover.convert("RGB").save(path,optimize=True)\n    else:\n        im.save(path,optimize=True)
     frames.append(path)
 concat=out/"video.ffconcat"
 with concat.open("w",encoding="utf-8") as f:
