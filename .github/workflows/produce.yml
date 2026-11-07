@@ -78,7 +78,7 @@ jobs:
           python engine/publish_manifest.py
           git config user.name "allstars-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add latest.json data/history.json data/drafts/
+          git add latest.json public/latest.json data/history.json data/drafts/
           git commit -m "content: episodio disponivel para download" || true
           git push
 
