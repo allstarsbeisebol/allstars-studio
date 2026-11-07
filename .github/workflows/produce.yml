@@ -29,7 +29,9 @@ jobs:
           python -m pip install -r requirements.txt
       - name: Baixar voz pt-BR
         run: python -m piper.download_voices pt_BR-faber-medium --data-dir voice
-      - name: Criar capa oficial do episodio\n        run: python engine/cover.py --episode output/selected.json --output output/capa.png\n      - name: Gerar MP3 e Reel
+      - name: Criar capa oficial do episodio
+        run: python engine/cover.py --episode output/selected.json --output output/capa.png
+      - name: Gerar MP3 e Reel
         run: |
           python engine/speech.py --episode output/selected.json --model pt_BR-faber-medium --data-dir voice --output output/narracao.wav
           python engine/render.py --episode output/selected.json --audio output/narracao.wav
@@ -39,7 +41,8 @@ jobs:
         with:
           name: allstars-producao-${{ github.run_number }}
           path: |
-            output/capa.png\n            output/allstars_reel.mp4
+            output/capa.png
+            output/allstars_reel.mp4
             output/narracao.mp3
             output/legenda_instagram.txt
             output/roteiro.txt
@@ -51,7 +54,8 @@ jobs:
           RELEASE_TAG: episodio-${{ github.run_number }}
         run: |
           gh release create "$RELEASE_TAG" \
-            output/capa.png#capa.png \\\n            output/allstars_reel.mp4#allstars_reel.mp4 \
+            output/capa.png#capa.png \
+            output/allstars_reel.mp4#allstars_reel.mp4 \
             output/narracao.mp3#narracao.mp3 \
             output/legenda_instagram.txt#legenda_instagram.txt \
             output/roteiro.txt#roteiro.txt \
