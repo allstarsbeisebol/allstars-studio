@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "policy": "Links de pesquisa não constituem verificação factual. Checar cada alegação no texto original; não copiar imagens sem licença nem fazer coleta massiva.",
+  "sources": [
+    {
+      "id": "baseball_reference",
+      "name": "Baseball-Reference",
+      "url": "https://www.baseball-reference.com/",
+      "domain": "baseball-reference.com",
+      "focus": "Estatísticas históricas e registros de carreira",
+      "method": "Pesquisa manual e links de consulta, sem scraping automatizado"
+    },
+    {
+      "id": "mlb_players",
+      "name": "MLB Players",
+      "url": "https://www.mlb.com/players",
+      "domain": "mlb.com",
+      "focus": "Perfis, equipes, cronologias e registros oficiais da MLB",
+      "method": "Pesquisa de fontes públicas; respeitar direitos e termos de uso"
+    },
+    {
+      "id": "statmuse",
+      "name": "StatMuse MLB",
+      "url": "https://www.statmuse.com/mlb/players",
+      "domain": "statmuse.com",
+      "focus": "Consultas estatísticas exploratórias e comparação de números",
+      "method": "Conferir os resultados com fonte primária; sem scraping"
+    },
+    {
+      "id": "hall_of_fame",
+      "name": "National Baseball Hall of Fame",
+      "url": "https://baseballhall.org/",
+      "domain": "baseballhall.org",
+      "focus": "Biografias, episódios históricos e contextualização",
+      "method": "Consultar artigos e perfis com URL específica"
+    }
+  ]
+}
