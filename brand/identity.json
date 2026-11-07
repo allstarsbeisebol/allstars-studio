@@ -1,0 +1,24 @@
+{
+  "name": "ALLSTARS Beisebol",
+  "slogan": "ALLSTARS Beisebol, aqui você brilha!",
+  "reference": "ALLSTARS - Bíblia Visual 2026.md",
+  "colors": {
+    "royal_blue": "#315FAC",
+    "navy": "#1A3566",
+    "red": "#CE233E",
+    "gold": "#F0C040",
+    "white": "#FFFFFF"
+  },
+  "fonts": {
+    "headline": "Barlow Condensed",
+    "impact": "Oswald",
+    "body": "Barlow"
+  },
+  "rules": [
+    "Não deformar, alterar fontes ou redesenhar o logotipo oficial",
+    "Manter área de proteção ao redor da marca",
+    "Evitar cópias visuais de MLB/ESPN",
+    "Evitar excesso de texto e estética infantil",
+    "Usar fotografia histórica com licença verificada"
+  ]
+}
