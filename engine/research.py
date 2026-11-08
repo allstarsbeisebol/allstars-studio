@@ -24,6 +24,8 @@ report={"athlete":name,"episode_id":ep.get("id"),"research_sites":references,
         "episode_source_urls":[{"url":u,"status":"FORNECIDA NO RASCUNHO — VERIFICAÇÃO HUMANA NECESSÁRIA"} for u in ep.get("sources",[])],
         "verified_claims":[],"verification_status":"PENDENTE",
         "notice":"Links de busca não foram consultados automaticamente. Um link fornecido pode ter seu HTML lido para criar o rascunho, mas seus fatos não são verificados de forma independente."}
+if isinstance(ep.get("editorial_checks"),dict):
+    report["editorial_checks"]=ep["editorial_checks"]
 if isinstance(ep.get("source_metadata"),dict):
     report["reference_article"]={
         "retrieval":"HTML público lido para elaboração do rascunho",
