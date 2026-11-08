@@ -38,6 +38,8 @@ jobs:
           python -m py_compile engine/from_link.py engine/request_select.py engine/article_extract.py engine/editorial_guard.py engine/content_request.py engine/topic_generate.py
       - name: Testar recuperação de páginas lentas sem Gemini
         run: python -m unittest discover -s tests -p 'test_link_timeout.py' -v
+      - name: Validar colagem extensa de fontes
+        run: python -m unittest discover -s tests -p 'test_reference_batch.py' -v
       - name: Validar extração de matérias e preservação de fontes
         run: python -m unittest discover -s tests -p 'test_article_extract.py' -v
       - name: Validar tipo de conteúdo e temas coletivos
@@ -52,6 +54,8 @@ jobs:
           python -c "import json; d=json.load(open('output/pesquisa.json')); assert len(d['research_sites']) == 4"
       - name: Instalar Pillow para validar a identidade visual
         run: python -m pip install "Pillow>=10.4,<12"
+      - name: Testar arte contextual única, nova a cada execução
+        run: python -m unittest discover -s tests -p 'test_original_art.py' -v
       - name: Verificar que artes anime só pertencem ao atleta aprovado
         run: python -m unittest discover -s tests -p 'test_anime_assets.py' -v
       - name: Confirmar imagem anime Jim Abbott aprovada e vinculada ao no-hitter
