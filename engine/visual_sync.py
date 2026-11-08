@@ -93,7 +93,6 @@ def archive(ep,stage,root=Path("output")):
     source="edited_variant" if external else "generated_studio"
     suffix="adapted-upload" if external else "studio"
     path=f"issues/{issue}/r{revision}-{suffix}.jpg"
-    qry="select=id,approval_status&id&object_path=eq."+urllib.parse.quote(path,safe="")
     rows=rest("allstars_visual_assets","select=id,approval_status&object_path=eq."+urllib.parse.quote(path,safe="")+"&limit=1") or []
     if rows:
         if stage=="published":
