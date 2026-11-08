@@ -50,14 +50,18 @@ def licensed_photo(episode):
     path=ROOT/"assets/athletes"/(athlete+".jpg")
     record=ROOT/"assets/athletes"/(athlete+".license.json")
     if not (path.is_file() and record.is_file()): return None
-    metadata=json.loads(record.read_text(encoding="utf-8"))
-    if metadata.get("approved_for_publication") is not True or not metadata.get("source_url") or not metadata.get("license"): return None
-    with Image.open(path) as src:
-        src=ImageOps.exif_transpose(src).convert("RGB")
-        scale=max(W/src.width,1270/src.height)
-        src=src.resize((round(src.width*scale),round(src.height*scale)),Image.Resampling.LANCZOS)
-        x=(src.width-W)//2;y=int(max(0,(src.height-1270)*0.3))
-        return ImageEnhance.Contrast(src.crop((x,y,x+W,y+1270))).enhance(1.15)
+    try:
+        metadata=json.loads(record.read_text(encoding="utf-8"))
+        if metadata.get("approved_for_publication") is not True or not metadata.get("source_url") or not metadata.get("license"): return None
+        with Image.open(path) as src:
+            src=ImageOps.exif_transpose(src).convert("RGB")
+            scale=max(W/src.width,1270/src.height)
+            src=src.resize((round(src.width*scale),round(src.height*scale)),Image.Resampling.LANCZOS)
+            x=(src.width-W)//2;y=int(max(0,(src.height-1270)*0.3))
+            return ImageEnhance.Contrast(src.crop((x,y,x+W,y+1270))).enhance(1.15)
+    except (OSError,ValueError,TypeError,KeyError):
+        # Foto/manifesto ilegível: recuperar com cartoon, sem gerar tela vazia.
+        return None
 
 def gradient():
     strip=Image.new("RGB",(1,H))
