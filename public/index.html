@@ -269,7 +269,7 @@ $('login-form').addEventListener('submit',async event=>{
 });
 function getReferences(){
  const raw=$('reference-links-text').value;
- const matches=raw.match(/https:\/\/[^\s<>"'\u0000-\u001F]+/gi)||[];
+ const matches=raw.match(/https:\/\/[^\s,;<>"'\u0000-\u001F]+/gi)||[];
  return [...new Set(matches.map(x=>x.replace(/[),;.\]}]+$/g,'').trim()).filter(Boolean))];
 }
 const explanations={
@@ -311,6 +311,7 @@ function openReview(){
   ['Assunto',draft.subject||'O Studio escolherá a história'],
   ['Links de referência',draft.urls.length?draft.urls.length+' link(s) informado(s)':'Nenhum'],
   ['Texto colado',draft.reference_text?draft.reference_text.length+' caracteres informados':'Nenhum'],
+  ['Leitura automática',draft.urls.length>16?'Os 16 primeiros URLs serão lidos; os outros serão preservados para conferência.':'As referências acessíveis serão analisadas; as fontes não são fatos verificados.'],
   ['Depois de confirmar','O pedido será registrado e a produção começará. Os arquivos aparecerão na área de downloads.']
  ];
  for(const [label,value] of lines){const p=document.createElement('p');const strong=document.createElement('strong');strong.textContent=label+': ';p.append(strong,document.createTextNode(value));summary.append(p);}
@@ -417,9 +418,12 @@ async function loadLatest(){
   files['capa.png']=data.cover;files['capa_perfil_3x4.png']=data.profile_cover;files['narracao.mp3']=data.audio;files['legenda_instagram.txt']=data.caption;
   files['roteiro.txt']=data.script;files['fontes.txt']=data.sources;files['pesquisa.json']=data.research;files['midia.json']=data.media;files['briefing_arte_anime.txt']=data.anime_briefing;files['qualidade_visual.json']=data.visual_quality;files['legendas.srt']=data.subtitles;files['storyboard.json']=data.storyboard;
   renderFiles(files,(data.subject||data.athlete||'ALLSTARS')+' — '+data.title);
-  if(data.visual_premium===false){
-   $('result-message').textContent='Prévia com arte de contingência: ainda não atende ao estilo anime premium aprovado. Revise antes de publicar.';
+  if(data.visual_mode==='original_context_art'){
+   $('result-message').textContent='Arte editorial inédita ligada a este roteiro, com cena e composição novas. Ainda não corresponde ao acabamento anime premium aprovado; revise antes de publicar.';
+  }else if(data.visual_premium===false){
+   $('result-message').textContent='A capa ainda não atende ao acabamento anime premium aprovado. Revise antes de publicar.';
   }
+  if(data.hook)document.title='⚾ '+data.hook.slice(0,68)+' · ALLSTARS Studio';
  }catch{$('result-message').textContent='Quando uma produção terminar, seus arquivos aparecerão aqui.';}
 }
 let libraryData=[],libraryPage=0,libraryMode='cards';
