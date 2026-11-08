@@ -16,3 +16,10 @@ else:
     script="engine/produce_select.py"
 print("Modo:",req["mode"],"| tipo:",req["content_type"],"| assunto:",req["subject"][:100],flush=True)
 subprocess.run([sys.executable,str(root/script)],check=True,cwd=root)
+
+# Toda nova execução produz arte exclusiva, mesmo com história automática da fila.
+selection=root/"output/selected.json"
+if selection.is_file():
+    episode=json.loads(selection.read_text(encoding="utf-8"))
+    episode["unique_art_required"]=True
+    selection.write_text(json.dumps(episode,ensure_ascii=False,indent=2),encoding="utf-8")
