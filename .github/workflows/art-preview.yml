@@ -59,7 +59,16 @@ jobs:
         run: |
           python engine/visual_quality.py --episode output/selected.json --output output/qualidade_visual.json
           python engine/anime_briefing.py --episode output/selected.json --output output/briefing_arte_anime.txt
-          python engine/cover.py --episode output/selected.json --output output/capa.png
+          python engine/external_prompt.py --episode output/selected.json --output output/prompt_imagem_ia.txt
+          asset="$(python -c 'import json; print(json.load(open("output/selected.json")).get("art_image_asset",""))')"
+          if [ -n "$asset" ]; then
+            gh release download "preview-issue-${ISSUE_ID}" --repo "${{ github.repository }}" \
+              --pattern "$asset" --dir output --clobber
+            python engine/import_art.py --episode output/selected.json \
+              --image "output/$asset" --output output/capa.png
+          else
+            python engine/cover.py --episode output/selected.json --output output/capa.png
+          fi
       - name: Publicar capa e roteiro no espaço de revisão do pedido
         run: |
           set -eu
@@ -70,6 +79,7 @@ jobs:
               output/capa.png#capa.png \
               output/capa_perfil_3x4.png#capa_perfil_3x4.png \
               output/briefing_arte_anime.txt#briefing_arte_anime.txt \
+              output/prompt_imagem_ia.txt#prompt_imagem_ia.txt \
               output/qualidade_visual.json#qualidade_visual.json \
               --repo "${{ github.repository }}" --clobber
           else
@@ -78,6 +88,7 @@ jobs:
               output/capa.png#capa.png \
               output/capa_perfil_3x4.png#capa_perfil_3x4.png \
               output/briefing_arte_anime.txt#briefing_arte_anime.txt \
+              output/prompt_imagem_ia.txt#prompt_imagem_ia.txt \
               output/qualidade_visual.json#qualidade_visual.json \
               --repo "${{ github.repository }}" \
               --title "ALLSTARS · Prévia da capa · pedido #${ISSUE_ID}" \
