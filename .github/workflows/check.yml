@@ -48,6 +48,8 @@ jobs:
           python -c "import json; d=json.load(open('output/pesquisa.json')); assert len(d['research_sites']) == 4"
       - name: Instalar Pillow para validar a identidade visual
         run: python -m pip install "Pillow>=10.4,<12"
+      - name: Validar layout 9:16, legendas e arte cartoon sem foto
+        run: python -m unittest discover -s tests -p 'test_visual_layout.py' -v
       - name: Testar seleção segura de imagens Commons
         run: python -m unittest discover -s tests -p 'test_commons_media.py' -v
       - name: Verificar logo original preservada
@@ -64,6 +66,7 @@ jobs:
         run: |
           python engine/cover.py --episode data/episode.json --output output/capa.png
           test -s output/capa.png
+          test -s output/capa_perfil_3x4.png
       - name: Instalar FFmpeg para teste de vídeo
         run: |
           sudo apt-get update -qq
