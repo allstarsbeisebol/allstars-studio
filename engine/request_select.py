@@ -4,11 +4,11 @@ import json,os,subprocess,sys
 from pathlib import Path
 from content_request import parse
 root=Path(__file__).resolve().parents[1]
-req={"mode":"auto","content_type":"auto","subject":"","url":""}
+req={"mode":"auto","content_type":"auto","subject":"","url":"","urls":[],"reference_text":""}
 if os.environ.get("GITHUB_EVENT_NAME")=="issues":
     event=json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text(encoding="utf-8"))
     req=parse(event.get("issue",{}).get("body",""))
-if req["url"]:
+if req["urls"] or req["reference_text"]:
     script="engine/from_link.py"
 elif req["subject"]:
     script="engine/topic_generate.py"
