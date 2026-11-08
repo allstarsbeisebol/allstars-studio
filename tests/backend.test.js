@@ -165,9 +165,9 @@ test("transferência: explica falta de permissão Issues no novo proprietário G
     const res=response();
     await generate({method:"POST",headers:headers(cookie),body:{mode:"auto"}},res);
     assert.equal(res.code,503);
-    assert.match(res.body.error,/ALLSTARS_GITHUB_TOKEN/);
+    assert.match(res.body.error,/GitHub recusou criar o pedido/);
     assert.match(res.body.error,/Issues.*Read and write/);
-    assert.match(res.body.error,/allstarsbeisebol/);
+    assert.match(res.body.error,/403/);
   }finally{globalThis.fetch=original;}
 });
 test("transferência: distingue token sem leitura e token sem escrita",async()=>{
