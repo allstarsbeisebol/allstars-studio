@@ -1,8 +1,13 @@
 name: "ALLSTARS | Verificar integridade"
 on:
   push:
-    branches: [main, feat/editorial-unique-art-ux-20261108]
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
+concurrency:
+  group: allstars-check-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
