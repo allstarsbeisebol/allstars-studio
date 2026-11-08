@@ -17,6 +17,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from article_extract import extract_article
+from editorial_guard import verify_reference
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -119,16 +120,19 @@ def run():
     article=read_page(url)
     text,title=article['text'],article['title']
     ep=gemini(text,title,url)
+    check=verify_reference(article,ep)
     history=json.loads((ROOT/"data/history.json").read_text(encoding="utf-8"))
-    covered={v.casefold().strip() for k in ("covered","drafted","produced") for v in history.get(k,[])}
-    if ep["athlete"].casefold().strip() in covered:
-        raise ValueError("Este atleta já foi abordado: "+ep["athlete"])
+    previously_produced={v.casefold().strip() for v in history.get("produced",[])}
+    repeated=ep["athlete"].casefold().strip() in previously_produced
+    if repeated:
+        print("Atleta já produzido; o pedido por link cria um novo episódio da história fornecida.")
     ep.update({"id":datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")+"-link",
       "sources":[url],"approved":False,"media_approved":False,
       "editorial_status":"RASCUNHO DE IA BASEADO EM LINK — fatos e direitos ainda não validados",
       "source_mode":"link","source_title":title,
       "source_metadata":{key:article[key] for key in ("submitted_url","url","redirect_count","title","extraction_method","paragraph_count","word_count","content_sha256","published_at","author","verification_status")},
-      "evidence_paragraphs":ep.get("evidence_paragraphs",[])})
+      "evidence_paragraphs":ep.get("evidence_paragraphs",[]),
+      "editorial_checks":check,"previously_produced":repeated})
     output=ROOT/"output";output.mkdir(exist_ok=True)
     (output/"selected.json").write_text(json.dumps(ep,ensure_ascii=False,indent=2),encoding="utf-8")
     print("Rascunho baseado no link:",ep["athlete"],url)
