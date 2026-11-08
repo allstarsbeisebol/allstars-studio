@@ -6,17 +6,17 @@ def normalized(value):
     text=unicodedata.normalize("NFKD",str(value)).encode("ascii","ignore").decode("ascii")
     return re.sub(r"\s+"," ",text.lower()).strip()
 
-def verify_reference(article,episode):
+def verify_reference(article,episode,require_athlete=True):
     """Falha se faltou atleta no texto; sinaliza datas inventadas e apoio ausente."""
     text=str(article.get("text",""))
     title=str(article.get("title",""))
     name=str(episode.get("athlete","")).strip()
-    if len(name)<4:raise ValueError("O artigo não permitiu identificar o nome do atleta.")
-    source=normalized(title+" "+text)
-    surname=normalized(name).split()[-1]
-    # Não aceitar nome de pessoa sem relação observável com a matéria.
-    if len(surname)<4 or not re.search(r"\b"+re.escape(surname)+r"\b",source):
-        raise ValueError("O nome do atleta não foi encontrado na matéria fornecida.")
+    if require_athlete:
+        if len(name)<4:raise ValueError("O artigo não permitiu identificar o nome do atleta.")
+        source=normalized(title+" "+text)
+        surname=normalized(name).split()[-1]
+        if len(surname)<4 or not re.search(r"\b"+re.escape(surname)+r"\b",source):
+            raise ValueError("O nome do atleta não foi encontrado na matéria fornecida.")
     generated=" ".join(str(episode.get(k,"")) for k in ("title","narration"))
     generated+=" "+" ".join(str(s) for s in episode.get("screens",[]))
     source_years=set(YEAR.findall(title+" "+text))
@@ -24,12 +24,12 @@ def verify_reference(article,episode):
     unmatched=sorted(generated_years-source_years)
     check={
       "source_article_title":title,
-      "athlete_mentioned_in_source":True,
+      "athlete_mentioned_in_source":True if require_athlete else None,
       "years_present_in_source":sorted(source_years),
       "years_in_generated_script":sorted(generated_years),
       "unsupported_years":unmatched,
       "evidence_paragraphs":episode.get("evidence_paragraphs",[]),
-      "checked_rules":["atleta citado no texto","anos do roteiro confrontados com o artigo","parágrafos de apoio solicitados à IA"],
+      "checked_rules":(["atleta citado no texto"] if require_athlete else [])+["anos do roteiro confrontados com o artigo","parágrafos de apoio solicitados à IA"],
       "verified_independently":False,
       "notice":"Checagem de consistência da matéria; não confirma fatos por segunda fonte."
     }
