@@ -282,6 +282,89 @@ function restoreDraft(){
 function clearDraft(){localStorage.removeItem(DRAFT_KEY);$('draft-status').textContent='Pedido enviado. Rascunho local limpo.';}
 
 const ordinaryTitle=document.title;
+let artRevision=0,artAssets={};
+function openImagePreview(url,title){
+ const allowed='https://github.com/allstarsbeisebol/allstars-studio/releases/download/';
+ if(typeof url!=='string'||!url.startsWith(allowed))return;
+ const dialog=$('image-preview-dialog');
+ $('image-preview-title').textContent=title||'Prévia da imagem';
+ $('image-preview-full').src=url;
+ $('image-preview-full').alt=title||'Imagem ALLSTARS ampliada';
+ $('image-preview-download').href=url;
+ if(typeof dialog.showModal==='function')dialog.showModal();
+ else window.open(url,'_blank','noopener,noreferrer');
+}
+$('image-preview-close').addEventListener('click',()=>$('image-preview-dialog').close());
+$('image-preview-dialog').addEventListener('click',event=>{if(event.target===$('image-preview-dialog'))$('image-preview-dialog').close();});
+$('cover-preview-btn').addEventListener('click',()=>openImagePreview($('cover').src,'Capa editorial ALLSTARS'));
+$('art-enlarge').addEventListener('click',()=>openImagePreview($('art-preview-cover').src,'Capa para sua aprovação'));
+function showArtReview(data){
+ artRevision=data.revision;
+ artAssets=data.assets||{};
+ const cover=artAssets['capa.png'];
+ if(!cover){$('progress-message').textContent='A imagem ainda não foi disponibilizada; atualize o pedido.';return;}
+ const unique=cover+(cover.includes('?')?'&':'?')+'revision='+encodeURIComponent(artRevision);
+ $('art-preview-cover').src=unique;
+ $('art-review-message').textContent=data.message||'A imagem precisa de sua aprovação antes de iniciar o vídeo.';
+ $('art-revision-label').textContent='Versão '+artRevision+' · você pode solicitar novas imagens quantas vezes precisar, respeitando os limites gratuitos da plataforma.';
+ $('art-action-message').textContent='';
+ $('art-review').classList.remove('hidden');
+ $('progress').classList.remove('hidden');
+ $('progress-stage').textContent='AGUARDANDO APROVAÇÃO DA CAPA';
+ $('progress-title').textContent='Imagem pronta para revisão';
+ $('progress-message').textContent='Nenhum vídeo foi produzido ainda. Escolha o que fazer com esta imagem abaixo.';
+ $('art-review').scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function submitArtAction(action){
+ if(!pending||!artRevision)return;
+ const notes=$('art-feedback').value.trim();
+ if(action==='revise'&&notes.length<5){$('art-action-message').textContent='Descreva o que precisa mudar na imagem.';return;}
+ const buttons=['art-revise','art-regenerate','art-approve'].map($);
+ for(const btn of buttons)btn.disabled=true;
+ $('art-action-message').textContent='Enviando sua decisão...';
+ try{
+  const data=await request('/api/art',{method:'POST',body:JSON.stringify({id:pending,revision:artRevision,action,notes})});
+  $('art-review').classList.add('hidden');
+  $('progress').classList.remove('hidden');
+  $('progress-stage').textContent=action==='approve'?'CAPA APROVADA':'REVISANDO CAPA';
+  $('progress-title').textContent=action==='approve'?'Produzindo o seu vídeo...':'Preparando uma nova imagem...';
+  $('progress-message').textContent=data.message;
+  $('art-feedback').value='';
+  $('progress').scrollIntoView({behavior:'smooth',block:'start'});
+  clearTimeout(timer);timer=setTimeout(poll,6000);
+ }catch(e){$('art-action-message').textContent=e.message;}
+ finally{for(const btn of buttons)btn.disabled=false;}
+}
+$('art-revise').addEventListener('click',()=>submitArtAction('revise'));
+$('art-regenerate').addEventListener('click',()=>submitArtAction('regenerate'));
+$('art-approve').addEventListener('click',()=>submitArtAction('approve'));
+$('file-preview-close').addEventListener('click',()=>$('file-text-preview').classList.add('hidden'));
+$('file-preview-copy').addEventListener('click',async()=>{
+ const value=$('file-preview-text').textContent;
+ try{
+  await navigator.clipboard.writeText(value);
+  $('file-preview-message').textContent='Texto copiado. Você pode colá-lo onde quiser.';
+ }catch{
+  $('file-preview-message').textContent='Este navegador bloqueou a cópia automática. Selecione e copie o texto mostrado abaixo.';
+  $('file-preview-text').focus();
+ }
+});
+async function openTextPreview(url,filename){
+ const matched=String(url||'').match(/^https:\/\/github\.com\/allstarsbeisebol\/allstars-studio\/releases\/download\/(episodio-[1-9]\d*|previa-jim-abbott-anime)\//);
+ if(!matched)return;
+ $('file-text-preview').classList.remove('hidden');
+ $('file-preview-title').textContent=filename;
+ $('file-preview-text').textContent='';
+ $('file-preview-message').textContent='Carregando o conteúdo para leitura...';
+ $('file-text-preview').scrollIntoView({behavior:'smooth',block:'start'});
+ try{
+  const data=await request('/api/file-preview?tag='+encodeURIComponent(matched[1])+'&file='+encodeURIComponent(filename));
+  let content=data.text||'';
+  if(filename.endsWith('.json')){try{content=JSON.stringify(JSON.parse(content),null,2);}catch{}}
+  $('file-preview-text').textContent=content;
+  $('file-preview-message').textContent='Prévia disponível. Use Copiar texto para reutilizar este conteúdo.';
+ }catch(e){$('file-preview-message').textContent=e.message;}
+}
 let toastTarget='downloads';
 function showToast(kind,title,message,target='downloads'){
  toastTarget=target;
@@ -453,15 +536,16 @@ async function create(){
  $('progress').classList.remove('hidden');
  $('progress-stage').textContent='ENVIANDO PEDIDO';
  $('progress-title').textContent='Enviando pedido...';
- $('progress-message').textContent='Preparando a produção segura.';
+ $('progress-message').textContent='Seu pedido será pesquisado e a capa será criada primeiro, para sua aprovação.';
+ $('art-review').classList.add('hidden');
  $('progress').scrollIntoView({behavior:'smooth'});
  try{
   const data=await request('/api/generate',{method:'POST',body:JSON.stringify({
    mode:urls.length||reference_text?'link':'auto',content_type,subject,urls,reference_text
   })});
   pending=data.request_id;localStorage.setItem('allstars-pending-issue',String(pending));$('overview-pending').textContent='Pedido #'+pending;clearDraft();
-  $('progress-stage').textContent='EM PRODUÇÃO';
-  $('progress-title').textContent='Vídeo solicitado';
+  $('progress-stage').textContent='PREPARANDO IMAGEM';
+  $('progress-title').textContent='Prévia da imagem solicitada';
   await poll();
  }catch(e){errorMessage(e.message);}
  finally{$('generate').disabled=!configured;}
@@ -471,7 +555,13 @@ async function poll(){
  if(!pending||!authenticated)return;
  try{
   const data=await request('/api/status?id='+encodeURIComponent(pending));
+  if(data.state==='art_review'){
+   clearTimeout(timer);timer=null;
+   showArtReview(data);
+   return;
+  }
   if(data.state==='ready'){
+   $('art-review').classList.add('hidden');
    const finishedIssue=pending;
    clearTimeout(timer);timer=null;
    $('progress-title').textContent='Seu episódio está pronto!';
@@ -484,6 +574,7 @@ async function poll(){
    return;
   }
   if(data.state==='error'){
+   $('art-review').classList.add('hidden');
    const failedIssue=pending;
    clearTimeout(timer);timer=null;localStorage.removeItem('allstars-pending-issue');pending=0;$('overview-pending').textContent='Nenhum pedido pendente';
    $('progress-stage').textContent='PRODUÇÃO ENCERRADA COM ERRO';
@@ -492,8 +583,11 @@ async function poll(){
    announceEnd(failedIssue,'error',data.message||'Confira os detalhes da produção.');
    return;
   }
-  $('progress-title').textContent='Produzindo seu vídeo...';
-  $('progress-message').textContent=data.message||'Montando os arquivos.';
+  const creatingVideo=data.state==='rendering';
+  $('progress-stage').textContent=creatingVideo?'VÍDEO EM PRODUÇÃO':'PREPARANDO IMAGEM';
+  $('progress-title').textContent=creatingVideo?'Produzindo seu vídeo...':'Preparando a imagem para sua aprovação...';
+  $('progress-message').textContent=data.message||(creatingVideo?'Montando os arquivos.':'Pesquisando e criando a capa.');
+  $('art-review').classList.add('hidden');
  }catch(e){$('progress-message').textContent=e.message;}
  clearTimeout(timer);timer=setTimeout(poll,16000);
 }
