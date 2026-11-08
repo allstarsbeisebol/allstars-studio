@@ -130,7 +130,12 @@ def main():
     root=Path(__file__).resolve().parents[1]
     from anime_assets import find_approved_anime
     anime=find_approved_anime(episode) if episode.get("content_type","atleta")=="atleta" and not episode.get("unique_art_required") else None
-    if episode.get("unique_art_required"):
+    if episode.get("art_source")=="uploaded":
+        result={"status":"external_image","visual_mode":"external_image",
+                "source":"Imagem fornecida pelo editor", "image_author":"Responsabilidade do editor",
+                "image_rights":"Direitos confirmados pelo editor, revisão obrigatória",
+                "illustration_note":"Importada de arquivo ou imagem colada; autoria não verificada automaticamente."}
+    elif episode.get("unique_art_required"):
         result={"status":"original_context_art","visual_mode":"original_context_art","source":"Arte contextual inédita montada localmente","illustration_note":"Composição original específica para o roteiro; não é anime premium e não representa fotografia histórica.","image_author":"ALLSTARS Studio","image_rights":"Ilustração gráfica do próprio projeto."}
     elif anime is not None:
         info=anime[1]
