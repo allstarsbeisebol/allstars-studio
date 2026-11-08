@@ -492,7 +492,7 @@ $('external-image-send').addEventListener('click',async()=>{
   const result=await request('/api/art-upload',{method:'POST',body:JSON.stringify({
    id:pending,revision:artRevision,image:base64,
    source_kind:$('external-image-source').value,
-   prompt:$('external-image-source').value==='generated_external'?$ ('external-image-prompt').value:'',
+   prompt:$('external-image-source').value==='generated_external'?$('external-image-prompt').value:'',
    fit:$('external-image-fit').value,rightsConfirmed:true
   })});
   clearExternalImage();
@@ -892,12 +892,109 @@ function paintLibrary(){
  $('overview-library').textContent=libraryData.length+' vídeos';
  $('library-message').textContent=libraryData.length+' produção(ões) na biblioteca.'+(libraryData.length>=100?' Exibindo até 100 registros recentes.':'');
 }
+function visualSourceLabel(source){
+ return ({
+  uploaded_original:"Imagem enviada",
+  generated_external:"Criada em outra IA",
+  generated_studio:"Criada no Studio",
+  edited_variant:"Adaptação de imagem enviada"
+ })[source]||"Origem registrada";
+}
+async function loadVisualLibrary(){
+ const msg=$('visual-message'),list=$('visual-items');
+ if(!authenticated){msg.textContent='Entre no Studio para consultar a biblioteca visual.';list.replaceChildren();return;}
+ msg.textContent='Carregando imagens da biblioteca privada...';
+ try{
+  const group=$('visual-origin').value;
+  const data=await request('/api/visual-library?group='+encodeURIComponent(group));
+  list.replaceChildren();
+  if(!data.configured){msg.textContent=data.message;return;}
+  msg.textContent=data.message+' · Até 18 registros recentes por consulta.';
+  for(const item of (data.items||[])){
+   const card=document.createElement('article');card.className='visual-card';
+   const image=document.createElement('img');image.alt='Imagem: '+item.title;image.loading='lazy';
+   if(item.image_url){
+    image.src=item.image_url;
+    image.addEventListener('click',()=>openImagePreview(item.image_url,item.title));
+    image.style.cursor='zoom-in';
+   }else{
+    image.hidden=true;
+   }
+   const source=document.createElement('span');source.className='source';source.textContent=visualSourceLabel(item.source_kind);
+   const title=document.createElement('strong');title.textContent=item.title||'Imagem ALLSTARS';
+   const details=document.createElement('p');details.className='note';
+   details.textContent=(item.issue_number?'Pedido #'+item.issue_number+' · ':'')+
+    (item.revision?'Versão '+item.revision+' · ':'')+
+    (item.created_at?new Date(item.created_at).toLocaleDateString('pt-BR')+' · ':'')+
+    (item.allow_style_reference?'Referência ativa':item.approval_status==='used_in_video'?'Usada em vídeo':item.approval_status==='approved'?'Aprovada':'Em revisão');
+   card.append(image,source,title,details);
+   if(item.image_url){
+    const zoom=document.createElement('button');zoom.type='button';zoom.className='secondary';
+    zoom.textContent='Ampliar imagem';zoom.addEventListener('click',()=>openImagePreview(item.image_url,item.title));
+    card.append(zoom);
+   }
+   const reviewBox=document.createElement('div');reviewBox.className='review-box';
+   const ratingLabel=document.createElement('label');ratingLabel.textContent='Nota editorial';
+   const rating=document.createElement('select');
+   for(let value=5;value>=1;value--){
+    const option=document.createElement('option');option.value=String(value);
+    option.textContent='★'.repeat(value)+' ('+value+'/5)';
+    rating.append(option);
+   }
+   ratingLabel.append(rating);
+   const textLabel=document.createElement('label');textLabel.textContent='Observações e preferências';
+   const notes=document.createElement('textarea');notes.maxLength=600;
+   notes.placeholder='Ex.: cores fortes e enquadramento dinâmico funcionam bem neste tema.';
+   textLabel.append(notes);
+   const result=document.createElement('p');result.className='note';result.setAttribute('role','status');
+   const submit=async(decision,learn=false)=>{
+    const text=notes.value.trim();
+    if(learn&&(text.length<8||Number(rating.value)<4)){
+     result.textContent='Para usar como referência, descreva o que funcionou e selecione nota 4 ou 5.';return;
+    }
+    const buttons=reviewBox.querySelectorAll('button');for(const b of buttons)b.disabled=true;
+    result.textContent='Registrando sua avaliação...';
+    try{
+     const reply=await request('/api/visual-review',{
+      method:'POST',body:JSON.stringify({
+       asset_id:item.id,decision,rating:Number(rating.value),feedback:text,learn
+      })
+     });
+     result.textContent=reply.message||'Avaliação registrada.';
+     await loadVisualLibrary();
+    }catch(e){result.textContent=e.message;}
+    finally{for(const b of buttons)b.disabled=false;}
+   };
+   const evaluate=document.createElement('button');evaluate.className='secondary';evaluate.type='button';
+   evaluate.textContent='Salvar avaliação';evaluate.addEventListener('click',()=>submit('note'));
+   reviewBox.append(ratingLabel,textLabel,evaluate);
+   if(item.allow_style_reference){
+    const disable=document.createElement('button');disable.type='button';disable.className='outline';
+    disable.textContent='Não usar mais no aprendizado';disable.addEventListener('click',()=>submit('disable_reference'));
+    reviewBox.append(disable);
+   }else if(item.rights_confirmed&&['generated_external','generated_studio'].includes(item.source_kind)){
+    const approve=document.createElement('button');approve.type='button';
+    approve.textContent='Aprovar como referência';approve.addEventListener('click',()=>submit('approve',true));
+    reviewBox.append(approve);
+   }else{
+    const note=document.createElement('p');note.className='note';
+    note.textContent='Esta origem não alimenta automaticamente a memória de criação.';
+    reviewBox.append(note);
+   }
+   reviewBox.append(result);card.append(reviewBox);list.append(card);
+  }
+ }catch(e){msg.textContent=e.message;}
+}
+$('visual-origin').addEventListener('change',loadVisualLibrary);
+$('visual-refresh').addEventListener('click',loadVisualLibrary);
+
 async function loadLibrary(){
  const message=$('library-message');
  if(!authenticated){message.textContent='Faça login para acessar a biblioteca.';return;}
  message.textContent='Consultando vídeos anteriores...';
  try{const data=await request('/api/library');libraryData=data.items||[];libraryPage=0;paintLibrary();}
  catch(e){message.textContent=e.message;}
+ await loadVisualLibrary();
 }
 $('library-search').addEventListener('input',()=>{libraryPage=0;paintLibrary();});
 $('library-sort').addEventListener('change',()=>{libraryPage=0;paintLibrary();});
