@@ -25,7 +25,15 @@ export default async function handler(req,res){
       return json(res,200,{state:"ready",athlete:data.name,assets,release:data.html_url});
     }
     const failure=comments.findLast(c=>String(c.body||"").startsWith("Não foi possível gerar este episódio"));
-    if(failure)return json(res,200,{state:"error",message:"Não foi possível gerar. Confira se o link é acessível e se o Gemini está configurado."});
+    if(failure){
+      const body=String(failure.body||"");
+      const found=body.match(/Motivo:\s*([\s\S]{1,450}?)\.\s*O pedido não foi substituído/);
+      const reason=found?.[1]?.trim();
+      const message=reason?
+        "Não foi possível gerar: "+reason+".":
+        "A geração falhou na chamada ao Gemini. Atualizamos o modelo; tente novamente. Se persistir, confira as permissões e cotas da chave.";
+      return json(res,200,{state:"error",message:message.slice(0,480)});
+    }
     return json(res,200,{state:"running",message:"Pesquisando, narrando e montando o Reel..."});
   }catch{return json(res,502,{error:"Erro ao consultar a produção."});}
 }
