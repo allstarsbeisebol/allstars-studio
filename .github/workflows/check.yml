@@ -128,6 +128,27 @@ jobs:
           print("PASSOU: imagem aprovada, marca e MP4 com legendas.")
           PY
           ffprobe -v error output/allstars_reel.mp4 >/dev/null
+      - name: Montar prévia anime com a narração original do episódio Jim Abbott
+        run: |
+          curl --fail --location --retry 2 --silent --show-error \
+            https://github.com/liuhelpme/allstars-studio/releases/download/episodio-9/narracao.mp3 \
+            --output output/narracao-jim-original.mp3
+          curl --fail --location --retry 2 --silent --show-error \
+            https://github.com/liuhelpme/allstars-studio/releases/download/episodio-9/roteiro.txt \
+            --output output/roteiro-jim-original.txt
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path=Path("output/test-jim-abbott.json")
+          ep=json.loads(path.read_text(encoding="utf-8"))
+          ep["narration"]=Path("output/roteiro-jim-original.txt").read_text(encoding="utf-8")
+          path.write_text(json.dumps(ep,ensure_ascii=False),encoding="utf-8")
+          PY
+          python engine/subtitles.py --episode output/test-jim-abbott.json --audio output/narracao-jim-original.mp3 --out-dir output
+          python engine/render.py --episode output/test-jim-abbott.json --audio output/narracao-jim-original.mp3 --out-dir output
+          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 output/allstars_reel.mp4
+          test -s output/allstars_reel.mp4
+          cp output/allstars_reel.mp4 output/jim_abbott_anime_preview.mp4
       - name: Disponibilizar prévia visual do teste
         if: success()
         uses: actions/upload-artifact@v4
@@ -139,6 +160,7 @@ jobs:
             output/qualidade_visual.json
             output/midia.json
             output/allstars_reel.mp4
+            output/jim_abbott_anime_preview.mp4
             output/legendas.srt
             output/legendas_metadata.json
           retention-days: 3
