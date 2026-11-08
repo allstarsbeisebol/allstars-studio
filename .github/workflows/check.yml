@@ -55,6 +55,32 @@ jobs:
           assert '.section-nav-links.is-open{display:flex}' in html
           print('Menu e notificações no topo: estrutura e acessibilidade OK')
           PY
+      - name: Testar revisão da capa, pesquisa complementar e prévias de arquivo
+        run: |
+          node --check api/art.js
+          node --check api/file-preview.js
+          node --test tests/art-editorial.test.js
+          python -m py_compile engine/art_gate.py engine/source_adaptation.py
+          python -m unittest discover -s tests -p 'test_source_adaptation.py' -v
+      - name: Conferir separação entre prévia, aprovação e produção final
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          preview=Path('.github/workflows/art-preview.yml').read_text()
+          produce=Path('.github/workflows/produce.yml').read_text()
+          frontend=Path('public/index.html').read_text()
+          assert 'types: [opened]' in preview
+          assert 'ALLSTARS_ART_CHANGE' in preview
+          assert 'gh release create' in preview and '--prerelease' in preview
+          assert "startsWith(github.event.comment.body, 'ALLSTARS_ART_APPROVE')" in produce
+          assert 'issues:\n    types: [opened]' not in produce
+          assert 'python engine/art_gate.py approve' in produce
+          assert 'gh release download' in produce
+          for control in ('art-review','art-revise','art-regenerate','art-approve',
+                          'file-preview-copy','image-preview-dialog'):
+              assert 'id="'+control+'"' in frontend, control
+          print('Prévia visual obrigatória, decisão editorial e reutilização de capa aprovada: OK')
+          PY
       - name: Compilar sintaxe Python dos módulos de produção por link
         run: |
           python -m py_compile engine/from_link.py engine/request_select.py engine/article_extract.py engine/editorial_guard.py engine/content_request.py engine/topic_generate.py
@@ -76,6 +102,8 @@ jobs:
           python -c "import json; d=json.load(open('output/pesquisa.json')); assert len(d['research_sites']) == 4"
       - name: Instalar Pillow para validar a identidade visual
         run: python -m pip install "Pillow>=10.4,<12"
+      - name: Validar aprovação de arte com Pillow instalado
+        run: python -m unittest discover -s tests -p 'test_art_gate.py' -v
       - name: Testar arte contextual única, nova a cada execução
         run: python -m unittest discover -s tests -p 'test_original_art.py' -v
       - name: Verificar que artes anime só pertencem ao atleta aprovado

@@ -57,19 +57,31 @@ def year_or_number(text):
 
 def art_key(ep,index):
     # Id da execução torna cada produção original, inclusive se o assunto se repetir.
-    base="|".join(str(ep.get(k,"")) for k in ("id","episode_number","subject","title","hook","art_direction"))
+    base="|".join(str(ep.get(k,"")) for k in ("id","episode_number","subject","title","hook","art_direction","art_revision","art_feedback"))
     base+="|"+str(index)
     return hashlib.sha256(base.encode("utf-8")).hexdigest()
 
 def create_context_art(ep,index=0):
     seed=art_key(ep,index)
     rng=random.Random(int(seed[:16],16))
-    kind=classify(ep)
+    feedback=str(ep.get("art_feedback") or "").casefold()
+    # Compositor local: atende ajustes reconhecíveis de cor e de tipo de cena;
+    # ajustes narrativos mais complexos ficam registrados para o editor.
+    style_hint=feedback if feedback else ""
+    scene_map={"arremesso":("arremess","pitcher","lançamento","lancamento"),
+               "rebatida":("rebat","home run","batedor"),"ranking":("ranking","lista"),
+               "explicacao":("diagrama","explicação","explicacao","esquema"),
+               "contrato":("contrato","documento"),"retorno":("superação","superacao","volta")}
+    kind=next((name for name,terms in scene_map.items()
+               if any(term in style_hint for term in terms)),classify(ep))
     panel=Image.new("RGBA",(W,H),(*NAVY,255))
     d=ImageDraw.Draw(panel,"RGBA")
     # Halo de cor específico por história, sem imagens externas ou elementos reutilizados.
     accents=[BLUE,RED,GOLD]
     accent=accents[int(seed[0],16)%3]
+    if "vermelh" in feedback:accent=RED
+    elif "dourad" in feedback or "amarel" in feedback:accent=GOLD
+    elif "azul" in feedback:accent=BLUE
     backdrop=Image.new("RGBA",(W,H),(0,0,0,0));bd=ImageDraw.Draw(backdrop,"RGBA")
     for j in range(6):
         x=rng.randint(-160,1200);y=rng.randint(-100,1100);radius=rng.randint(140,420)
@@ -153,4 +165,7 @@ def art_metadata(ep,index=0):
     return {"generation_key":art_key(ep,index),"visual_type":"original_contextual_vector_art",
             "story_mode":classify(ep),"art_direction":str(ep.get("art_direction") or ep.get("title") or "")[:600],
             "episode_id":str(ep.get("id") or ep.get("episode_number") or ""),
+            "art_revision":int(ep.get("art_revision") or 0),
+            "art_feedback":str(ep.get("art_feedback") or "")[:300],
+            "approved_by_editor":bool(ep.get("art_approved",False)),
             "rights":"Composição gráfica criada localmente pelo ALLSTARS Studio; não é foto documental nem arte anime premium."}

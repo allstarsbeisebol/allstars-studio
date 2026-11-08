@@ -1,17 +1,23 @@
 name: "ALLSTARS | Produzir vídeo"
 on:
   workflow_dispatch:
-  issues:
-    types: [opened]
+  issue_comment:
+    types: [created]
 permissions:
   contents: write
   issues: write
 concurrency:
-  group: allstars-production
+  group: allstars-issue-${{ github.event.issue.number || github.run_id }}
   cancel-in-progress: false
 jobs:
   full-episode:
-    if: github.event_name != 'issues' || (contains(fromJSON('["liuhelpme","allstarsbeisebol"]'), github.event.issue.user.login) && startsWith(github.event.issue.title, '[ALLSTARS] Criar novo episódio'))
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issue_comment' &&
+       contains(fromJSON('["liuhelpme","allstarsbeisebol"]'), github.event.comment.user.login) &&
+       contains(fromJSON('["liuhelpme","allstarsbeisebol"]'), github.event.issue.user.login) &&
+       startsWith(github.event.issue.title, '[ALLSTARS] Criar novo episódio') &&
+       startsWith(github.event.comment.body, 'ALLSTARS_ART_APPROVE'))
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -20,11 +26,23 @@ jobs:
         with:
           python-version: "3.11"
       - name: Selecionar história ou preparar episódio baseado em link
+        if: github.event_name == 'workflow_dispatch'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: gemini-3.5-flash-lite
         run: |
           python engine/request_select.py
+      - name: Recuperar roteiro e imagem da versão aprovada
+        if: github.event_name == 'issue_comment'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_ID: ${{ github.event.issue.number }}
+        run: |
+          mkdir -p output
+          gh release download "preview-issue-${ISSUE_ID}" --repo "${{ github.repository }}" \
+            --pattern selected.json --pattern capa.png --pattern capa_perfil_3x4.png \
+            --dir output --clobber
+          python engine/art_gate.py approve
       - name: Instalar programas
         run: |
           sudo apt-get update -qq
@@ -39,6 +57,7 @@ jobs:
       - name: Baixar voz pt-BR
         run: python -m piper.download_voices pt_BR-faber-medium --data-dir voice
       - name: Registrar identificador técnico de produção
+        if: github.event_name == 'workflow_dispatch'
         env:
           EPISODE_NUMBER: ${{ github.run_number }}
         run: |
@@ -59,6 +78,7 @@ jobs:
       - name: Preparar direção anime para a história selecionada
         run: python engine/anime_briefing.py --episode output/selected.json --output output/briefing_arte_anime.txt
       - name: Criar capa oficial do vídeo
+        if: github.event_name == 'workflow_dispatch'
         run: python engine/cover.py --episode output/selected.json --output output/capa.png
       - name: Gerar narração brasileira pausada
         run: python engine/speech.py --episode output/selected.json --model pt_BR-faber-medium --data-dir voice --output output/narracao.wav --pace 1.14
@@ -127,7 +147,7 @@ jobs:
           git push
 
       - name: Informar falha do pedido sem gerar conteúdo errado
-        if: failure() && github.event_name == 'issues'
+        if: failure() && github.event_name == 'issue_comment'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -141,7 +161,7 @@ jobs:
           gh issue close "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --reason "not planned"
 
       - name: Registrar resultado no pedido iniciado pelo site
-        if: success() && github.event_name == 'issues'
+        if: success() && github.event_name == 'issue_comment'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

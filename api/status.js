@@ -34,6 +34,28 @@ export default async function handler(req,res){
         "A geração falhou na chamada ao Gemini. Atualizamos o modelo; tente novamente. Se persistir, confira as permissões e cotas da chave.";
       return json(res,200,{state:"error",message:message.slice(0,480)});
     }
-    return json(res,200,{state:"running",message:"Pesquisando, narrando e montando o Reel..."});
+    const artReadyIndex=comments.findLastIndex(c=>/^ALLSTARS_ART_READY REVISION=\d+ TAG=preview-issue-\d+$/.test(String(c.body||"").trim()));
+    const artFailedIndex=comments.findLastIndex(c=>String(c.body||"").startsWith("ALLSTARS_ART_FAILED:"));
+    const artActionIndex=comments.findLastIndex(c=>/^(ALLSTARS_ART_CHANGE|ALLSTARS_ART_APPROVE)/.test(String(c.body||"")));
+    if(artReadyIndex>=0){
+      const parsed=String(comments[artReadyIndex].body).match(/REVISION=(\d+) TAG=(preview-issue-\d+)/);
+      if(artActionIndex>artReadyIndex&&artFailedIndex<artActionIndex){
+        const approved=String(comments[artActionIndex].body).startsWith("ALLSTARS_ART_APPROVE");
+        return json(res,200,{state:approved?"rendering":"art_generating",
+          message:approved?"Imagem aprovada. Produzindo o vídeo e a narração...":"Preparando a nova versão da imagem..."});
+      }
+      const release=await fetch("https://api.github.com/repos/"+REPO+"/releases/tags/"+parsed[2],{headers});
+      if(!release.ok)return json(res,200,{state:"art_generating",message:"Preparando imagens para conferência..."});
+      const data=await release.json();
+      const assets=Object.fromEntries((data.assets||[]).filter(a=>["capa.png","capa_perfil_3x4.png","briefing_arte_anime.txt","qualidade_visual.json"].includes(a.name))
+        .map(a=>[a.name,a.browser_download_url]));
+      const warning=artFailedIndex>artReadyIndex?"A última tentativa de ajuste falhou; a imagem anterior continua disponível para revisão.":"";
+      return json(res,200,{state:"art_review",revision:Number(parsed[1]),assets,
+        title:data.name||"Prévia ALLSTARS",message:warning||"Confira a capa. Você pode pedir ajustes, gerar outra ou aprovar para produzir o Reel."});
+    }
+    if(artFailedIndex>=0){
+      return json(res,200,{state:"error",message:String(comments[artFailedIndex].body||"").slice(0,380)});
+    }
+    return json(res,200,{state:"art_generating",message:"Pesquisando o assunto e preparando a primeira imagem para sua aprovação..."});
   }catch{return json(res,502,{error:"Erro ao consultar a produção."});}
 }

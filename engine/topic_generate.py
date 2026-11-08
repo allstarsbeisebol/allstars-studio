@@ -22,7 +22,10 @@ def create_topic(request):
         "auto":"formato apropriado para o assunto"
     }
     prompt=(
-       "Você produz roteiros editoriais em português brasileiro para ALLSTARS Beisebol. "
+       "Você cria roteiros AUTORAIS para ALLSTARS Beisebol, série ALÉM DO JOGO, em português brasileiro. "
+       "Reinterprete a pesquisa com voz, narração, gancho e direção artística originais, sem copiar textos, bordões ou imagens de outra publicação. "
+       "Preserve o assunto solicitado inclusive quando surgiu de postagem social; não invente conexão com beisebol se não houver fatos esportivos. "
+       "Use os termos fornecidos apenas como pista de busca, não como prova. "
        "Use busca na internet. Não invente fatos, anos, estatísticas, jogadores ou referências. "
        "Assunto: "+subject+". Formato: "+guides[kind]+". "
        "Use hook específico e verificável nos primeiros 3 segundos (8-14 palavras), sem clickbait enganoso. "
