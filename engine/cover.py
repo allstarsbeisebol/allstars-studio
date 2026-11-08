@@ -2,7 +2,8 @@
 """Produz capa oficial ALLSTARS com o compositor editorial 9:16."""
 import argparse,json
 from pathlib import Path
-from poster import poster
+from poster import poster, official_logo
+from PIL import Image, ImageDraw
 p=argparse.ArgumentParser()
 p.add_argument("--episode",default="data/episode.json")
 p.add_argument("--output",default="output/capa.png")
@@ -13,7 +14,16 @@ image=poster(episode)
 image.save(dest,optimize=True)
 # Prévia exata da grade de perfil 3:4, centralizada no Reel 9:16.
 # 1080x1440 corresponde ao corte y=240..1680 da arte vertical.
-preview=image.crop((0,240,1080,1680))
+preview=image.crop((0,240,1080,1680)).convert('RGBA')
+# No recorte 3:4, a logo do rodapé 9:16 sairia da grade.
+# Reaplicamos o arquivo ORIGINAL, sem redesenho, numa faixa de proteção inferior.
+bar=Image.new('RGBA',preview.size,(0,0,0,0))
+ImageDraw.Draw(bar,'RGBA').rectangle((0,1300,1080,1440),fill=(4,14,33,230))
+preview.alpha_composite(bar)
+brand=official_logo()
+brand.thumbnail((320,105),Image.Resampling.LANCZOS)
+preview.alpha_composite(brand,((1080-brand.width)//2,1320))
+preview=preview.convert('RGB')
 preview_path=dest.parent/'capa_perfil_3x4.png'
 preview.save(preview_path,optimize=True)
 print('Prévia de perfil 3:4:',preview_path)
