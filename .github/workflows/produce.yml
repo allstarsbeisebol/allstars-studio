@@ -54,6 +54,8 @@ jobs:
         run: python engine/commons_media.py --episode output/selected.json --output output/midia.json
       - name: Preparar referências para pesquisa
         run: python engine/research.py --episode output/selected.json --output output/pesquisa.json
+      - name: Preparar direção anime para a história selecionada
+        run: python engine/anime_briefing.py --episode output/selected.json --output output/briefing_arte_anime.txt
       - name: Criar capa oficial do episodio
         run: python engine/cover.py --episode output/selected.json --output output/capa.png
       - name: Gerar narração brasileira pausada
@@ -81,6 +83,7 @@ jobs:
             output/fontes.txt
             output/pesquisa.json
             output/midia.json
+            output/briefing_arte_anime.txt
             output/legendas.srt
             output/legendas_metadata.json
           retention-days: 30
@@ -99,6 +102,7 @@ jobs:
             output/fontes.txt#fontes.txt \
             output/pesquisa.json#pesquisa.json \
             output/midia.json#midia.json \
+            output/briefing_arte_anime.txt#briefing_arte_anime.txt \
             output/legendas.srt#legendas.srt \
             output/legendas_metadata.json#legendas_metadata.json \
             --repo "${{ github.repository }}" \
