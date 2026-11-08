@@ -154,3 +154,29 @@ test("entrada: rejeita assunto com quebras de linha e tipos não suportados",asy
    assert.equal(res.code,400);
  }
 });
+
+test("transferência: explica falta de permissão Issues no novo proprietário GitHub",async()=>{
+  const cookie=await loginCookie(), original=globalThis.fetch;
+  globalThis.fetch=async(url,options={})=>{
+    if(options.method==="POST")return {ok:false,status:403};
+    return {ok:true,json:async()=>[]};
+  };
+  try{
+    const res=response();
+    await generate({method:"POST",headers:headers(cookie),body:{mode:"auto"}},res);
+    assert.equal(res.code,503);
+    assert.match(res.body.error,/ALLSTARS_GITHUB_TOKEN/);
+    assert.match(res.body.error,/Issues = Read and write/);
+    assert.match(res.body.error,/allstarsbeisebol\/allstars-studio/);
+  }finally{globalThis.fetch=original;}
+});
+test("transferência: distingue token sem leitura e token sem escrita",async()=>{
+  const cookie=await loginCookie(), original=globalThis.fetch;
+  globalThis.fetch=async()=>({ok:false,status:403});
+  try{
+    const res=response();
+    await generate({method:"POST",headers:headers(cookie),body:{mode:"auto"}},res);
+    assert.equal(res.code,503);
+    assert.match(res.body.error,/não consegue consultar/);
+  }finally{globalThis.fetch=original;}
+});
