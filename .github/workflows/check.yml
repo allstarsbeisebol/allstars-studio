@@ -67,7 +67,7 @@ jobs:
           node --check api/visual-review.js
           node --test tests/visual-library.test.js
           python -m py_compile engine/visual_sync.py
-          python -m py_compile engine/art_gate.py engine/source_adaptation.py engine/import_art.py engine/external_prompt.py
+          python -m py_compile engine/art_gate.py engine/source_adaptation.py engine/import_art.py engine/external_prompt.py engine/scene_direction.py engine/narrative_league.py engine/brand_assets.py engine/anime_briefing.py engine/cover.py engine/poster.py
           python -m unittest discover -s tests -p 'test_source_adaptation.py' -v
       - name: Conferir separação entre prévia, aprovação e produção final
         run: |
@@ -126,6 +126,8 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_visual_sync.py' -v
       - name: Testar arte contextual única, nova a cada execução
         run: python -m unittest discover -s tests -p 'test_original_art.py' -v
+      - name: Verificar Rube Foster, arte importada e logo ALLSTARS
+        run: python -m unittest discover -s tests -p 'test_contextual_composition.py' -v
       - name: Verificar que artes anime só pertencem ao atleta aprovado
         run: python -m unittest discover -s tests -p 'test_anime_assets.py' -v
       - name: Confirmar imagem anime Jim Abbott aprovada e vinculada ao no-hitter
