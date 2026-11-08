@@ -67,7 +67,7 @@ def ass_dialogues(groups,formatter):
     lines=[]
     for row in groups:
         start,end=formatter(row["start"]),formatter(row["end"])
-        box=(r"{\an7\pos(0,0)\p1\bord0\shad0\1c&H1A3566&\1a&H55&}"
+        box=(r"{\an7\pos(0,0)\p1\bord0\shad0\1c&H66351A&\1a&H30&}"
              f"m {LEFT} {TOP} l {RIGHT} {TOP} {RIGHT} {BOTTOM} {LEFT} {BOTTOM}"
              r"{\p0}")
         text=r"{\an5\pos(540,1040)\fs"+str(row["font_size"])+r"\bord3\shad0}"+r"\N".join(escape_ass(x) for x in row["lines"])
