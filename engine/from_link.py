@@ -12,6 +12,7 @@ import json
 import os
 import re
 import socket
+import time
 import sys
 import urllib.error
 import urllib.parse
@@ -42,38 +43,73 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 def read_page(url):
+    """Lê artigo com orçamento finito, redirecionamentos revalidados e erro claro.
+
+    Nunca escolhe outra fonte silenciosamente: sem texto da URL submetida, o
+    sistema falha visivelmente, em vez de inventar fatos históricos.
+    """
     original=validate(url)
-    current=original
     opener=urllib.request.build_opener(NoRedirect)
-    for hop in range(4):
-        current=validate(current)
-        req=urllib.request.Request(current,headers={
-            "User-Agent":"ALLSTARS-Editorial/1.0 (research, single-page fetch)",
-            "Accept":"text/html"})
+    last_error=None
+    # Até três tentativas, mas sem deixar o GitHub Actions preso indefinidamente.
+    for attempt in range(3):
+        current=original
         try:
-            with opener.open(req,timeout=15) as response:
-                mime=response.headers.get_content_type()
-                if mime not in ("text/html","application/xhtml+xml"):
-                    raise ValueError("O link não contém um artigo HTML acessível.")
-                if int(response.headers.get("Content-Length","0"))>900000:
-                    raise ValueError("Página maior que o limite permitido.")
-                body=response.read(900001)
-                if len(body)>900000:
-                    raise ValueError("Página maior que o limite permitido.")
-                encoding=response.headers.get_content_charset() or "utf-8"
-                page=body.decode(encoding,errors="replace")
-            extracted=extract_article(page,current)
-            extracted["submitted_url"]=original
-            extracted["redirect_count"]=hop
-            return extracted
-        except urllib.error.HTTPError as ex:
-            if ex.code in (301,302,303,307,308) and hop<3:
-                location=ex.headers.get("Location")
-                if not location:raise ValueError("Redirecionamento sem destino público.") from ex
-                current=validate(urllib.parse.urljoin(current,location))
+            for hop in range(4):
+                current=validate(current)
+                req=urllib.request.Request(current,headers={
+                    "User-Agent":"Mozilla/5.0 (compatible; ALLSTARS-Editorial/1.0; research)",
+                    "Accept":"text/html,application/xhtml+xml;q=0.9",
+                    "Accept-Language":"es,pt-BR;q=0.9,en;q=0.7"})
+                try:
+                    with opener.open(req,timeout=12) as response:
+                        mime=response.headers.get_content_type()
+                        if mime not in ("text/html","application/xhtml+xml"):
+                            raise ValueError("O link não contém um artigo HTML acessível.")
+                        if int(response.headers.get("Content-Length","0"))>900000:
+                            raise ValueError("Página maior que o limite permitido.")
+                        body=response.read(900001)
+                        if len(body)>900000:
+                            raise ValueError("Página maior que o limite permitido.")
+                        encoding=response.headers.get_content_charset() or "utf-8"
+                        page=body.decode(encoding,errors="replace")
+                    extracted=extract_article(page,current)
+                    extracted["submitted_url"]=original
+                    extracted["redirect_count"]=hop
+                    return extracted
+                except urllib.error.HTTPError as ex:
+                    if ex.code in (301,302,303,307,308) and hop<3:
+                        location=ex.headers.get("Location")
+                        if not location:
+                            raise ValueError("Redirecionamento sem destino público.") from None
+                        current=validate(urllib.parse.urljoin(current,location))
+                        continue
+                    if ex.code in (429,500,502,503,504):
+                        raise RuntimeError("HTTP "+str(ex.code)) from None
+                    if ex.code in (401,403):
+                        raise ValueError(
+                            "O site bloqueou a leitura automática (HTTP "+str(ex.code)+"). "
+                            "Use uma matéria pública acessível ou uma biografia em outro site."
+                        ) from None
+                    raise ValueError("O site não liberou a leitura do artigo (HTTP "+str(ex.code)+").") from None
+            raise ValueError("A matéria redirecionou muitas vezes.")
+        except (TimeoutError,socket.timeout,urllib.error.URLError,ConnectionError,RuntimeError) as ex:
+            last_error=ex
+            if attempt<2:
+                time.sleep(1+attempt)
                 continue
-            raise ValueError("Site não liberou a leitura HTTP: "+str(ex.code)) from ex
-    raise ValueError("A matéria redirecionou muitas vezes sem disponibilizar o conteúdo.")
+    reason=str(last_error or "").lower()
+    if "timed out" in reason or isinstance(last_error,(TimeoutError,socket.timeout)):
+        raise ValueError(
+            "O site de origem demorou para responder após 3 tentativas. "
+            "Não foi possível ler a matéria do Olympics; a chave Gemini não é o problema. "
+            "Experimente um link direto sobre um atleta específico."
+        ) from None
+    raise ValueError(
+        "Não foi possível ler a página após 3 tentativas. "
+        "O site pode estar bloqueando robôs ou instável; use outra matéria pública. "
+        "Detalhe: "+str(last_error or "indisponível")[:95]
+    ) from None
 
 def gemini(text,title,url):
     paragraphs=[p.strip() for p in text.split("\n\n") if p.strip()]
@@ -112,6 +148,8 @@ def gemini(text,title,url):
         }
         label=diagnoses.get(e.code,"falha HTTP do provedor")
         raise ValueError(f"Gemini HTTP {e.code} ({model}): {label}.") from None
+    except (TimeoutError,socket.timeout) as e:
+        raise ValueError(f"Gemini demorou para responder ({model}); tente novamente.") from None
     except urllib.error.URLError as e:
         raise ValueError(f"Não foi possível acessar o Gemini por erro de rede ({model}).") from None
     try:out=json.loads(result["candidates"][0]["content"]["parts"][0]["text"])
