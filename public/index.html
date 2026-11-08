@@ -100,7 +100,7 @@ async function poll(){
  clearTimeout(timer);timer=setTimeout(poll,16000);
 }
 $('refresh').addEventListener('click',poll);
-const labels=[['allstars_reel.mp4','↓ Vídeo MP4'],['capa.png','↓ Capa PNG'],['narracao.mp3','↓ Áudio MP3'],['legenda_instagram.txt','↓ Legenda'],['roteiro.txt','↓ Roteiro'],['fontes.txt','↓ Fontes'],['pesquisa.json','↓ Pesquisa']];
+const labels=[['allstars_reel.mp4','↓ Vídeo MP4'],['capa.png','↓ Capa PNG'],['narracao.mp3','↓ Áudio MP3'],['legenda_instagram.txt','↓ Legenda do post'],['legendas.srt','↓ Legendas sincronizadas'],['roteiro.txt','↓ Roteiro'],['fontes.txt','↓ Fontes'],['pesquisa.json','↓ Pesquisa']];
 function renderFiles(assets,title){
  $('result-title').textContent=title;
  $('result-message').textContent='Arquivos disponíveis para baixar.';
@@ -123,7 +123,7 @@ async function loadLatest(){
   const files={'allstars_reel.mp4':data.video};
   // Os demais campos são vinculados por seus nomes reais.
   files['capa.png']=data.cover;files['narracao.mp3']=data.audio;files['legenda_instagram.txt']=data.caption;
-  files['roteiro.txt']=data.script;files['fontes.txt']=data.sources;files['pesquisa.json']=data.research;
+  files['roteiro.txt']=data.script;files['fontes.txt']=data.sources;files['pesquisa.json']=data.research;files['legendas.srt']=data.subtitles;
   renderFiles(files,data.athlete+' — '+data.title);
  }catch{$('result-message').textContent='Quando uma produção terminar, seus arquivos aparecerão aqui.';}
 }
