@@ -15,9 +15,9 @@ def prompt(ep):
             memory_items=json.loads(memory_file.read_text(encoding="utf-8"))
             notes=[]
             for item in memory_items[:8]:
-                direction="PRIORIZE" if item.get("preference")=="prefer" else "EVITE"
+                preference="PRIORIZE" if item.get("preference")=="prefer" else "EVITE"
                 summary=" ".join(str(item.get("summary") or "").split())[:220]
-                if summary:notes.append("- "+direction+": "+summary)
+                if summary:notes.append("- "+preference+": "+summary)
             if notes:
                 memory_notes="\nPREFERÊNCIAS EDITORIAIS APROVADAS (orientações, não imagens para copiar):\n"+"\n".join(notes)+"\n"
         except (OSError,ValueError,TypeError):
