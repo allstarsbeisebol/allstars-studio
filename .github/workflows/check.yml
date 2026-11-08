@@ -62,6 +62,11 @@ jobs:
           node --test tests/art-editorial.test.js
           node --check api/art-upload.js
           node --test tests/image-import.test.js
+          node --check lib/visual-storage.js
+          node --check api/visual-library.js
+          node --check api/visual-review.js
+          node --test tests/visual-library.test.js
+          python -m py_compile engine/visual_sync.py
           python -m py_compile engine/art_gate.py engine/source_adaptation.py engine/import_art.py engine/external_prompt.py
           python -m unittest discover -s tests -p 'test_source_adaptation.py' -v
       - name: Conferir separação entre prévia, aprovação e produção final
@@ -86,6 +91,10 @@ jobs:
           assert 'python engine/import_art.py' in preview
           assert 'prompt_imagem_ia.txt#prompt_imagem_ia.txt' in preview
           assert 'gh release download "preview-issue-' in produce
+          assert 'python engine/visual_sync.py --stage preview' in preview
+          assert 'python engine/visual_sync.py --stage published' in produce
+          assert 'id="visual-archive"' in frontend
+          assert 'id="visual-origin"' in frontend
           print('Prévia visual obrigatória, decisão editorial e reutilização de capa aprovada: OK')
           PY
       - name: Compilar sintaxe Python dos módulos de produção por link
@@ -113,6 +122,8 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_art_gate.py' -v
       - name: Validar upload de imagem, cortes 9:16/3:4 e prompt externo
         run: python -m unittest discover -s tests -p 'test_external_image.py' -v
+      - name: Validar arquivo Supabase e memória editorial sem credenciais
+        run: python -m unittest discover -s tests -p 'test_visual_sync.py' -v
       - name: Testar arte contextual única, nova a cada execução
         run: python -m unittest discover -s tests -p 'test_original_art.py' -v
       - name: Verificar que artes anime só pertencem ao atleta aprovado
