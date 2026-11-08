@@ -85,5 +85,22 @@ except (subprocess.CalledProcessError,subprocess.TimeoutExpired):
     motion="fallback sem transições"
 for field,name in [("caption","legenda_instagram.txt"),("narration","roteiro.txt")]:
     (out/name).write_text(str(ep.get(field,"")),encoding="utf-8")
-(out/"fontes.txt").write_text("\n".join(ep.get("sources",[])),encoding="utf-8")
+sources=list(ep.get("sources",[]))
+media=out/"midia.json"
+if media.is_file():
+    try:
+        status=json.loads(media.read_text(encoding="utf-8"))
+        if status.get("status") in ("downloaded","existing"):
+            info=status.get("record",{})
+            sources.extend([
+                "",
+                "CRÉDITOS DA IMAGEM UTILIZADA",
+                "Fonte: "+str(info.get("source_url","")),
+                "Autor/crédito: "+str(info.get("author","")),
+                "Licença: "+str(info.get("license","")),
+                "Licença (detalhes): "+str(info.get("license_url","")),
+                "Conferir licença e direitos antes de publicar."
+            ])
+    except (ValueError,OSError):pass
+(out/"fontes.txt").write_text("\n".join(sources),encoding="utf-8")
 print("Reel pronto:",output,"| segundos:",round(duration,1),"| movimento:",motion)
