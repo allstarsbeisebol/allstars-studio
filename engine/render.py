@@ -26,10 +26,11 @@ if len(scenes)==1:scenes.append(ep.get("athlete","HISTÓRIAS REAIS"))
 photos=[]
 for i,message in enumerate(scenes):
     path=out/f"cena_{i:02d}.jpg"
-    if i==0 and (out/"capa.png").is_file():
-        with Image.open(out/"capa.png") as im:im.convert("RGB").save(path,quality=91,subsampling=0)
-    else:
-        poster(ep,headline=message,index=i,total=len(scenes)-1).save(path,quality=91,subsampling=0)
+    # O cartaz aprovado é destinado à capa. Nas cenas internas usamos
+    # somente o personagem anime aprovado, sem reutilizar títulos embutidos
+    # que poderiam ficar debaixo das legendas.
+    poster(ep,headline=message,index=i,total=len(scenes)-1).save(
+        path,quality=91,subsampling=0)
     photos.append(path)
 # Uso editorial: abertura mais curta, cenas centrais dividindo o tempo total.
 if len(scenes)>1 and duration>8:
