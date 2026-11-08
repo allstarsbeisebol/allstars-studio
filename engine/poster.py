@@ -108,7 +108,36 @@ def illustrated_player(base):
     base.alpha_composite(layer.filter(ImageFilter.GaussianBlur(20)),(0,130))
     base.alpha_composite(layer,(0,130))
 
+def thematic_hero(base,episode):
+    """Ilustração editorial temática: bola, diamante e estádio, sem atleta falso."""
+    layer=Image.new("RGBA",(W,1120),(0,0,0,0))
+    d=ImageDraw.Draw(layer,"RGBA")
+    kind=episode.get("content_type","tema")
+    d.ellipse((180,155,910,885),fill=(3,15,38,130),outline=(*ROYAL,145),width=13)
+    d.polygon([(530,180),(845,520),(530,865),(215,520)],fill=(*ROYAL,60),outline=(*GOLD,180),width=12)
+    d.line((525,188,846,520,525,860,212,520,525,188),fill=(*WHITE,110),width=7,joint="curve")
+    # Bola de beisebol original, desenhada como elemento esportivo central.
+    d.ellipse((325,240,775,690),fill=(247,248,241,245),outline=(*NAVY,255),width=22)
+    d.arc((355,258,605,672),-82,79,fill=(*RED,255),width=16)
+    d.arc((495,258,746,672),103,262,fill=(*RED,255),width=16)
+    for j in range(6):
+        y=315+j*47
+        d.line((410-j*8,y,443-j*4,y+18),fill=(*RED,220),width=7)
+        d.line((643+j*7,y,671+j*3,y-17),fill=(*RED,220),width=7)
+    # Faixas temáticas, com destaque ao formato escolhido.
+    label={"tema":"HISTÓRIA DO BEISEBOL","noticia":"NOTÍCIA & CONTEXTO",
+           "lista":"NÚMEROS & HISTÓRIAS","explicativo":"ENTENDA O BEISEBOL"}.get(kind,"ALÉM DO JOGO")
+    f=face(46)
+    tw=d.textbbox((0,0),label,font=f)[2]
+    d.rounded_rectangle((540-tw//2-34,735,540+tw//2+34,825),radius=20,
+                        fill=(*NAVY,235),outline=(*GOLD,210),width=4)
+    d.text((540-tw//2,749),label,font=f,fill=WHITE)
+    base.alpha_composite(layer,(0,185))
+    return True
+
 def add_hero(base,episode):
+    if episode.get("content_type","atleta") not in ("atleta",):
+        return thematic_hero(base,episode)
     curated=hero_from_approved_asset(episode)
     if curated is not None:
         image,metadata=curated
