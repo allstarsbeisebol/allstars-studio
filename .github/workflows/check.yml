@@ -38,6 +38,23 @@ jobs:
           Path('/tmp/allstars-ui.mjs').write_text(script,encoding='utf-8')
           PY
           node --check /tmp/allstars-ui.mjs
+      - name: Verificar menu mobile acessível e botão de avisos no topo
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          html=Path('public/index.html').read_text(encoding='utf-8')
+          assert html.count('id="notify-enable"')==1
+          assert html.count('id="mobile-menu-toggle"')==1
+          assert html.count('id="studio-nav-links"')==1
+          assert html.index('id="alert-settings"')<html.index('<section class="hero">')
+          assert 'aria-controls="studio-nav-links"' in html
+          assert 'aria-expanded="false"' in html
+          assert 'if(event.key===\'Escape\'' in html
+          assert 'if(event.target.closest(\'a\'))closeMobileMenu()' in html
+          assert '.section-nav-links.is-open{display:flex}' in html
+          print('Menu e notificações no topo: estrutura e acessibilidade OK')
+          PY
       - name: Compilar sintaxe Python dos módulos de produção por link
         run: |
           python -m py_compile engine/from_link.py engine/request_select.py engine/article_extract.py engine/editorial_guard.py engine/content_request.py engine/topic_generate.py
