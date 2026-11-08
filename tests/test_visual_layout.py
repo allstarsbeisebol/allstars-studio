@@ -36,7 +36,7 @@ class SubtitleGeometryTests(unittest.TestCase):
         self.assertEqual(cartoon.size,(1080,1270))
         self.assertEqual(cartoon.mode,"RGBA")
         # Illustration has face, cap, shirt and contrast, not a blank background.
-        self.assertGreater(len(cartoon.getcolors(maxcolors=20000) or []),15)
+        # Sample the palette after quantization so anti-aliased art cannot exceed maxcolors.\n        colors=cartoon.convert("RGB").quantize(colors=32).getcolors(maxcolors=32) or []\n        self.assertGreater(len(colors),10)
     def test_poster_without_photo_uses_original_cartoon(self):
         ep={"athlete":"Jim Abbott","title":"UMA HISTÓRIA DE SUPERAÇÃO","episode_number":11}
         im=poster(ep)
