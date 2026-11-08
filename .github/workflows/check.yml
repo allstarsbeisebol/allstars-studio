@@ -36,6 +36,8 @@ jobs:
       - name: Compilar sintaxe Python dos módulos de produção por link
         run: |
           python -m py_compile engine/from_link.py engine/request_select.py engine/article_extract.py engine/editorial_guard.py
+      - name: Testar recuperação de páginas lentas sem Gemini
+        run: python -m unittest discover -s tests -p 'test_link_timeout.py' -v
       - name: Validar extração de matérias e preservação de fontes
         run: python -m unittest discover -s tests -p 'test_article_extract.py' -v
       - name: Validar consistência histórica dos roteiros por link
