@@ -105,7 +105,10 @@ def illustrated_player(base):
 def add_hero(base,episode):
     photo=licensed_photo(episode)
     if photo is None:
-        illustrated_player(base);return False
+        raise FileNotFoundError(
+            "FOTOGRAFIA OBRIGATÓRIA: não foi encontrada foto histórica autorizada do atleta. "
+            "Nenhum vídeo será criado com silhueta ou ilustração substituta."
+        )
     overlay=photo.convert("RGBA")
     film=Image.new("RGBA",overlay.size,(*NAVY,36))
     overlay=Image.alpha_composite(overlay,film)
@@ -125,7 +128,7 @@ def paint(draw,top,bottom,hue,seed):
 def headline_fit(message):
     """Tipografia grande, mas dentro da faixa editorial e sem cortar palavras."""
     draw=ImageDraw.Draw(Image.new("RGB",(1,1)))
-    original=re.sub(r"\\s+"," ",str(message).upper()).strip()
+    original=re.sub(r"\s+"," ",str(message).upper()).strip()
     text=original[:135]
     for size in range(138,41,-3):
         font=face(size)
@@ -137,7 +140,7 @@ def headline_fit(message):
             else:line=attempt
         if line:lines.append(line)
         max_width=max([draw.textbbox((0,0),line,font=font)[2] for line in lines] or [0])
-        if len(lines)<=5 and max_width<=920 and int(size*1.08)*len(lines)<=505:
+        if len(lines)<=4 and max_width<=920 and int(size*1.08)*len(lines)<=345:
             return font,lines
     # Apenas títulos extremamente longos recebem indicação visual de corte.
     font=face(43)
@@ -148,8 +151,8 @@ def headline_fit(message):
             lines.append(line);line=word
         else:line=attempt
     if line:lines.append(line)
-    if len(lines)>5:
-        lines=lines[:5]
+    if len(lines)>4:
+        lines=lines[:4]
         while draw.textbbox((0,0),lines[-1]+"…",font=font)[2]>920:
             lines[-1]=" ".join(lines[-1].split()[:-1])
         lines[-1]+="…"
@@ -177,7 +180,9 @@ def poster(episode,headline=None,index=0,total=1):
     text=headline or episode.get("cover_headline") or episode.get("title") or "ALÉM DO JOGO"
     f,lines=headline_fit(text)
     lh=int(f.size*1.08)
-    start=1073+max(0,(505-lh*len(lines))//2)
+    # A faixa central y=930..1150 é exclusiva das legendas.
+    # O título da cena fica abaixo de y=1240, sem disputar a leitura.
+    start=1230+max(0,(355-lh*len(lines))//2)
     paint(d,start-50,start+len(lines)*lh+65,NAVY,18+index)
     if len(lines)>=3:paint(d,start+2*lh-26,start+len(lines)*lh+57,RED,73+index)
     for i,line in enumerate(lines):
@@ -191,11 +196,6 @@ def poster(episode,headline=None,index=0,total=1):
     lf=face(42,False)
     while d.textbbox((0,0),label,font=lf)[2]>900 and lf.size>23:lf=face(lf.size-2,False)
     d.text(((W-d.textbbox((0,0),label,font=lf)[2])//2,1672),label,font=lf,fill=WHITE)
-    if not has_photo:
-        note="ILUSTRAÇÃO EDITORIAL · SEM FOTO HISTÓRICA"
-        nd=face(23,False)
-        d.rounded_rectangle((65,949,715,996),radius=9,fill=(*INK,205))
-        d.text((84,952),note,font=nd,fill=GOLD)
     base.alpha_composite(art)
     logo=official_logo()
     # Aumenta com proporção original preservada, sem recriar a marca.
