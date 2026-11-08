@@ -134,6 +134,16 @@ def main():
         # Uma falha de pesquisa não deve impedir a produção do Reel.
         result={"status":"unavailable","reason":str(error)[:160]}
     dest=Path(opts.output);dest.parent.mkdir(parents=True,exist_ok=True)
+    if result.get("status") not in ("existing","downloaded"):
+        result={
+            **result,
+            "visual_mode":"original_cartoon",
+            "illustration_note":"Arte cartoon original inspirada no universo do beisebol; não é retrato histórico fiel do atleta nem fotografia.",
+            "image_author":"ALLSTARS Studio — composição vetorial original",
+            "image_rights":"Arte produzida pelo próprio sistema, sem uso de fotografia externa."
+        }
+    else:
+        result["visual_mode"]="licensed_photo"
     dest.write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
     print("Busca de foto:",result["status"])
 
