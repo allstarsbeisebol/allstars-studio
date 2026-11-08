@@ -51,10 +51,9 @@ A conexão do Supabase já existe no ChatGPT, mas **não transmite automaticamen
 |---|---|---|
 | Vercel → projeto `allstars-studio` → Environment Variables | `SUPABASE_URL` | `https://alrgqmwnynybawenyugb.supabase.co` |
 | Vercel → projeto `allstars-studio` → Environment Variables | `SUPABASE_SERVICE_ROLE_KEY` | Chave secreta de serviço do projeto ALLSTARS, configurada diretamente na Vercel |
-| GitHub → repositório `allstarsbeisebol/allstars-studio` → Settings → Secrets and variables → Actions | `SUPABASE_URL` | Mesma URL do projeto |
 | GitHub → repositório `allstarsbeisebol/allstars-studio` → Settings → Secrets and variables → Actions | `SUPABASE_SERVICE_ROLE_KEY` | Chave secreta configurada diretamente no GitHub |
 
-Configure na Vercel pelo menos **Production**. Habilite também **Preview** se testar as APIs em prévias de PR. Após configurar variáveis na Vercel, publique novamente a revisão em produção. O GitHub Actions lê suas próprias secrets, não as da Vercel.
+A variável `SUPABASE_URL` já foi criada na Vercel (Production e Preview). Falta apenas a chave protegida. Configure a credencial na Vercel pelo menos em **Production**. Habilite também **Preview** se testar as APIs em prévias de PR. Após configurar variáveis na Vercel, publique novamente a revisão em produção. O GitHub Actions já tem a URL pública do projeto no workflow; só precisa da secret `SUPABASE_SERVICE_ROLE_KEY`. Ele lê suas próprias secrets, não as da Vercel.
 
 **Nunca cole a chave secreta no chat ou em um commit.** Não use a chave pública (publishable/anon) no lugar da credencial do servidor; o bucket continua privado e o acesso direto anônimo permanece bloqueado. As chaves atuais de GitHub e de login do Studio devem ser preservadas.
 
