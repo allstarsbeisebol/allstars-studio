@@ -12,6 +12,9 @@ Estúdio online para solicitar e baixar Reels de beisebol, preservando a identid
 4. Se for necessário, expanda o campo adicional para colar o texto de uma postagem bloqueada por login.
 5. Clique em **Conferir meu pedido** e **Preparar prévia da imagem**. Isso cria primeiro o roteiro e a capa, **sem MP4**.
 6. Na seção **Aprovar imagem**, amplie a capa e escolha **Solicitar ajustes** (por texto), **Gerar outra versão** ou **Aprovar imagem e produzir vídeo**.
+   - **Opção com outra IA, sem API paga:** abra **Usar minha imagem ou criar em outra IA**, copie o prompt específico da história, cole no ChatGPT/Gemini ou em outro gerador de sua preferência, gere a arte e volte ao Studio.
+   - **Importação:** copie a imagem (Ctrl+V na caixa de colagem), arraste ou selecione PNG/JPG/WEBP. O navegador converte e otimiza para JPEG de até 1,9 MB. Escolha **Mostrar inteira**, **Preencher** ou **Fundo desfocado**, confirme seus direitos de uso e clique em **Usar esta imagem**.
+   - A versão importada reaparece como **prévia para aprovação**, produzindo uma capa vertical 9:16 e uma capa de perfil 3:4. Só depois do botão de aprovação começa o MP4.
 7. Somente a aprovação inicia narração e montagem do Reel. Quando terminar, o Studio oferece MP4, MP3, capa 9:16, capa 3:4, legenda, fontes, roteiro e storyboard.
 8. Nos arquivos produzidos, **Ver imagem** abre a capa ampliada, e **Visualizar / Copiar** mostra o roteiro, legenda, fontes e JSON em uma prévia com botão **Copiar texto**. O download original permanece disponível.
 
@@ -24,6 +27,9 @@ Estúdio online para solicitar e baixar Reels de beisebol, preservando a identid
 - O mecanismo de revisão local é procedural: consegue variar composição, cores (vermelho, azul, dourado) e alguns motivos da ilustração (arremesso, rebatida, lista etc.), mas não gera personagens/cenas anime complexos apenas por texto livre. Solicitações mais sofisticadas ficam documentadas para evolução posterior.
 - O sistema não afirma que essa composição gráfica é ilustração anime premium. A referência aprovada de Jim Abbott continua disponível somente como exemplo, não como imagem de novas histórias.
 - Para gerar imagens anime premium com IA de forma totalmente automática será necessário um motor de imagem adequado, com direitos e custos verificados. Não se ativa API paga de imagem sem autorização específica.
+- O novo caminho alternativo exporta **prompt_imagem_ia.txt** e permite usar o gerador de imagens externo escolhido por você, sem conexão automática ou compartilhamento de prompts com terceiros.
+- Imagens enviadas são anexadas à prévia em GitHub Releases e convertidas por `engine/import_art.py`. A arte original aprovada também é utilizada como base das cenas do Reel; a origem é creditada como **imagem fornecida pelo editor**, não como arte gerada pelo Studio.
+- **Atenção à permissão:** para receber upload na Vercel, `ALLSTARS_GITHUB_TOKEN` precisa de **Contents: Read and write** no repositório, além de **Issues: Read and write**. Caso falte, o Studio informa a permissão necessária. O histórico de imagens externas não é salvo como commits Git; fica vinculado ao release da prévia.
 
 ## Narração e roteiro
 - Gemini ajuda a pesquisar e preparar histórias a partir de assunto ou fontes. Os textos seguem revisão editorial obrigatória; fatos extraídos de uma fonte não são automaticamente verificados por uma segunda fonte.

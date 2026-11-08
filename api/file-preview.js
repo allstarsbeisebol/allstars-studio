@@ -4,7 +4,7 @@ const API="https://api.github.com/repos/"+REPO;
 const FILES=new Set([
  "roteiro.txt","legenda_instagram.txt","fontes.txt","briefing_arte_anime.txt",
  "legendas.srt","pesquisa.json","midia.json","qualidade_visual.json",
- "storyboard.json","legendas_metadata.json"
+ "storyboard.json","legendas_metadata.json","prompt_imagem_ia.txt"
 ]);
 const MAX_BYTES=240000;
 export default async function handler(req,res){

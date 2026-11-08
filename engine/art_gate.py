@@ -38,7 +38,8 @@ def advance(ep,body):
     current=int(ep.get("art_revision",0))
     if current!=expected:raise ValueError("Esta versão da arte não está mais disponível para revisão.")
     action=fields.get("ACTION","")
-    if action not in ("regenerate","revise"):raise ValueError("Escolha revisar ou gerar uma nova imagem.")
+    if action not in ("regenerate","revise","external"):
+        raise ValueError("Escolha revisar, gerar outra imagem ou enviar a sua própria arte.")
     encoded=fields.get("FEEDBACK_BASE64","")
     try:feedback=base64.b64decode(encoded,validate=True).decode("utf-8").strip() if encoded else ""
     except (ValueError,UnicodeDecodeError) as exc:raise ValueError("Ajuste textual inválido.") from exc
@@ -46,6 +47,22 @@ def advance(ep,body):
         raise ValueError("O ajuste deve ter no máximo 1.200 caracteres.")
     if action=="revise" and len(feedback)<5:
         raise ValueError("Explique o que deseja ajustar na imagem.")
+    if action=="external":
+        asset=fields.get("IMAGE_ASSET","")
+        fit=fields.get("FIT","")
+        if not re.fullmatch(r"external-r"+str(current+1)+r"-[a-f0-9]{12}\.jpg",asset):
+            raise ValueError("O arquivo enviado não corresponde à próxima revisão do pedido.")
+        if fit not in ("contain","cover","blur"):
+            raise ValueError("Enquadramento da imagem não permitido.")
+        ep["art_source"]="uploaded"
+        ep["art_image_asset"]=asset
+        ep["art_image_fit"]=fit
+        ep["art_rights_confirmed"]=True
+    else:
+        ep["art_source"]="generated"
+        ep.pop("art_image_asset",None)
+        ep.pop("art_image_fit",None)
+        ep.pop("art_rights_confirmed",None)
     ep["art_revision"]=current+1
     ep["art_approved"]=False
     ep["art_feedback"]=feedback if action=="revise" else ""
@@ -72,6 +89,7 @@ def approve(ep,body):
 def prepare(ep,issue_id):
     if not isinstance(issue_id,int) or issue_id<1:raise ValueError("Pedido inválido.")
     ep["art_revision"]=1
+    ep["art_source"]="generated"
     ep["art_feedback"]=""
     ep["art_approved"]=False
     ep["episode_number"]=issue_id

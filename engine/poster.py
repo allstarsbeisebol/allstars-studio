@@ -136,6 +136,24 @@ def thematic_hero(base,episode):
     return True
 
 def add_hero(base,episode,index=0):
+    if episode.get("art_source")=="uploaded":
+        # Usar a arte enviada na própria narrativa e nas cenas do vídeo, não
+        # somente na capa. A origem é um asset do mesmo pedido.
+        filename=str(episode.get("art_image_asset") or "")
+        if not re.fullmatch(r"external-r[1-9]\d{0,4}-[a-f0-9]{12}\.jpg",filename):
+            raise ValueError("Imagem externa não autorizada no roteiro.")
+        art_path=ROOT/"output"/filename
+        if not art_path.is_file():
+            raise FileNotFoundError("Arte externa aprovada não foi recuperada para o vídeo.")
+        with Image.open(art_path) as image:
+            art=ImageOps.exif_transpose(image).convert("RGBA")
+            art=ImageOps.fit(art,(W,1270),method=Image.Resampling.LANCZOS,centering=(.5,.45))
+        fade=Image.new("L",(1,art.height),255)
+        for y in range(920,art.height):
+            fade.putpixel((0,y),int(255*max(0,(art.height-y)/(art.height-920))))
+        art.putalpha(fade.resize(art.size))
+        base.alpha_composite(art,(0,95))
+        return True
     if episode.get("unique_art_required"):
         from story_art import create_context_art
         base.alpha_composite(create_context_art(episode,index),(0,120))

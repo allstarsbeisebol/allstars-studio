@@ -102,7 +102,13 @@ media=out/"midia.json"
 if media.is_file():
     try:
         status=json.loads(media.read_text(encoding="utf-8"))
-        if status.get("status")=="approved_anime":
+        if status.get("status")=="external_image":
+            credit="Imagem enviada pelo editor; autoria e direitos de uso não são verificados automaticamente."
+            caption=(caption+"\n\n"+credit).strip()
+            sources.extend(["","ARTE FORNECIDA PELO EDITOR",credit,
+                "Arquivo aprovado do mesmo pedido: "+str(ep.get("art_image_asset") or ""),
+                "Conferir direitos e referências visuais antes da publicação."])
+        elif status.get("status")=="approved_anime":
             credit="Arte anime original aprovada para Jim Abbott; não representa fotografia histórica."
             caption=(caption+"\n\n"+credit).strip()
             sources.extend(["","CRÉDITOS DA ARTE ANIME APROVADA",

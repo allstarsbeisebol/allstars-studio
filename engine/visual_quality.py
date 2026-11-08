@@ -12,7 +12,18 @@ args=p.parse_args()
 
 ep=json.loads(Path(args.episode).read_text(encoding="utf-8"))
 approved=find_approved_anime(ep) if ep.get("content_type","atleta")=="atleta" and not ep.get("unique_art_required") else None
-if ep.get("unique_art_required"):
+if ep.get("art_source")=="uploaded":
+    data={
+      "mode":"external_image",
+      "premium":False,
+      "new_for_episode":True,
+      "approved_by_editor":bool(ep.get("art_approved",False)),
+      "art_revision":int(ep.get("art_revision") or 0),
+      "message":"Imagem fornecida pelo editor ou por outra IA; verificar direitos, autoria e fidelidade dos fatos.",
+      "source_filename":str(ep.get("art_image_asset") or ""),
+      "rights_confirmed_by_editor":bool(ep.get("art_rights_confirmed",False))
+    }
+elif ep.get("unique_art_required"):
     from story_art import art_metadata
     data={
       "mode":"original_context_art",
