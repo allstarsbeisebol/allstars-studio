@@ -1,16 +1,16 @@
 {
   "available": true,
-  "tag": "episodio-4",
-  "updated_at": "2026-11-07T21:39:40.437011+00:00",
-  "athlete": "Roy Campanella",
-  "title": "QUANDO O CAMPO DEIXOU DE SER UMA OPÇÃO.",
+  "tag": "episodio-5",
+  "updated_at": "2026-11-08T00:33:28.090359+00:00",
+  "athlete": "Larry Doby",
+  "title": "O SEGUNDO NOME TAMBÉM ENFRENTOU A PRIMEIRA BARREIRA.",
   "status": "PRÉVIA EDITORIAL — confira informações históricas, voz e direitos de uso antes de publicar",
-  "cover": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-4/capa.png",
-  "video": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-4/allstars_reel.mp4",
-  "audio": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-4/narracao.mp3",
-  "caption": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-4/legenda_instagram.txt",
-  "script": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-4/roteiro.txt",
-  "sources": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-4/fontes.txt",
-  "research": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-4/pesquisa.json",
-  "release": "https://github.com/liuhelpme/allstars-studio/releases/tag/episodio-4"
+  "cover": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-5/capa.png",
+  "video": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-5/allstars_reel.mp4",
+  "audio": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-5/narracao.mp3",
+  "caption": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-5/legenda_instagram.txt",
+  "script": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-5/roteiro.txt",
+  "sources": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-5/fontes.txt",
+  "research": "https://github.com/liuhelpme/allstars-studio/releases/download/episodio-5/pesquisa.json",
+  "release": "https://github.com/liuhelpme/allstars-studio/releases/tag/episodio-5"
 }
