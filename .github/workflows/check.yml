@@ -29,6 +29,8 @@ jobs:
           Path('/tmp/allstars-ui.mjs').write_text(script,encoding='utf-8')
           PY
           node --check /tmp/allstars-ui.mjs
+      - name: Validar extração de matérias e preservação de fontes
+        run: python -m unittest discover -s tests -p 'test_article_extract.py' -v
       - name: Conferir scripts, dados e histórico
         run: python engine/check.py
       - name: Conferir fontes de pesquisa
