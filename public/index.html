@@ -4,6 +4,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
 /* Navegação e biblioteca otimizadas para desktop e mobile */
+.studio-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.overview-item{background:#10284e;border:1px solid #4b6491;border-radius:12px;padding:15px}
+.overview-item strong{font-size:20px;display:block;color:#F0C040;margin-top:6px}
+@media(max-width:680px){.studio-overview{grid-template-columns:1fr}}
 .section-nav{position:sticky;top:0;z-index:20;display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;padding:10px 14px;background:rgba(7,22,50,.96);border-bottom:1px solid #486899;white-space:nowrap}
 .section-nav a{padding:8px 13px;border-radius:12px;border:1px solid #617fb1;color:#e7f1ff;text-decoration:none;font-weight:700;font-size:14px}
 .section-nav a:hover,.section-nav a:focus-visible{border-color:#F0C040;color:#F0C040}
@@ -47,6 +51,11 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 </nav>
 <main>
 <section class="hero"><div class="eyebrow">ESTÚDIO DE PRODUÇÃO</div><h1>Seu próximo Reel.<br><span style="color:var(--gold)">Você escolhe quando criar.</span></h1><p class="muted">Selecione uma das duas opções. O estúdio prepara a narração, o vídeo vertical, a capa e a legenda para você baixar. Nenhuma programação semanal obrigatória.</p></section>
+<section id="overview" class="studio-overview" aria-label="Visão geral">
+ <div class="overview-item"><span class="note">Última produção</span><strong id="overview-last">Consultando...</strong><span class="note">Vídeo disponível para revisão</span></div>
+ <div class="overview-item"><span class="note">Pedido em andamento</span><strong id="overview-pending">Nenhum</strong><a class="note" href="#progress">Ver acompanhamento</a></div>
+ <div class="overview-item"><span class="note">Minha biblioteca</span><strong id="overview-library">Faça login</strong><a class="note" href="#library">Buscar produções</a></div>
+</section>
 <section class="panel login hidden" id="login"><h2>Entrar no estúdio</h2><p class="muted">Acesso de produção reservado à administração ALLSTARS. Entre uma vez neste navegador.</p>
 <form id="login-form"><label for="password">Senha do estúdio</label><input id="password" type="password" autocomplete="current-password" required maxlength="300" placeholder="Sua senha de acesso"><button style="width:100%;margin-top:15px" type="submit">Entrar e continuar</button></form><p id="login-message" role="status" class="note"></p></section>
 <section id="setup" class="panel hidden"><h2>Conexão inicial pendente</h2><p class="muted">O aplicativo visual já está preparado. Falta configurar as credenciais seguras do serviço de produção uma única vez. Nenhum dado secreto deve ser colocado no código ou na página pública.</p><a href="https://vercel.com/allstars-beisebol/allstars-studio/settings/environment-variables" target="_blank" rel="noopener" class="btn secondary">Abrir configuração segura</a></section>
@@ -246,6 +255,7 @@ async function request(path,options={}){
 }
 async function init(){
  syncNotifyButton();
+ $('overview-pending').textContent=pending?'Pedido #'+pending:'Nenhum pedido pendente';
  try{
   const state=await request('/api/login');
   authenticated=state.authenticated;configured=state.configured;
@@ -354,7 +364,7 @@ async function create(){
   const data=await request('/api/generate',{method:'POST',body:JSON.stringify({
    mode:urls.length||reference_text?'link':'auto',content_type,subject,urls,reference_text
   })});
-  pending=data.request_id;localStorage.setItem('allstars-pending-issue',String(pending));clearDraft();
+  pending=data.request_id;localStorage.setItem('allstars-pending-issue',String(pending));$('overview-pending').textContent='Pedido #'+pending;clearDraft();
   $('progress-stage').textContent='EM PRODUÇÃO';
   $('progress-title').textContent='Vídeo solicitado';
   await poll();
@@ -371,7 +381,7 @@ async function poll(){
    clearTimeout(timer);timer=null;
    $('progress-title').textContent='Seu episódio está pronto!';
    $('progress-message').textContent='Use os botões abaixo para baixar.';
-   localStorage.removeItem('allstars-pending-issue');pending=0;
+   localStorage.removeItem('allstars-pending-issue');pending=0;$('overview-pending').textContent='Nenhum pedido pendente';
    renderFiles(data.assets||{},data.athlete||'Novo vídeo');
    announceEnd(finishedIssue,'ready','');
    await loadLibrary();
@@ -380,7 +390,7 @@ async function poll(){
   }
   if(data.state==='error'){
    const failedIssue=pending;
-   clearTimeout(timer);timer=null;localStorage.removeItem('allstars-pending-issue');pending=0;
+   clearTimeout(timer);timer=null;localStorage.removeItem('allstars-pending-issue');pending=0;$('overview-pending').textContent='Nenhum pedido pendente';
    $('progress-stage').textContent='PRODUÇÃO ENCERRADA COM ERRO';
    $('progress-title').textContent='Não foi possível concluir o vídeo';
    $('progress-message').textContent=data.message;
@@ -412,7 +422,8 @@ async function loadLatest(){
   const res=await fetch('./latest.json?version='+Date.now(),{cache:'no-store'});
   if(!res.ok)throw Error('indisponível');
   const data=await res.json();
-  if(!data.available){$('result-message').textContent='Ainda não há vídeos prontos.';return;}
+  if(!data.available){$('result-message').textContent='Ainda não há vídeos prontos.';$('overview-last').textContent='Sem produção';return;}
+  $('overview-last').textContent=String(data.subject||data.athlete||'Vídeo pronto').slice(0,55);
   const files={'allstars_reel.mp4':data.video};
   // Os demais campos são vinculados por seus nomes reais.
   files['capa.png']=data.cover;files['capa_perfil_3x4.png']=data.profile_cover;files['narracao.mp3']=data.audio;files['legenda_instagram.txt']=data.caption;
@@ -424,7 +435,7 @@ async function loadLatest(){
    $('result-message').textContent='A capa ainda não atende ao acabamento anime premium aprovado. Revise antes de publicar.';
   }
   if(data.hook)document.title='⚾ '+data.hook.slice(0,68)+' · ALLSTARS Studio';
- }catch{$('result-message').textContent='Quando uma produção terminar, seus arquivos aparecerão aqui.';}
+ }catch{$('result-message').textContent='Quando uma produção terminar, seus arquivos aparecerão aqui.';$('overview-last').textContent='Indisponível';}
 }
 let libraryData=[],libraryPage=0,libraryMode='cards';
 function paintLibrary(){
@@ -451,6 +462,7 @@ function paintLibrary(){
  }
  $('library-page').textContent=results.length?'Página '+(libraryPage+1)+' de '+pages+' · '+results.length+' vídeo(s)':'Nenhum vídeo encontrado.';
  $('library-prev').disabled=libraryPage===0;$('library-next').disabled=libraryPage+1>=pages;
+ $('overview-library').textContent=libraryData.length+' vídeos';
  $('library-message').textContent=libraryData.length+' produção(ões) na biblioteca.'+(libraryData.length>=100?' Exibindo até 100 registros recentes.':'');
 }
 async function loadLibrary(){
