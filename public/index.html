@@ -4,12 +4,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:dark;--navy:#1A3566;--blue:#315FAC;--red:#CE233E;--gold:#F0C040;--fg:#fff;--muted:#c1cee6;font-family:Barlow,Arial,sans-serif}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 90% -20%,#315FAC88,transparent 50%),#071632;color:var(--fg)}button,input{font:inherit}button,a{touch-action:manipulation}a{color:var(--gold)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 90% -20%,#315FAC88,transparent 50%),#071632;color:var(--fg)}button,input,select{font:inherit}button,a{touch-action:manipulation}a{color:var(--gold)}
 header{background:var(--navy);border-bottom:3px solid var(--red);padding:18px 22px}.wrap{max-width:980px;margin:auto}.brand{font-family:'Barlow Condensed',Impact,sans-serif;font-weight:900;letter-spacing:1px;font-size:28px}.brand span{color:var(--gold)}.sub{font-size:12px;color:#b9ccec;letter-spacing:1.3px}
 main{max-width:980px;margin:0 auto;padding:32px 18px 60px}.eyebrow{font-weight:800;letter-spacing:1.4px;color:var(--gold);font-size:12px}h1,h2{font-family:'Barlow Condensed',Impact,sans-serif;line-height:1.07}h1{font-size:clamp(40px,7vw,68px);margin:10px 0 18px}h2{font-size:clamp(27px,4vw,36px);margin:0 0 10px}p{line-height:1.55}p.muted,.muted{color:var(--muted)}
 .hero{padding:22px 4px 10px}.cards{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}.panel{background:#10284e;border:1px solid #49648e;border-radius:17px;padding:24px}.option{display:flex;flex-direction:column;gap:12px;min-height:270px}.option h2{margin:0}.option p{margin:0;color:#c7d6ed}.grow{flex:1} .icon{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:12px;background:#315FAC33;font-size:28px}
-button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold);font-weight:800;color:#071730;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;line-height:1.2;min-height:49px}button:disabled{opacity:.57;cursor:not-allowed}.secondary{background:var(--blue);color:white;border:1px solid #7f9ece}.outline{background:transparent;color:var(--gold);border:1px solid #aa9a68}label{display:block;font-size:14px;font-weight:700;margin:7px 0 8px}input{background:#081a36;color:#fff;padding:13px;border:1px solid #8197b9;width:100%;border-radius:9px;font-size:15px}input:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold);font-weight:800;color:#071730;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;line-height:1.2;min-height:49px}button:disabled{opacity:.57;cursor:not-allowed}.secondary{background:var(--blue);color:white;border:1px solid #7f9ece}.outline{background:transparent;color:var(--gold);border:1px solid #aa9a68}label{display:block;font-size:14px;font-weight:700;margin:7px 0 8px}input,select{background:#081a36;color:#fff;padding:13px;border:1px solid #8197b9;width:100%;border-radius:9px;font-size:15px}input:focus,select:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .note{color:#aac1e2;font-size:13px}.notice{background:#16345a;border-left:3px solid var(--gold);padding:12px 14px;border-radius:7px;color:#e0ebf9}.status{font-size:15px;margin:10px 0 15px}.result{display:grid;grid-template-columns:minmax(180px,280px) 1fr;gap:24px;align-items:start}.result img,.result video{width:100%;aspect-ratio:9/16;object-fit:contain;border-radius:12px;border:2px solid var(--gold);background:#08162e}.links{display:flex;gap:10px;flex-wrap:wrap}.links a{font-size:14px}.chip{display:inline-block;padding:5px 11px;border:1px solid #7888a6;border-radius:20px;font-size:12px;color:#c9d9f1}.hidden,[hidden]{display:none!important}.login{max-width:440px;margin:16px auto}.login label{text-align:left}.login p{font-size:14px}.extras{display:flex;gap:14px;flex-wrap:wrap;color:#acbfd9;font-size:13px}.extras a{color:#d2ddf0}footer{text-align:center;padding:30px;color:#acbfda;font-size:12px}
+.studio-form{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;margin-top:19px}
+.studio-form>div:nth-child(3),.studio-form .note,.studio-form .generate-primary{grid-column:1/-1}
+.studio-form select{width:100%;min-height:48px;border-radius:9px;border:1px solid #8197b9;padding:11px;color:#fff}
+.studio-form .generate-primary{width:100%;font-size:17px}
+@media(max-width:680px){.studio-form{grid-template-columns:1fr}}
 .alert-settings{margin:0 0 17px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .alert-settings .note{flex:1;min-width:240px}
 .toast{position:fixed;top:18px;right:18px;width:min(440px,calc(100vw - 36px));z-index:1000;background:#10284e;border:2px solid var(--gold);border-left:7px solid var(--gold);border-radius:14px;padding:17px 17px 16px;box-shadow:0 16px 45px #020916be}
@@ -23,9 +28,35 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 <section class="panel login hidden" id="login"><h2>Entrar no estúdio</h2><p class="muted">Acesso de produção reservado à administração ALLSTARS. Entre uma vez neste navegador.</p>
 <form id="login-form"><label for="password">Senha do estúdio</label><input id="password" type="password" autocomplete="current-password" required maxlength="300" placeholder="Sua senha de acesso"><button style="width:100%;margin-top:15px" type="submit">Entrar e continuar</button></form><p id="login-message" role="status" class="note"></p></section>
 <section id="setup" class="panel hidden"><h2>Conexão inicial pendente</h2><p class="muted">O aplicativo visual já está preparado. Falta configurar as credenciais seguras do serviço de produção uma única vez. Nenhum dado secreto deve ser colocado no código ou na página pública.</p><a href="https://vercel.com/liuhelpme-4965s-projects/allstars-studio/settings/environment-variables" target="_blank" rel="noopener" class="btn secondary">Abrir configuração segura</a></section>
-<section class="cards" id="options">
-<article class="panel option"><div class="icon">✦</div><h2>Gerar automaticamente</h2><p>Selecionar uma nova história de superação da biblioteca ALLSTARS, sem repetir atletas já produzidos.</p><div class="grow"></div><button id="auto" type="button">✦ Gerar meu episódio</button></article>
-<article class="panel option"><div class="icon">🔗</div><h2>Gerar a partir de link</h2><p>Cole uma matéria ou biografia pública. O roteiro será baseado naquela referência. Não use links privados ou com tokens.</p><label for="article">Link de referência</label><input id="article" type="url" autocomplete="url" placeholder="https://baseballhall.org/..." inputmode="url"><div class="grow"></div><button class="secondary" id="from-link" type="button">Gerar com este link</button></article>
+<section class="panel" id="options" aria-labelledby="form-title">
+  <div class="eyebrow">GERADOR DE REELS</div>
+  <h2 id="form-title">O que vamos criar?</h2>
+  <p class="muted">Escolha o tipo, escreva um assunto ou cole um link. Se deixar tudo em automático, selecionamos uma história da biblioteca.</p>
+  <div class="studio-form">
+    <div>
+      <label for="content-type">Tipo de conteúdo</label>
+      <select id="content-type">
+        <option value="auto">✦ Automático — escolher por mim</option>
+        <option value="atleta">⚾ Atleta</option>
+        <option value="tema">✧ Tema ou história coletiva</option>
+        <option value="noticia">📰 Notícia</option>
+        <option value="lista">☷ Lista ou ranking</option>
+        <option value="explicativo">? Explicativo</option>
+      </select>
+    </div>
+    <div>
+      <label for="subject">Assunto <span class="note">(opcional no automático)</span></label>
+      <input id="subject" type="text" maxlength="160" autocomplete="off"
+        placeholder="Ex.: Hall da Fama, Jim Abbott, Top 5 no-hitters">
+    </div>
+    <div>
+      <label for="article">Link de referência <span class="note">(opcional)</span></label>
+      <input id="article" type="url" autocomplete="url" inputmode="url"
+        placeholder="https://www.mlb.com/...">
+    </div>
+    <p id="form-hint" class="note">Sem assunto ou link, o estúdio escolhe a próxima história disponível.</p>
+    <button id="generate" type="button" class="generate-primary">✦ Gerar episódio</button>
+  </div>
 </section>
 <div class="alert-settings" id="alert-settings"><button type="button" id="notify-enable" class="btn outline" aria-pressed="false">🔔 Ativar avisos do navegador</button><span class="note" id="notify-explanation">Quando o episódio terminar, mostraremos um aviso aqui. Para avisar também no navegador, ative a opção. Mantenha a página aberta.</span></div>
 <section class="panel hidden" id="progress" aria-live="polite"><div class="eyebrow">EM PRODUÇÃO</div><h2 id="progress-title">Criando o episódio...</h2><p id="progress-message" class="muted">Preparando o pedido...</p><p class="note">Você pode deixar esta página aberta. O histórico de produção será mantido neste navegador.</p><button class="secondary" id="refresh" type="button">↻ Verificar andamento</button></section>
@@ -131,7 +162,7 @@ async function init(){
   authenticated=state.authenticated;configured=state.configured;
   $('setup').classList.toggle('hidden',configured);
   $('login').classList.toggle('hidden',!configured||authenticated);
-  for(const id of ['auto','from-link'])$(id).disabled=!configured;
+  $('generate').disabled=!configured;
   if(authenticated&&pending)await poll();
  }catch{$('setup').classList.remove('hidden');$('setup').querySelector('p').textContent='Não foi possível conectar ao serviço de geração. O painel de downloads permanece disponível.'}
  await loadLatest();
@@ -145,27 +176,40 @@ $('login-form').addEventListener('submit',async event=>{
   if(pending)await poll();
  }catch(e){$('login-message').textContent=e.message;}
 });
-async function create(mode){
+function updateFormHint(){
+ const type=$('content-type').value, subject=$('subject').value.trim(), url=$('article').value.trim();
+ $('form-hint').textContent=url?
+  'Usaremos o conteúdo deste link para criar um '+({atleta:'episódio sobre o atleta',tema:'tema',noticia:'resumo de notícia',lista:'episódio em lista',explicativo:'vídeo explicativo',auto:'episódio'}[type])+'.':
+  subject?'O estúdio pesquisará o assunto e exigirá referências públicas antes de montar o vídeo.':
+  'Sem assunto ou link, o estúdio escolhe a próxima história da biblioteca.';
+}
+for(const id of ['content-type','subject','article'])$(id).addEventListener('input',updateFormHint);
+async function create(){
  $('completion-toast').classList.add('hidden');
  document.title=ordinaryTitle;
  if(!authenticated){$('login').classList.remove('hidden');$('login').scrollIntoView({behavior:'smooth'});return;}
- let url='';
- if(mode==='link'){
-  url=$('article').value.trim();
-  try{const u=new URL(url);if(u.protocol!=='https:'||u.username||u.password)throw Error('invalid');}catch{errorMessage('Cole um link válido começando com https://');return;}
+ const url=$('article').value.trim(),subject=$('subject').value.trim(),content_type=$('content-type').value;
+ if(url){
+  try{const u=new URL(url);if(u.protocol!=='https:'||u.username||u.password)throw Error('invalid');}
+  catch{errorMessage('Informe um link público válido começando com https://');return;}
  }
- for(const id of ['auto','from-link'])$(id).disabled=true;
- $('progress').classList.remove('hidden');$('progress-title').textContent='Enviando pedido...';$('progress-message').textContent='Preparando a produção segura.';
+ if(!url&&content_type!=='auto'&&!subject){errorMessage('Digite o assunto que deseja transformar em episódio.');return;}
+ $('generate').disabled=true;
+ $('progress').classList.remove('hidden');
+ $('progress-title').textContent='Enviando pedido...';
+ $('progress-message').textContent='Preparando a produção segura.';
  $('progress').scrollIntoView({behavior:'smooth'});
  try{
-  const data=await request('/api/generate',{method:'POST',body:JSON.stringify({mode,url})});
+  const data=await request('/api/generate',{method:'POST',body:JSON.stringify({
+   mode:url?'link':'auto',content_type,subject,url
+  })});
   pending=data.request_id;localStorage.setItem('allstars-pending-issue',String(pending));
   $('progress-title').textContent='Episódio solicitado';
   await poll();
  }catch(e){errorMessage(e.message);}
- finally{for(const id of ['auto','from-link'])$(id).disabled=!configured;}
+ finally{$('generate').disabled=!configured;}
 }
-$('auto').addEventListener('click',()=>create('auto'));$('from-link').addEventListener('click',()=>create('link'));
+$('generate').addEventListener('click',create);
 async function poll(){
  if(!pending||!authenticated)return;
  try{
