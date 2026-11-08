@@ -113,7 +113,7 @@ if media.is_file():
                 "Conferir licença e direitos antes de publicar."
             ])
         elif status.get("visual_mode")=="original_cartoon" or status.get("status") not in ("downloaded","existing"):
-            warning="Arte ilustrativa original em estilo cartoon; personagem fictício, não é retrato histórico fiel do atleta."
+            warning=("Composição temática ilustrativa original do ALLSTARS Studio; não é fotografia documental." if ep.get("content_type","atleta")!="atleta" else "Arte ilustrativa original em estilo cartoon; personagem fictício, não é retrato histórico fiel do atleta.")
             caption=(caption+"\n\n"+warning).strip()
             sources.extend(["", "CRÉDITOS DA IMAGEM", warning, "Criação: ALLSTARS Studio. Nenhuma foto histórica utilizada."])
     except (ValueError,OSError):pass
