@@ -205,7 +205,7 @@ def poster(episode,headline=None,index=0,total=1):
         d.text((x+5,y+8),line,font=f,fill=(3,9,24),stroke_width=3,stroke_fill=INK)
         d.text((x,y),line,font=f,fill=GOLD if i>=len(lines)-max(1,len(lines)//2) else WHITE,stroke_width=3,stroke_fill=INK)
     d.line((72,1663,1007,1663),fill=GOLD,width=5)
-    label=str(episode.get("athlete","HISTÓRIA DO BEISEBOL")).upper()
+    label=str(episode.get("subject") or episode.get("athlete","HISTÓRIA DO BEISEBOL")).upper()
     if index:label+=f"  ·  CENA {index:02}/{total:02}"
     lf=face(42,False)
     while d.textbbox((0,0),label,font=lf)[2]>900 and lf.size>23:lf=face(lf.size-2,False)
