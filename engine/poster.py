@@ -37,9 +37,11 @@ def slug(text):
     return re.sub(r"[^a-z0-9]+","-",t).strip("-")
 
 def official_logo():
-    path=ROOT/"brand/logo.png"
-    if path.is_file():
-        with Image.open(path) as im: return im.convert("RGBA")
+    # Usar exatamente o arquivo da própria marca, jamais pedir que uma IA a redesenhe.
+    # A cópia HD do site oficial acompanha o release do episódio; fallback preservado.
+    for path in (ROOT/"output/logo-oficial.png",ROOT/"brand/logo.png"):
+        if path.is_file():
+            with Image.open(path) as im: return im.convert("RGBA")
     path=ROOT/"brand/logo.b64"
     if path.is_file():
         content=base64.b64decode(path.read_text(encoding="ascii").strip())
@@ -135,6 +137,26 @@ def thematic_hero(base,episode):
     base.alpha_composite(layer,(0,185))
     return True
 
+def external_frame(episode,source):
+    """Enquadra a imagem inteira no layout final, sem pedir caixas à IA."""
+    with Image.open(source) as src:
+        art=ImageOps.exif_transpose(src).convert("RGB")
+    mode=str(episode.get("art_image_fit") or "contain")
+    if mode=="cover":
+        return ImageOps.fit(art,(W,H),method=Image.Resampling.LANCZOS,
+                            centering=(.5,.46)).convert("RGBA")
+    if mode not in ("contain","blur"):
+        raise ValueError("Enquadramento externo inválido.")
+    if mode=="blur":
+        bg=ImageOps.fit(art,(W,H),method=Image.Resampling.LANCZOS)
+        bg=bg.filter(ImageFilter.GaussianBlur(52))
+        bg=Image.blend(bg,Image.new("RGB",(W,H),INK),.45)
+    else:
+        bg=Image.new("RGB",(W,H),INK)
+    foreground=ImageOps.contain(art,(W,H),method=Image.Resampling.LANCZOS)
+    bg.paste(foreground,((W-foreground.width)//2,(H-foreground.height)//2))
+    return bg.convert("RGBA")
+
 def add_hero(base,episode,index=0):
     if episode.get("art_source")=="uploaded":
         # Usar a arte enviada na própria narrativa e nas cenas do vídeo, não
@@ -223,9 +245,18 @@ def headline_fit(message):
         lines[-1]+="…"
     return font,lines
 
-def poster(episode,headline=None,index=0,total=1):
-    base=gradient();draw_stadium(base,2026+index)
-    has_photo=add_hero(base,episode,index)
+def poster(episode,headline=None,index=0,total=1,art_override=None):
+    if episode.get("art_source")=="uploaded":
+        # A imagem gerada externamente é APENAS a ilustração-base.
+        # O Studio acrescenta, neste momento, os títulos e a marca oficial.
+        source=Path(art_override) if art_override else ROOT/"output"/str(episode.get("art_image_asset",""))
+        if not source.is_file():raise FileNotFoundError("Imagem externa do episódio indisponível.")
+        base=external_frame(episode,source)
+        has_photo=True
+    else:
+        base=gradient()
+        draw_stadium(base,2026+index)
+        has_photo=add_hero(base,episode,index)
     dark=Image.new("RGBA",(W,H),(0,0,0,0));d=ImageDraw.Draw(dark,"RGBA")
     for y in range(850,1740,4):
         alpha=int(min(235,(y-850)/890*238))
@@ -260,10 +291,16 @@ def poster(episode,headline=None,index=0,total=1):
     d.text(((W-d.textbbox((0,0),label,font=lf)[2])//2,1672),label,font=lf,fill=WHITE)
     base.alpha_composite(art)
     logo=official_logo()
-    # Aumenta com proporção original preservada, sem recriar a marca.
-    scale=min(460/max(1,logo.width),145/max(1,logo.height))
+    # Fonte antiga é 180×97: ampliar 2,6× borrava bordas e letras.
+    # Reduzir uma marca HD é seguro; sem HD mostrar a logo original menor.
+    if logo.width>=500:
+        scale=min(440/max(1,logo.width),155/max(1,logo.height),1.0)
+    else:
+        scale=min(235/max(1,logo.width),122/max(1,logo.height),1.3)
     if abs(scale-1)>0.01:
         logo=logo.resize((max(1,round(logo.width*scale)),max(1,round(logo.height*scale))),Image.Resampling.LANCZOS)
+    if scale>1:
+        logo=logo.filter(ImageFilter.UnsharpMask(radius=.85,percent=125,threshold=2))
     x=(W-logo.width)//2;y=1742
     shade=Image.new("RGBA",(W,H),(0,0,0,0))
     sd=ImageDraw.Draw(shade,"RGBA")
@@ -278,3 +315,23 @@ def poster(episode,headline=None,index=0,total=1):
     td.arc((-220,1580,300,2100),290,60,fill=(*ROYAL,95),width=18)
     base.alpha_composite(texture)
     return base.convert("RGB")
+
+
+def profile_from_cover(image):
+    """Recorte 3:4 da MESMA capa, com rodapé e logo nítidos e oficiais."""
+    cropped=image.crop((0,240,W,1680)).convert("RGBA")
+    layer=Image.new("RGBA",cropped.size,(0,0,0,0))
+    draw=ImageDraw.Draw(layer,"RGBA")
+    draw.rectangle((0,1270,W,1440),fill=(*INK,245))
+    draw.line((105,1275,975,1275),fill=(*GOLD,230),width=4)
+    cropped.alpha_composite(layer)
+    logo=official_logo()
+    if logo.width>=500:
+        scale=min(340/max(1,logo.width),132/max(1,logo.height),1.0)
+    else:
+        scale=min(190/max(1,logo.width),107/max(1,logo.height),1.15)
+    if abs(scale-1)>.01:
+        logo=logo.resize((max(1,round(logo.width*scale)),
+                          max(1,round(logo.height*scale))),Image.Resampling.LANCZOS)
+    cropped.alpha_composite(logo,((W-logo.width)//2,1302+(120-logo.height)//2))
+    return cropped.convert("RGB")

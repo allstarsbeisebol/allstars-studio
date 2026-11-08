@@ -13,7 +13,7 @@ Estúdio online para solicitar e baixar Reels de beisebol, preservando a identid
 5. Clique em **Conferir meu pedido** e **Preparar prévia da imagem**. Isso cria primeiro o roteiro e a capa, **sem MP4**.
 6. Na seção **Aprovar imagem**, amplie a capa e escolha **Solicitar ajustes** (por texto), **Gerar outra versão** ou **Aprovar imagem e produzir vídeo**.
    - **Opção com outra IA, sem API paga:** abra **Usar minha imagem ou criar em outra IA**, copie o prompt específico da história, cole no ChatGPT/Gemini ou em outro gerador de sua preferência, gere a arte e volte ao Studio.
-   - **Importação:** copie a imagem (Ctrl+V na caixa de colagem), arraste ou selecione PNG/JPG/WEBP. O navegador converte e otimiza para JPEG de até 1,9 MB. Escolha **Mostrar inteira**, **Preencher** ou **Fundo desfocado**, confirme seus direitos de uso e clique em **Usar esta imagem**.
+   - **Importação:** copie a **ilustração-base sem texto nem logo** (Ctrl+V na caixa de colagem), arraste ou selecione PNG/JPG/WEBP. O navegador converte e otimiza para JPEG de até 1,9 MB. Escolha **Mostrar inteira**, **Preencher** ou **Fundo desfocado**, confirme seus direitos de uso e clique em **Usar esta imagem**. O Studio montará o layout, a logo e os recortes antes da aprovação.
    - A versão importada reaparece como **prévia para aprovação**, produzindo uma capa vertical 9:16 e uma capa de perfil 3:4. Só depois do botão de aprovação começa o MP4.
 7. Somente a aprovação inicia narração e montagem do Reel. Quando terminar, o Studio oferece MP4, MP3, capa 9:16, capa 3:4, legenda, fontes, roteiro e storyboard.
 8. Nos arquivos produzidos, **Ver imagem** abre a capa ampliada, e **Visualizar / Copiar** mostra o roteiro, legenda, fontes e JSON em uma prévia com botão **Copiar texto**. O download original permanece disponível.
@@ -30,6 +30,18 @@ Estúdio online para solicitar e baixar Reels de beisebol, preservando a identid
 - O novo caminho alternativo exporta **prompt_imagem_ia.txt** e permite usar o gerador de imagens externo escolhido por você, sem conexão automática ou compartilhamento de prompts com terceiros.
 - Imagens enviadas são anexadas à prévia em GitHub Releases e convertidas por `engine/import_art.py`. A arte original aprovada também é utilizada como base das cenas do Reel; a origem é creditada como **imagem fornecida pelo editor**, não como arte gerada pelo Studio.
 - **Atenção à permissão:** para receber upload na Vercel, `ALLSTARS_GITHUB_TOKEN` precisa de **Contents: Read and write** no repositório, além de **Issues: Read and write**. Caso falte, o Studio informa a permissão necessária. O histórico de imagens externas não é salvo como commits Git; fica vinculado ao release da prévia.
+
+## Correção editorial — cena coerente, marca oficial e capa montada pelo Studio
+
+As próximas gerações **não usam uma capa com cinco cartões numerados** para histórias de fundação de ligas. O motor local diferencia claramente a imagem narrativa e a camada editorial.
+
+- **Cena concreta:** `engine/scene_direction.py` prepara uma direção vinculada ao assunto e a ação do episódio; para Rube Foster, considera a organização da Negro National League em 1920 como **interpretação artística**, não fotografia de reunião real. `engine/narrative_league.py` desenha uma cena de organização e decisão, sem cartões numerados. A geração local continua uma **ilustração gráfica**, não um gerador de anime premium.
+- **Prompt para IA externa:** `engine/external_prompt.py` agora pede a **cena principal**, o contexto de época e a ilustração-base SEM título, logo, moldura, caixas, números decorativos ou layout pronto. Referências de outros artistas servem de inspiração e orientação, não de cópia literal. O briefing anime acompanha essa divisão.
+- **Composição de imagem importada:** `engine/import_art.py` usa `poster.py` para aplicar o layout oficial sobre a arte enviada: título, marca original, contraste de legendas, encaixe (preencher/mostrar inteira/fundo desfocado) e recorte do perfil 3:4. O editor vê essa capa final **antes** de aprovar a produção do MP4.
+- **Logo oficial mais nítida:** o logo anterior do repositório tinha somente **180×97 pixels** e era ampliado excessivamente. `engine/brand_assets.py` tenta recuperar o logo de maior resolução **usado no site oficial ALLSTARS** e guarda o arquivo junto da prévia. A produção reutiliza o mesmo arquivo. Se a fonte externa falhar, a marca anterior aparece menor, sem falsa ampliação de qualidade. A marca nunca é redesenhada pela IA.
+- **Qualidade e custos:** a prévia automática melhora a coerência da narrativa e elimina o padrão arbitrário de cartões, mas **não promete um retrato realista ou uma cena anime premium gerada automaticamente**. Para esse acabamento, o prompt específico continua disponível para ser usado manualmente em uma IA externa, sem inserir APIs pagas.
+
+Fontes históricas de referência para Rube Foster: [National Baseball Hall of Fame](https://baseballhall.org/discover-more/stories/inside-pitch/negro-national-league-is-founded) e [MLB](https://www.mlb.com/history/negro-leagues/players/rube-foster).
 
 ## Biblioteca visual privada no Supabase (etapa de integração)
 

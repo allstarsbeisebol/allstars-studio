@@ -212,7 +212,7 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
  </div>
  <details id="external-image-options" class="external-image-box">
   <summary>Usar minha imagem ou criar em outra IA (copiar prompt)</summary>
-  <p>Copie o prompt do próprio episódio para a IA de sua preferência. Depois, <strong>cole a imagem com Ctrl+V</strong>, arraste para a caixa ou selecione um arquivo. O vídeo só começa depois que você conferir e aprovar a imagem importada.</p>
+  <p>O prompt pede uma <strong>cena específica do episódio</strong>, não um cartaz pronto. Gere só a ilustração em outra IA, sem texto ou logo. Depois, <strong>cole com Ctrl+V</strong>, arraste ou selecione um arquivo: o Studio aplicará título, marca oficial e recorte 3:4 antes da sua aprovação.</p>
   <label for="external-image-prompt">Prompt específico desta história</label>
   <textarea id="external-image-prompt" readonly rows="10" placeholder="O prompt aparecerá quando a pesquisa e a primeira capa estiverem prontas."></textarea>
   <div class="prompt-copy-actions">
@@ -230,7 +230,7 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
   <div id="external-image-drop" class="external-drop" tabindex="0" role="region" aria-label="Área para colar ou arrastar uma imagem">Clique aqui e cole com Ctrl+V, ou arraste uma imagem para esta caixa</div>
   <input id="external-image-file" type="file" accept="image/png,image/jpeg,image/webp">
   <img id="external-image-preview" alt="Imagem selecionada para importar" hidden>
-  <p class="note" id="external-image-status" role="status">A imagem será otimizada no seu navegador antes do envio, sem usar uma API paga.</p>
+  <p class="note" id="external-image-status" role="status">Esta é a arte-base. Após enviar, o Studio apresentará uma nova prévia já com título, logo oficial e recorte 3:4, sem usar API paga.</p>
   <label for="external-image-fit">Como encaixar no formato vertical 9:16?</label>
   <select id="external-image-fit">
    <option value="contain">Mostrar a imagem inteira, com margens se necessário</option>
@@ -423,7 +423,7 @@ async function acceptExternalImage(file){
   selectedExternalImageUrl=URL.createObjectURL(blob);
   $('external-image-preview').src=selectedExternalImageUrl;
   $('external-image-preview').hidden=false;
-  $('external-image-status').textContent='Imagem pronta para conferência · '+Math.round(blob.size/1024)+' KB · JPEG otimizado. Clique em Usar esta imagem para enviar.';
+  $('external-image-status').textContent='Arte-base selecionada · '+Math.round(blob.size/1024)+' KB. Ao enviar, o Studio aplicará o layout oficial e exibirá a capa completa antes da aprovação.';
   $('external-image-send').disabled=false;
  }catch(e){$('external-image-status').textContent=e.message;}
 }

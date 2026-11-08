@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-"""Normaliza uma imagem enviada para capa 9:16 e versão 3:4.
+"""Imagem externa é ARTE-BASE, nunca um pôster final pronto da outra IA.
 
-Não gera conteúdo nem depende de serviço de imagem pago. Não mistura a
-imagem de outros pedidos e nunca altera o arquivo original no GitHub Release.
+O Studio faz enquadramento, contraste, títulos, marca oficial e recorte 3:4
+EXATAMENTE como faz com a arte automática. Só a ilustração vem do editor.
 """
 import argparse,json,re
 from pathlib import Path
-from PIL import Image,ImageFilter,ImageOps,ImageDraw
+from PIL import Image
+from poster import poster,profile_from_cover
 
 Image.MAX_IMAGE_PIXELS=24_000_000
-W,H=1080,1920
-BACKGROUND=(7,22,50)
 
 def render_import(image_file,episode,output):
     path=Path(image_file)
@@ -21,34 +20,28 @@ def render_import(image_file,episode,output):
         raise ValueError("O arquivo enviado não pertence à versão atual da capa.")
     if not path.is_file() or path.stat().st_size>1_900_000:
         raise ValueError("Imagem externa ausente ou muito grande.")
-    with Image.open(path) as image:
-        if image.format!="JPEG":
-            raise ValueError("Somente imagem JPEG normalizada é aceita nesta etapa.")
-        if min(image.size)<256 or image.width*image.height>24_000_000:
+    with Image.open(path) as source:
+        if source.format!="JPEG":raise ValueError("A imagem externa precisa ser JPEG.")
+        if min(source.size)<256 or source.width*source.height>24_000_000:
             raise ValueError("Imagem externa com resolução inadequada.")
-        art=ImageOps.exif_transpose(image).convert("RGB")
-    mode=str(episode.get("art_image_fit") or "contain")
-    if mode=="cover":
-        canvas=ImageOps.fit(art,(W,H),method=Image.Resampling.LANCZOS,centering=(.5,.46))
-    elif mode in ("blur","contain"):
-        if mode=="blur":
-            bg=ImageOps.fit(art,(W,H),method=Image.Resampling.LANCZOS)
-            bg=bg.filter(ImageFilter.GaussianBlur(65))
-            bg=Image.blend(bg,Image.new("RGB",(W,H),BACKGROUND),.40)
-        else:
-            bg=Image.new("RGB",(W,H),BACKGROUND)
-        foreground=ImageOps.contain(art,(W,H),method=Image.Resampling.LANCZOS)
-        bg.paste(foreground,((W-foreground.width)//2,(H-foreground.height)//2))
-        canvas=bg
-    else:raise ValueError("Tipo de enquadramento não permitido.")
+    if str(episode.get("art_image_fit") or "contain") not in ("contain","cover","blur"):
+        raise ValueError("Tipo de enquadramento não permitido.")
+    # A etapa que antes só fazia resize agora gera a MESMA composição
+    # editorial da capa automática, com arte externa como plano de fundo.
+    canvas=poster(episode,art_override=path)
     dest=Path(output);dest.parent.mkdir(parents=True,exist_ok=True)
     canvas.save(dest,format="PNG",optimize=True)
-    # O perfil do Instagram mostra a região central 1080x1440.
-    profile=canvas.crop((0,240,W,1680))
+    profile=profile_from_cover(canvas)
     profile.save(dest.parent/"capa_perfil_3x4.png",format="PNG",optimize=True)
-    return {"source":"user_supplied_image","fit":mode,"dimensions":[W,H],
-            "source_filename":expected,"rights_confirmed":True,
-            "note":"Arte enviada pelo editor. A autoria, veracidade e os direitos da imagem devem ser conferidos antes de publicar."}
+    return {"source":"user_supplied_image",
+            "fit":str(episode.get("art_image_fit") or "contain"),
+            "dimensions":[1080,1920],
+            "profile_dimensions":[1080,1440],
+            "layout_applied_by_studio":True,
+            "official_logo_used":True,
+            "source_filename":expected,
+            "rights_confirmed":bool(episode.get("art_rights_confirmed")),
+            "note":"A capa final contém imagem do editor como arte-base; layout e marca são aplicados pelo Studio."}
 
 def main():
     p=argparse.ArgumentParser()
@@ -58,6 +51,6 @@ def main():
     args=p.parse_args()
     ep=json.loads(Path(args.episode).read_text(encoding="utf-8"))
     meta=render_import(args.image,ep,args.output)
-    print("Capa externa importada:",json.dumps(meta,ensure_ascii=False))
+    print("Capa externa com identidade ALLSTARS:",json.dumps(meta,ensure_ascii=False))
 
 if __name__=="__main__":main()
