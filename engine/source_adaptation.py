@@ -24,7 +24,7 @@ def describe_reference(req):
     subject=normalize_words(req.get("subject",""))
     if subject:return subject[:160], "subject"
     pasted=normalize_words(req.get("reference_text",""))
-    if len(pasted.split())>=5 and len(pasted)>=28:
+    if len(pasted.split())>=2 and len(pasted)>=10:
         # User words are a search clue, not independently confirmed facts.
         sentence=re.split(r"(?<=[.!?])\s+",pasted,maxsplit=1)[0]
         return sentence[:160], "user_text_hint"
