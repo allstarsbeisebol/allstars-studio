@@ -11,7 +11,7 @@ p.add_argument("--output",default="output/qualidade_visual.json")
 args=p.parse_args()
 
 ep=json.loads(Path(args.episode).read_text(encoding="utf-8"))
-approved=find_approved_anime(ep)
+approved=find_approved_anime(ep) if ep.get("content_type","atleta")=="atleta" else None
 if approved is not None:
     info=approved[1]
     data={
@@ -21,7 +21,7 @@ if approved is not None:
       "source":info.get("source_note","Arte original aprovada"),
       "rights_basis":info.get("rights_basis")
     }
-elif licensed_photo(ep) is not None:
+elif ep.get("content_type","atleta")=="atleta" and licensed_photo(ep) is not None:
     data={
       "mode":"foto_licenciada",
       "premium":True,
