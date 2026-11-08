@@ -70,3 +70,14 @@ jobs:
           test -s output/allstars_reel.mp4
           test -s output/legendas.srt
           ffprobe -v error output/allstars_reel.mp4 >/dev/null
+      - name: Disponibilizar prévia visual do teste
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allstars-previa-visual-${{ github.run_number }}
+          path: |
+            output/capa.png
+            output/allstars_reel.mp4
+            output/legendas.srt
+            output/legendas_metadata.json
+          retention-days: 3
