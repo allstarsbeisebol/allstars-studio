@@ -12,11 +12,15 @@ export default async function handler(req,res){
   if(!types.has(contentType))return json(res,400,{error:"Escolha um tipo de conteúdo válido."});
   const subject=typeof req.body?.subject==="string"?req.body.subject.trim():"";
   if(subject.length>160||/[\r\n\x00-\x1F]/.test(subject))return json(res,400,{error:"O assunto deve ter até 160 caracteres em uma única linha."});
-  const rawUrl=typeof req.body?.url==="string"?req.body.url.trim():"";
-  const source=rawUrl?allowedUrl(rawUrl):null;
-  if(rawUrl&&!source)return json(res,400,{error:"Informe um link HTTPS público válido."});
-  if(mode==="link"&&!source)return json(res,400,{error:"Informe o link HTTPS público de uma matéria ou biografia."});
-  if(!source&&contentType!=="auto"&&!subject)return json(res,400,{error:"Digite o assunto que deseja transformar em Reel."});
+  const rawUrls=Array.isArray(req.body?.urls)?req.body.urls:[req.body?.url||""];
+  if(rawUrls.length>5||rawUrls.some(x=>typeof x!=="string"))return json(res,400,{error:"Informe no máximo 5 links de referência."});
+  const urls=rawUrls.map(x=>x.trim()).filter(Boolean);
+  const sources=urls.map(allowedUrl);
+  if(sources.some(x=>!x)||new Set(sources).size!==sources.length)return json(res,400,{error:"Use links HTTPS públicos diferentes, sem repetição."});
+  const referenceText=typeof req.body?.reference_text==="string"?req.body.reference_text.trim():"";
+  if(referenceText.length>8000)return json(res,400,{error:"O texto colado deve ter no máximo 8.000 caracteres."});
+  if(mode==="link"&&!sources.length&&!referenceText)return json(res,400,{error:"Informe um link ou cole um texto de referência."});
+  if(!sources.length&&!referenceText&&contentType!=="auto"&&!subject)return json(res,400,{error:"Digite o assunto que deseja transformar em Reel."});
 
   const token=process.env.ALLSTARS_GITHUB_TOKEN;
   const headers={"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","User-Agent":"ALLSTARS-Studio"};
@@ -33,9 +37,11 @@ export default async function handler(req,res){
       return json(res,409,{error:"Já existe um episódio em produção. Conclua esse pedido antes de iniciar outro."});
     }
     const extras="TIPO: "+contentType+"\nASSUNTO: "+subject+"\n";
-    const body=(mode==="link"
-      ?"MODO: link\n"+extras+"LINK: "+source+"\n\nGerar roteiro baseado nessa fonte, respeitando o tipo escolhido e sem inventar fatos."
-      :"MODO: auto\n"+extras+"\n"+(subject?"Criar roteiro sobre o assunto indicado; obter fontes verificáveis.":"Gerar próxima história inédita da biblioteca ALLSTARS."));
+    const withReferences=sources.length>0||referenceText.length>0;
+    const sourceLines=sources.map(url=>"LINK: "+url).join("\n");
+    const pasted=referenceText?"TEXTO_BASE64: "+Buffer.from(referenceText,"utf8").toString("base64")+"\n":"";
+    const body="MODO: "+(withReferences?"link":"auto")+"\n"+extras+(sourceLines?sourceLines+"\n":"")+pasted+"\n"+
+      (withReferences?"Criar vídeo com base nas referências fornecidas, sem inventar fatos.":subject?"Pesquisar o assunto e exigir fontes verificáveis.":"Gerar próxima história inédita da biblioteca ALLSTARS.");
     const issue=await fetch("https://api.github.com/repos/"+REPO+"/issues",{method:"POST",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({title:mode==="link"?"[ALLSTARS] Criar novo episódio por link":"[ALLSTARS] Criar novo episódio",body})});
     if(!issue.ok){
       const status=issue.status;
