@@ -1,4 +1,4 @@
-name: "ALLSTARS | Produzir episodio completo"
+name: "ALLSTARS | Produzir vídeo"
 on:
   workflow_dispatch:
   issues:
@@ -38,7 +38,7 @@ jobs:
           fc-cache -f || true
       - name: Baixar voz pt-BR
         run: python -m piper.download_voices pt_BR-faber-medium --data-dir voice
-      - name: Registrar numero do episodio
+      - name: Registrar identificador técnico de produção
         env:
           EPISODE_NUMBER: ${{ github.run_number }}
         run: |
@@ -58,7 +58,7 @@ jobs:
         run: python engine/visual_quality.py --episode output/selected.json --output output/qualidade_visual.json
       - name: Preparar direção anime para a história selecionada
         run: python engine/anime_briefing.py --episode output/selected.json --output output/briefing_arte_anime.txt
-      - name: Criar capa oficial do episodio
+      - name: Criar capa oficial do vídeo
         run: python engine/cover.py --episode output/selected.json --output output/capa.png
       - name: Gerar narração brasileira pausada
         run: python engine/speech.py --episode output/selected.json --model pt_BR-faber-medium --data-dir voice --output output/narracao.wav --pace 1.14
@@ -143,5 +143,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue comment "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --body "Episódio gerado. Baixe pelo site https://allstarsbeisebol.github.io/allstars-studio/#downloads ou consulte https://github.com/allstarsbeisebol/allstars-studio/releases/tag/episodio-${{ github.run_number }}. Prévia editorial: confira os fatos e direitos antes da publicação."
+          gh issue comment "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --body "Vídeo gerado. Baixe pelo site https://allstarsbeisebol.github.io/allstars-studio/#downloads ou consulte https://github.com/allstarsbeisebol/allstars-studio/releases/tag/episodio-${{ github.run_number }}. Prévia editorial: confira os fatos e direitos antes da publicação."
           gh issue close "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --reason completed
