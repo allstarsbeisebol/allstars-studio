@@ -357,6 +357,7 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 </main><footer>ALLSTARS Beisebol · Aqui você brilha! · Conteúdo para revisão antes da publicação</footer>
 <script type="module">
 import {PREF_KEY,browserAvailable,alertsEnabled,enableAlerts,announceIssue} from './notify.js';
+import {wizardSteps,wizardStep,panelForScreen,normalizeWizardScreen,routeWizardScreen,resumeDraftScreen} from './wizard.js';
 const $=id=>document.getElementById(id);
 // O menu hambúrguer aparece no mobile e fecha ao navegar, tocar fora ou apertar Esc.
 const menuToggle=$('mobile-menu-toggle'),navLinks=$('studio-nav-links');
@@ -383,8 +384,84 @@ document.addEventListener('keydown',event=>{
 window.addEventListener('resize',()=>{if(window.innerWidth>680)closeMobileMenu();});
 let authenticated=false,configured=false,pending=Number(localStorage.getItem('allstars-pending-issue')||0),timer=null;
 const DRAFT_KEY='allstars-studio-draft-v4';
+const WIZARD_VIEW_KEY='allstars-wizard-view-v1';
+let wizardView='home',draftStartScreen='content';
+function updateWizardHome(){
+ $('home-continue').classList.toggle('hidden',!pending);
+ $('home-create').textContent=pending?'Pedido em andamento — continuar':'＋ Criar novo vídeo';
+}
+function showWizardScreen(requested,{focus=true,force=false}={}){
+ const view=force?normalizeWizardScreen(requested):routeWizardScreen(requested,pending);
+ wizardView=view;
+ const panel=panelForScreen(view);
+ document.querySelectorAll('[data-studio-screen]').forEach(el=>{
+  el.classList.toggle('wizard-hidden',el.dataset.studioScreen!==panel);
+ });
+ const references=view==='references';
+ $('wizard-pane-content').classList.toggle('wizard-hidden',references);
+ $('wizard-pane-references').classList.toggle('wizard-hidden',!references);
+ if(panel==='editor'){
+  $('form-title').textContent=references?'Deseja acrescentar referências?':'O que vamos criar?';
+  $('wizard-editor-help').textContent=references?'Opcional: cole links ou um texto. Você pode pular.':
+   'Escolha o tipo de história. No automático não é necessário escrever o assunto.';
+  $('wizard-automatic-tip').classList.toggle('wizard-hidden',references);
+  draftStartScreen=view;
+  saveDraft();
+ }
+ const step=wizardStep(view);
+ $('wizard-progress').classList.toggle('wizard-hidden',step<0);
+ if(step>=0){
+  $('wizard-current-number').textContent='Etapa '+(step+1)+' de 5';
+  $('wizard-current-name').textContent=view==='progress'?'Preparando seu vídeo':wizardSteps[step];
+  $('wizard-step-hint').textContent=view==='progress'?'Você pode voltar ao início sem cancelar o pedido.':
+   view==='art'?'Aprovar, revisar ou usar outra imagem: a escolha é sua.':
+   'Avance e volte sem perder seu rascunho. Nada é enviado sem confirmação.';
+  [...$('wizard-steps').children].forEach((el,i)=>{
+   el.classList.toggle('is-current',i===step);el.classList.toggle('is-complete',i<step);
+   if(i===step)el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');
+  });
+ }
+ if(view==='progress'){
+  $('progress').classList.remove('hidden');
+  $('wizard-progress-home').textContent=pending?'← Início (sem cancelar pedido)':'← Voltar ao formulário';
+ }
+ updateWizardHome();
+ try{localStorage.setItem(WIZARD_VIEW_KEY,view);}catch{}
+ if(focus){
+  const target=step>=0?$('wizard-progress'):panel==='home'?$('overview'):
+   panel==='library'?$('library'):panel==='alerts'?$('alert-settings'):$('options');
+  target?.scrollIntoView({behavior:'smooth',block:'start'});
+  if(panel==='editor')$('form-title').focus({preventScroll:true});
+  if(view==='confirm')$('confirm-panel').focus({preventScroll:true});
+  if(view==='art')$('art-review').focus({preventScroll:true});
+ }
+}
+function continuePending(){
+ if(!pending){showWizardScreen('home');return;}
+ showWizardScreen('progress');poll();
+}
+$('home-create').addEventListener('click',()=>pending?continuePending():showWizardScreen(draftStartScreen));
+$('home-continue').addEventListener('click',continuePending);
+$('home-library').addEventListener('click',()=>showWizardScreen('library'));
+$('wizard-content-home').addEventListener('click',()=>showWizardScreen('home'));
+$('wizard-content-next').addEventListener('click',()=>showWizardScreen('references'));
+$('wizard-references-back').addEventListener('click',()=>showWizardScreen('content'));
+$('wizard-references-skip').addEventListener('click',openReview);
+$('wizard-progress-home').addEventListener('click',()=>pending?showWizardScreen('home'):showWizardScreen('references'));
+$('wizard-art-home').addEventListener('click',()=>showWizardScreen('home'));
+$('wizard-art-progress').addEventListener('click',()=>showWizardScreen('progress'));
+document.addEventListener('click',event=>{
+ const link=event.target.closest('[data-wizard-go]');
+ if(!link)return;
+ event.preventDefault();
+ const target=link.dataset.wizardGo;
+ if(target==='progress'){if(pending)continuePending();else showWizardScreen('result');return;}
+ if(target==='content'){if(pending)continuePending();else showWizardScreen(draftStartScreen);return;}
+ showWizardScreen(target);
+});
 function saveDraft(){
- const value={content_type:$('content-type').value,subject:$('subject').value,urls:$('reference-links-text').value,reference_text:$('reference-text').value};
+ const value={content_type:$('content-type').value,subject:$('subject').value,urls:$('reference-links-text').value,reference_text:$('reference-text').value,
+  wizard_step:wizardView==='references'?'references':'content'};
  try{localStorage.setItem(DRAFT_KEY,JSON.stringify(value));$('draft-status').textContent='Rascunho salvo neste navegador.';}catch{}
 }
 function restoreDraft(){
@@ -392,7 +469,8 @@ function restoreDraft(){
   const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');if(!d||typeof d!=='object')return;
   for(const [key,id] of [['subject','subject'],['urls','reference-links-text'],['reference_text','reference-text']])if(typeof d[key]==='string')$(id).value=d[key];
   if(['auto','atleta','tema','noticia','lista','explicativo'].includes(d.content_type))$('content-type').value=d.content_type;
-  $('draft-status').textContent='Rascunho recuperado.';if(d.reference_text)$('extra-reference').open=true;updateFormHint();explainType();
+  $('draft-status').textContent='Rascunho recuperado.';if(d.reference_text)$('extra-reference').open=true;
+   draftStartScreen=resumeDraftScreen(d.wizard_step);updateFormHint();explainType();
  }catch{}
 }
 function clearDraft(){localStorage.removeItem(DRAFT_KEY);$('draft-status').textContent='Pedido enviado. Rascunho local limpo.';}
@@ -570,7 +648,7 @@ function showArtReview(data){
  $('progress-stage').textContent='AGUARDANDO APROVAÇÃO DA CAPA';
  $('progress-title').textContent='Imagem pronta para revisão';
  $('progress-message').textContent='Nenhum vídeo foi produzido ainda. Escolha o que fazer com esta imagem abaixo.';
- $('art-review').scrollIntoView({behavior:'smooth',block:'start'});
+ if(wizardView==='progress'||wizardView==='art')showWizardScreen('art',{focus:wizardView!=='art'});
 }
 async function submitArtAction(action){
  if(!pending||!artRevision)return;
