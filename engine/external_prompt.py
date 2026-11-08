@@ -8,6 +8,20 @@ def prompt(ep):
     title=str(ep.get("title") or subject).strip()[:180]
     hook=str(ep.get("hook") or title).strip()[:220]
     direction=str(ep.get("art_direction_original") or ep.get("art_direction") or title).strip()[:850]
+    memory_notes=""
+    memory_file=Path("output/style_memory.json")
+    if memory_file.is_file():
+        try:
+            memory_items=json.loads(memory_file.read_text(encoding="utf-8"))
+            notes=[]
+            for item in memory_items[:8]:
+                direction="PRIORIZE" if item.get("preference")=="prefer" else "EVITE"
+                summary=" ".join(str(item.get("summary") or "").split())[:220]
+                if summary:notes.append("- "+direction+": "+summary)
+            if notes:
+                memory_notes="\nPREFERÊNCIAS EDITORIAIS APROVADAS (orientações, não imagens para copiar):\n"+"\n".join(notes)+"\n"
+        except (OSError,ValueError,TypeError):
+            pass
     return f"""PROMPT — ILUSTRAÇÃO ORIGINAL ALLSTARS / ALÉM DO JOGO
 
 Crie uma imagem NOVA, EXCLUSIVA e vertical, proporção 9:16 (idealmente 1080 × 1920 pixels), de alto nível artístico, para um Reel editorial de beisebol. NÃO reaproveite uma imagem genérica de beisebol ou personagens de outra história.
@@ -20,6 +34,7 @@ CENA E CONTEXTO ESPECÍFICOS: {direction}
 DIREÇÃO ARTÍSTICA
 Anime esportivo adulto cinematográfico, composição expressiva e plausível para a época e os fatos, poses anatomicamente corretas, cel-shading refinado, linhas detalhadas, iluminação de estádio, perspectiva forte, profundidade e ambiente próprios desta narrativa. Paleta ALLSTARS: azul royal #315FAC, azul marinho #1A3566, vermelho #CE233E, dourado #F0C040, branco.
 
+{memory_notes}
 REGRAS
 - Crie uma cena única, ligada diretamente ao tema e ao gancho. Nada de poster genérico.
 - Não copie imagens, personagens, cenas, uniformes protegidos ou material de outros artistas.
