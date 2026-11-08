@@ -9,6 +9,21 @@ Endereço: https://allstars-studio.vercel.app/
 3. Acompanhe o status no próprio painel.
 4. Baixe vídeo MP4, capa PNG, áudio MP3, legenda e fontes no mesmo lugar.
 
+## Avisos de produção
+
+Depois de solicitar um episódio, o estúdio consulta o andamento automaticamente. Ao concluir, exibe uma mensagem em destaque com **Ver downloads**; em caso de falha, apresenta **Ver detalhes**.
+
+Para receber uma notificação do navegador:
+1. Na página inicial, clique **🔔 Ativar avisos do navegador**.
+2. Quando o navegador perguntar, escolha **Permitir**. É uma permissão opcional.
+3. Gere o episódio normalmente. O aviso será exibido mesmo quando o estúdio estiver em outra aba, **desde que a página permaneça aberta**.
+4. Para desativar a opção dentro do estúdio, clique novamente em **Avisos ativados — desativar**.
+
+Se a permissão for negada ou o navegador não oferecer suporte, a mensagem dentro da página continuará funcionando. O estúdio registra qual pedido já foi notificado para evitar repetir o aviso após atualizar a aba. Se você fechar e voltar depois, a página consulta o pedido em andamento quando for aberta novamente.
+
+**Limitação importante:** o sistema atual não oferece Web Push quando todas as abas estiverem fechadas. Isso exigiria um serviço de notificações com inscrição do navegador e processamento no servidor. A versão atual não usa serviços pagos de notificação.
+
+
 A versão integrada exige um **backend seguro**; GitHub Pages sozinho não pode disparar tarefas privadas sem autenticação. Não é necessário navegar pelo GitHub Actions para uso normal.
 
 ## Conexão inicial — somente uma vez
