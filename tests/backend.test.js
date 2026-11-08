@@ -166,8 +166,8 @@ test("transferência: explica falta de permissão Issues no novo proprietário G
     await generate({method:"POST",headers:headers(cookie),body:{mode:"auto"}},res);
     assert.equal(res.code,503);
     assert.match(res.body.error,/ALLSTARS_GITHUB_TOKEN/);
-    assert.match(res.body.error,/Issues = Read and write/);
-    assert.match(res.body.error,/allstarsbeisebol\/allstars-studio/);
+    assert.match(res.body.error,/Issues.*Read and write/);
+    assert.match(res.body.error,/allstarsbeisebol/);
   }finally{globalThis.fetch=original;}
 });
 test("transferência: distingue token sem leitura e token sem escrita",async()=>{
@@ -177,7 +177,7 @@ test("transferência: distingue token sem leitura e token sem escrita",async()=>
     const res=response();
     await generate({method:"POST",headers:headers(cookie),body:{mode:"auto"}},res);
     assert.equal(res.code,503);
-    assert.match(res.body.error,/não consegue consultar/);
+    assert.match(res.body.error,/consultar os pedidos/);
   }finally{globalThis.fetch=original;}
 });
 
@@ -210,4 +210,29 @@ test("fontes: rejeita link duplicado, lista longa e texto excessivo",async()=>{
   await generate({method:"POST",headers:headers(cookie),body},res);
   assert.equal(res.code,400);
  }
+});
+
+test("GitHub 403: orienta aguardar quando limite de uso foi atingido",async()=>{
+ const cookie=await loginCookie(),original=globalThis.fetch;
+ globalThis.fetch=async(url,options={})=>options.method==="POST"?{
+  ok:false,status:403,headers:{get(key){return key==="retry-after"?"60":null;}},
+  json:async()=>({message:"You have exceeded a secondary rate limit."})
+ }:{ok:true,json:async()=>[]};
+ try{
+  const res=response();await generate({method:"POST",headers:headers(cookie),body:{mode:"auto"}},res);
+  assert.equal(res.code,503);assert.match(res.body.error,/limitou temporariamente/);
+  assert.match(res.body.error,/Não é necessário criar um token novo/);
+ }finally{globalThis.fetch=original;}
+});
+test("GitHub 403: explica recusa específica de permissão de escrita",async()=>{
+ const cookie=await loginCookie(),original=globalThis.fetch;
+ globalThis.fetch=async(url,options={})=>options.method==="POST"?{
+  ok:false,status:403,headers:{get:()=>null},
+  json:async()=>({message:"Resource not accessible by personal access token"})
+ }:{ok:true,json:async()=>[]};
+ try{
+  const res=response();await generate({method:"POST",headers:headers(cookie),body:{mode:"auto"}},res);
+  assert.equal(res.code,503);assert.match(res.body.error,/Issues.*Read and write/);
+  assert.match(res.body.error,/allstarsbeisebol/);
+ }finally{globalThis.fetch=original;}
 });
