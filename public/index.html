@@ -66,6 +66,21 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 .toast[data-kind="error"]{border-color:var(--red)}.toast strong{font-family:'Barlow Condensed',Impact,sans-serif;font-size:27px;line-height:1.12;display:block;padding-right:30px}.toast p{margin:7px 0 13px;color:#e1edfd;font-size:14px}.toast .toast-close{position:absolute;right:7px;top:7px;border:0;background:none;color:#fff;min-height:36px;padding:6px 12px;font-size:23px}.toast .toast-action{padding:11px 16px;min-height:42px}
 .reference-example{margin-top:22px;border-top:1px solid #49648e;padding-top:17px}.reference-example summary{cursor:pointer;color:var(--gold);font-weight:800;font-size:16px;list-style:revert}.reference-example .sample-layout{display:grid;grid-template-columns:minmax(150px,215px) 1fr;gap:18px;align-items:start;margin-top:15px}.reference-example video{width:100%;max-height:410px;aspect-ratio:9/16;object-fit:contain;background:#08162e;border:1px solid #5275a1;border-radius:12px}.reference-example p{margin-top:0}@media(max-width:680px){.reference-example .sample-layout{grid-template-columns:1fr}.reference-example video{max-width:220px}}
 @media(max-width:680px){.cards,.result{grid-template-columns:1fr}.panel{padding:19px}.option{min-height:225px}h1{font-size:46px}.links a{width:100%}.result img{max-width:230px;margin:auto}.cards button{width:100%}}
+.art-review-gallery{display:grid;grid-template-columns:minmax(180px,320px) 1fr;gap:20px;align-items:start;margin:18px 0}
+.art-review-gallery img{display:block;width:100%;max-height:500px;object-fit:contain;border:1px solid #718db7;border-radius:12px;background:#071632}
+.art-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.art-actions button{min-height:46px}
+.art-review-notice{color:var(--muted);font-size:14px;line-height:1.5}
+.file-actions{display:flex;flex-wrap:wrap;gap:9px;margin:10px 0}
+.file-actions button{min-height:42px}
+.file-text-preview{margin:18px 0;border:1px solid #49648e}
+#file-preview-text{max-height:55vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-family:ui-monospace,Consolas,monospace;font-size:14px;line-height:1.6;background:#081a34;border-radius:10px;padding:15px;user-select:text}
+#image-preview-dialog{width:min(920px,calc(100vw - 30px));max-height:92vh;background:#081a34;border:1px solid #718db7;border-radius:16px;padding:16px;color:#fff}
+#image-preview-dialog::backdrop{background:rgba(0,0,0,.78)}
+#image-preview-dialog img{display:block;width:100%;max-height:76vh;object-fit:contain}
+#image-preview-dialog .modal-actions{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:12px}
+#image-preview-dialog a{color:#F0C040}
+@media(max-width:680px){.art-review-gallery{grid-template-columns:1fr}.art-review-gallery img{max-height:420px;max-width:300px;margin:auto}.art-actions{flex-direction:column}.art-actions button{width:100%}.file-actions{flex-direction:column}.file-actions button{width:100%}}
 </style></head><body>
 <header><div class="wrap"><div class="brand">⚾ ALLSTARS <span>STUDIO</span></div><div class="sub">ALÉM DO JOGO · HISTÓRIAS REAIS DO BEISEBOL</div></div></header>
 <nav class="section-nav" aria-label="Navegação no Studio">
@@ -138,17 +153,48 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
   <div class="eyebrow">ETAPA FINAL · CONFIRA SEU PEDIDO</div>
   <h2 id="confirm-title">Está tudo certo?</h2>
   <p class="field-help">Cada Reel começa com um gancho histórico nos três primeiros segundos e usa uma direção de arte vinculada ao assunto. O material continua sujeito à revisão editorial.</p>
-  <p class="muted">Leia o resumo abaixo antes de começar. Depois de confirmar, o Studio enviará o pedido e iniciará a produção. Isso pode levar alguns minutos e não há botão para cancelar uma produção já iniciada.</p>
+  <p class="muted">Após confirmar, o Studio pesquisará o assunto e criará primeiro a imagem. Você poderá visualizar, pedir correções, gerar outra versão ou aprová-la. <strong>O vídeo só será produzido depois da sua aprovação.</strong></p>
   <div id="confirm-summary" class="order-summary" aria-live="polite"></div>
   <div class="notice"><strong>Antes de confirmar:</strong> o pedido e as referências fornecidas ficam registrados no GitHub público. Não envie informações privadas. O resultado será uma prévia para sua revisão, não uma postagem automática nas redes sociais.</div>
   <div class="confirm-actions">
     <button type="button" id="review-back" class="secondary">← Voltar e corrigir</button>
-    <button type="button" id="generate">✓ Confirmar e iniciar produção</button>
+    <button type="button" id="generate">✓ Preparar prévia da imagem</button>
   </div>
 </section>
-<section class="panel hidden" id="progress" aria-live="polite"><div class="eyebrow" id="progress-stage">ACOMPANHAR PEDIDO</div><h2 id="progress-title">Criando o vídeo...</h2><p id="progress-message" class="muted">Preparando o pedido...</p><p class="note">Você pode continuar nesta página enquanto acompanhamos a produção. Os vídeos concluídos ficam salvos na Biblioteca ALLSTARS; o pedido em andamento fica registrado neste navegador.</p><button class="secondary" id="refresh" type="button">↻ Atualizar situação</button></section>
+<section class="panel hidden" id="progress" aria-live="polite"><div class="eyebrow" id="progress-stage">ACOMPANHAR PEDIDO</div><h2 id="progress-title">Preparando sua imagem...</h2><p id="progress-message" class="muted">Pesquisando e preparando a primeira capa para aprovação.</p><p class="note">Você pode sair e voltar ao Studio: o pedido continuará identificado neste navegador. O áudio e o vídeo só serão criados após a imagem ser aprovada.</p><button class="secondary" id="refresh" type="button">↻ Atualizar situação</button></section>
+<section class="panel hidden" id="art-review" tabindex="-1" aria-labelledby="art-review-title">
+ <div class="eyebrow">ETAPA 2 · APROVAR IMAGEM ANTES DO VÍDEO</div>
+ <h2 id="art-review-title">Confira a capa do seu Reel</h2>
+ <p id="art-review-message" class="muted">Veja a imagem e solicite ajustes, uma nova versão ou aprove para continuar.</p>
+ <div class="art-review-gallery">
+  <div><img id="art-preview-cover" alt="Prévia da capa gerada para este pedido" loading="lazy"><button id="art-enlarge" class="secondary" type="button" style="margin-top:10px">Ampliar imagem</button></div>
+  <div>
+   <p class="art-review-notice">A arte é contextual e inédita, mas o compositor atual ainda não tem o acabamento anime premium. A imagem mostrada aqui é a que será preservada como capa após sua aprovação.</p>
+   <label for="art-feedback">O que deseja corrigir? (opcional para gerar outra versão)</label>
+   <textarea id="art-feedback" maxlength="1200" rows="5" placeholder="Ex.: prefiro vermelho, destacar a bola, mostrar diagrama do arremesso."></textarea>
+   <p class="note" id="art-revision-label" aria-live="polite"></p>
+   <div class="art-actions">
+    <button id="art-revise" type="button" class="secondary">Solicitar ajustes</button>
+    <button id="art-regenerate" type="button" class="outline">Gerar outra versão</button>
+    <button id="art-approve" type="button">✓ Aprovar imagem e produzir vídeo</button>
+   </div>
+   <p class="note" id="art-action-message" role="status"></p>
+  </div>
+ </div>
+</section>
 <section class="panel" id="downloads"><div class="eyebrow">ARQUIVOS PRODUZIDOS</div><h2 id="result-title">Último vídeo disponível</h2><p class="muted" id="result-message">Consultando os downloads...</p>
-<div id="result" class="result hidden"><div><img id="cover" alt="Capa do vídeo ALLSTARS" loading="lazy"></div><div><video id="video" controls preload="none" playsinline aria-label="Assista ao Reel"></video><p class="note">Prévia editorial. Confira fatos históricos, voz e direitos das imagens antes de publicar.</p><div class="links" id="files"></div></div></div>
+<div id="result" class="result hidden"><div><img id="cover" alt="Capa do vídeo ALLSTARS" loading="lazy"><button id="cover-preview-btn" class="secondary" type="button" style="margin-top:10px">Ampliar capa</button></div><div><video id="video" controls preload="none" playsinline aria-label="Assista ao Reel"></video><p class="note">Prévia editorial. Confira fatos históricos, voz e direitos das imagens antes de publicar.</p><div class="links" id="files"></div></div></div>
+<section class="panel file-text-preview hidden" id="file-text-preview" aria-labelledby="file-preview-title">
+ <div class="eyebrow">PRÉVIA EDITORIAL · TEXTO</div><h2 id="file-preview-title">Arquivo</h2>
+ <p class="note" id="file-preview-message" role="status">Visualize e copie o conteúdo antes de baixar.</p>
+ <pre id="file-preview-text" tabindex="0"></pre>
+ <div class="file-actions"><button id="file-preview-copy" type="button">Copiar texto</button><button id="file-preview-close" class="secondary" type="button">Fechar prévia</button></div>
+</section>
+<dialog id="image-preview-dialog" aria-label="Imagem ampliada">
+ <div class="modal-actions"><strong id="image-preview-title">Prévia da imagem</strong><button id="image-preview-close" class="secondary" type="button">Fechar</button></div>
+ <img id="image-preview-full" alt="Imagem ALLSTARS ampliada">
+ <p><a id="image-preview-download" target="_blank" rel="noopener">Baixar esta imagem</a></p>
+</dialog>
 <details class="reference-example" id="approved-anime-preview">
   <summary>Ver prévia anime aprovada · Jim Abbott</summary>
   <div class="sample-layout">
@@ -371,7 +417,7 @@ function openReview(){
   ['Links de referência',draft.urls.length?draft.urls.length+' link(s) informado(s)':'Nenhum'],
   ['Texto colado',draft.reference_text?draft.reference_text.length+' caracteres informados':'Nenhum'],
   ['Leitura automática',draft.urls.length>16?'Os 16 primeiros URLs serão lidos; os outros serão preservados para conferência.':'As referências acessíveis serão analisadas; as fontes não são fatos verificados.'],
-  ['Depois de confirmar','O pedido será registrado e a produção começará. Os arquivos aparecerão na área de downloads.']
+  ['Depois de confirmar','Será gerada apenas a capa. Você revisa a imagem e só após aprovar começa a produção do MP4.']
  ];
  for(const [label,value] of lines){const p=document.createElement('p');const strong=document.createElement('strong');strong.textContent=label+': ';p.append(strong,document.createTextNode(value));summary.append(p);}
  $('confirm-panel').classList.remove('hidden');$('confirm-panel').scrollIntoView({behavior:'smooth',block:'start'});$('confirm-panel').focus();
