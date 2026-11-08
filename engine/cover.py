@@ -2,7 +2,7 @@
 """Produz capa oficial ALLSTARS com o compositor editorial 9:16."""
 import argparse,json
 from pathlib import Path
-from poster import poster, official_logo
+from poster import poster, official_logo, profile_from_cover
 from anime_assets import cover_from_approved_asset
 from PIL import Image, ImageDraw
 p=argparse.ArgumentParser()
@@ -22,24 +22,16 @@ if curated is not None:
     draw.rectangle((0,1655,1080,1920),fill=(4,14,33,255))
     image.alpha_composite(stamp)
     mark=official_logo()
-    scale=min(510/max(1,mark.width),190/max(1,mark.height))
+    scale=min((440 if mark.width>=500 else 220)/max(1,mark.width),
+              (155 if mark.width>=500 else 115)/max(1,mark.height),
+              1.0 if mark.width>=500 else 1.2)
     mark=mark.resize((max(1,round(mark.width*scale)),max(1,round(mark.height*scale))),Image.Resampling.LANCZOS)
     image.alpha_composite(mark,((1080-mark.width)//2,1700+(190-mark.height)//2))
     image=image.convert("RGB")
 image.save(dest,optimize=True)
 print('Visual:', 'anime aprovado para este atleta' if curated is not None else 'arte gerada pelo compositor atual')
-# Prévia exata da grade de perfil 3:4, centralizada no Reel 9:16.
-# 1080x1440 corresponde ao corte y=240..1680 da arte vertical.
-preview=image.crop((0,240,1080,1680)).convert('RGBA')
-# No recorte 3:4, a logo do rodapé 9:16 sairia da grade.
-# Reaplicamos o arquivo ORIGINAL, sem redesenho, numa faixa de proteção inferior.
-bar=Image.new('RGBA',preview.size,(0,0,0,0))
-ImageDraw.Draw(bar,'RGBA').rectangle((0,1300,1080,1440),fill=(4,14,33,230))
-preview.alpha_composite(bar)
-brand=official_logo()
-brand.thumbnail((320,105),Image.Resampling.LANCZOS)
-preview.alpha_composite(brand,((1080-brand.width)//2,1320))
-preview=preview.convert('RGB')
+# Recorte de perfil do MESMO compositor; a marca oficial é reaplicada nítida.
+preview=profile_from_cover(image)
 preview_path=dest.parent/'capa_perfil_3x4.png'
 preview.save(preview_path,optimize=True)
 print('Prévia de perfil 3:4:',preview_path)
