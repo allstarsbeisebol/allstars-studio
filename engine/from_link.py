@@ -60,8 +60,8 @@ def read_page(url):
     return extract_article(page,url)
 
 def gemini(text,title,url):
-    paragraphs=[p.strip() for p in text.split("\\n\\n") if p.strip()]
-    referenced="\\n\\n".join(f"[P{i:02}] {p}" for i,p in enumerate(paragraphs,1))
+    paragraphs=[p.strip() for p in text.split("\n\n") if p.strip()]
+    referenced="\n\n".join(f"[P{i:02}] {p}" for i,p in enumerate(paragraphs,1))
     key=os.environ.get("GEMINI_API_KEY","").strip()
     if not key:raise ValueError("O modo LINK precisa da chave gratuita GEMINI_API_KEY nas Secrets do GitHub. Nenhum roteiro aleatório será gerado.")
     model=os.environ.get("GEMINI_MODEL","gemini-2.5-flash")
