@@ -51,10 +51,13 @@ def advance(ep,body):
     ep["art_feedback"]=feedback if action=="revise" else ""
     ep["art_feedback_history"]=(list(ep.get("art_feedback_history") or [])+
         [{"revision":current+1,"action":action,"feedback":feedback[:1200]}])[-15:]
+    # Outra geração sem observações volta à direção de arte original.
+    ep["art_direction_original"]=ep.get("art_direction_original") or ep.get("art_direction","")
     if action=="revise":
         # Texto editorial acrescentado ao briefing, sem alterar o assunto.
-        ep["art_direction_original"]=ep.get("art_direction_original") or ep.get("art_direction","")
         ep["art_direction"]=(str(ep["art_direction_original"])+"\nAJUSTES DA EDIÇÃO: "+feedback)[:1800]
+    else:
+        ep["art_direction"]=str(ep["art_direction_original"])[:1800]
     return ep
 
 def approve(ep,body):
