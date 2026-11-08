@@ -23,7 +23,15 @@ for source in registry["sources"]:
 report={"athlete":name,"episode_id":ep.get("id"),"research_sites":references,
         "episode_source_urls":[{"url":u,"status":"FORNECIDA NO RASCUNHO — VERIFICAÇÃO HUMANA NECESSÁRIA"} for u in ep.get("sources",[])],
         "verified_claims":[],"verification_status":"PENDENTE",
-        "notice":"Não há acesso automático verificado às páginas nem validação das alegações históricas. Não apresentar os links de busca como fontes já consultadas."}
+        "notice":"Links de busca não foram consultados automaticamente. Um link fornecido pode ter seu HTML lido para criar o rascunho, mas seus fatos não são verificados de forma independente."}
+if isinstance(ep.get("source_metadata"),dict):
+    report["reference_article"]={
+        "retrieval":"HTML público lido para elaboração do rascunho",
+        **ep["source_metadata"],
+        "supporting_paragraph_ids":ep.get("evidence_paragraphs",[]),
+        "evidence_note":"Identificadores apenas para auditoria do artigo, não constituem prova externa nem verificação histórica.",
+        "rights":"A leitura da página não autoriza reutilizar fotos, ilustrações ou conteúdo integral."
+    }
 out=Path(args.output);out.parent.mkdir(parents=True,exist_ok=True)
 out.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
 print("Pesquisa orientada para",name,":",len(references),"sites cadastrados")
