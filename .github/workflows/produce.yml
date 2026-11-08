@@ -38,6 +38,20 @@ jobs:
           fc-cache -f || true
       - name: Baixar voz pt-BR
         run: python -m piper.download_voices pt_BR-faber-medium --data-dir voice
+      - name: Registrar numero do episodio
+        env:
+          EPISODE_NUMBER: ${{ github.run_number }}
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          path=Path("output/selected.json")
+          episode=json.loads(path.read_text(encoding="utf-8"))
+          episode["episode_number"]=int(os.environ["EPISODE_NUMBER"])
+          path.write_text(json.dumps(episode,ensure_ascii=False,indent=2),encoding="utf-8")
+          PY
+      - name: Procurar fotografia com licença e crédito explícitos
+        run: python engine/commons_media.py --episode output/selected.json --output output/midia.json
       - name: Preparar referências para pesquisa
         run: python engine/research.py --episode output/selected.json --output output/pesquisa.json
       - name: Criar capa oficial do episodio
@@ -65,6 +79,7 @@ jobs:
             output/roteiro.txt
             output/fontes.txt
             output/pesquisa.json
+            output/midia.json
             output/legendas.srt
             output/legendas_metadata.json
           retention-days: 30
@@ -81,6 +96,7 @@ jobs:
             output/roteiro.txt#roteiro.txt \
             output/fontes.txt#fontes.txt \
             output/pesquisa.json#pesquisa.json \
+            output/midia.json#midia.json \
             output/legendas.srt#legendas.srt \
             output/legendas_metadata.json#legendas_metadata.json \
             --repo "${{ github.repository }}" \
