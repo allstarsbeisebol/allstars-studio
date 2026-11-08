@@ -152,7 +152,7 @@ def main():
         result={
             **result,
             "visual_mode":"original_cartoon",
-            "illustration_note":"Arte cartoon original inspirada no universo do beisebol; não é retrato histórico fiel do atleta nem fotografia.",
+            "illustration_note":("Composição temática original sobre beisebol; não é fotografia documental." if episode.get("content_type","atleta")!="atleta" else "Arte cartoon original inspirada no universo do beisebol; não é retrato histórico fiel do atleta nem fotografia."),
             "image_author":"ALLSTARS Studio — composição vetorial original",
             "image_rights":"Arte produzida pelo próprio sistema, sem uso de fotografia externa."
         }
