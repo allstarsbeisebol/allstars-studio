@@ -91,7 +91,7 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
   </div>
 </section>
 <div class="alert-settings" id="alert-settings"><button type="button" id="notify-enable" class="btn outline" aria-pressed="false">🔔 Ativar avisos do navegador</button><span class="note" id="notify-explanation">Quando o vídeo terminar, mostraremos um aviso aqui. Para avisar também no navegador, ative a opção. Mantenha a página aberta.</span></div>
-<section class="panel hidden" id="progress" aria-live="polite"><div class="eyebrow">EM PRODUÇÃO</div><h2 id="progress-title">Criando o vídeo...</h2><p id="progress-message" class="muted">Preparando o pedido...</p><p class="note">Você pode continuar nesta página enquanto acompanhamos a produção. Os vídeos concluídos ficam salvos na Biblioteca ALLSTARS; o pedido em andamento fica registrado neste navegador.</p><button class="secondary" id="refresh" type="button">↻ Atualizar situação</button></section>
+<section class="panel hidden" id="progress" aria-live="polite"><div class="eyebrow" id="progress-stage">ACOMPANHAR PEDIDO</div><h2 id="progress-title">Criando o vídeo...</h2><p id="progress-message" class="muted">Preparando o pedido...</p><p class="note">Você pode continuar nesta página enquanto acompanhamos a produção. Os vídeos concluídos ficam salvos na Biblioteca ALLSTARS; o pedido em andamento fica registrado neste navegador.</p><button class="secondary" id="refresh" type="button">↻ Atualizar situação</button></section>
 <section class="panel" id="downloads"><div class="eyebrow">ARQUIVOS PRODUZIDOS</div><h2 id="result-title">Último vídeo disponível</h2><p class="muted" id="result-message">Consultando os downloads...</p>
 <div id="result" class="result hidden"><div><img id="cover" alt="Capa do vídeo ALLSTARS" loading="lazy"></div><div><video id="video" controls preload="none" playsinline aria-label="Assista ao Reel"></video><p class="note">Prévia editorial. Confira fatos históricos, voz e direitos das imagens antes de publicar.</p><div class="links" id="files"></div></div></div>
 <details class="reference-example" id="approved-anime-preview">
@@ -189,7 +189,7 @@ function announceEnd(issueId,kind,details){
   }
  });
 }
-function errorMessage(text){$('progress').classList.remove('hidden');$('progress-title').textContent='Não foi possível concluir';$('progress-message').textContent=text;}
+function errorMessage(text){$('progress').classList.remove('hidden');$('progress-stage').textContent='PEDIDO NÃO INICIADO';$('progress-title').textContent='O vídeo ainda não começou a ser produzido';$('progress-message').textContent=text;}
 async function request(path,options={}){
  const response=await fetch(path,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json'},...options});
  let data;try{data=await response.json()}catch{throw Error('O serviço não respondeu corretamente.')}
@@ -291,6 +291,7 @@ async function create(){
  $('generate').disabled=true;
  $('confirm-panel').classList.add('hidden');
  $('progress').classList.remove('hidden');
+ $('progress-stage').textContent='ENVIANDO PEDIDO';
  $('progress-title').textContent='Enviando pedido...';
  $('progress-message').textContent='Preparando a produção segura.';
  $('progress').scrollIntoView({behavior:'smooth'});
@@ -299,6 +300,7 @@ async function create(){
    mode:urls.length||reference_text?'link':'auto',content_type,subject,urls,reference_text
   })});
   pending=data.request_id;localStorage.setItem('allstars-pending-issue',String(pending));
+  $('progress-stage').textContent='EM PRODUÇÃO';
   $('progress-title').textContent='Vídeo solicitado';
   await poll();
  }catch(e){errorMessage(e.message);}
@@ -324,7 +326,9 @@ async function poll(){
   if(data.state==='error'){
    const failedIssue=pending;
    clearTimeout(timer);timer=null;localStorage.removeItem('allstars-pending-issue');pending=0;
-   errorMessage(data.message);
+   $('progress-stage').textContent='PRODUÇÃO ENCERRADA COM ERRO';
+   $('progress-title').textContent='Não foi possível concluir o vídeo';
+   $('progress-message').textContent=data.message;
    announceEnd(failedIssue,'error',data.message||'Confira os detalhes da produção.');
    return;
   }
