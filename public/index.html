@@ -474,7 +474,15 @@ function restoreDraft(){
    draftStartScreen=resumeDraftScreen(d.wizard_step);updateFormHint();explainType();
  }catch{}
 }
-function clearDraft(){localStorage.removeItem(DRAFT_KEY);$('draft-status').textContent='Pedido enviado. Rascunho local limpo.';}
+function clearDraft(){
+ localStorage.removeItem(DRAFT_KEY);
+ draftStartScreen='content';
+ for(const id of ['subject','reference-links-text','reference-text'])$(id).value='';
+ $('content-type').value='auto';
+ $('extra-reference').open=false;
+ $('draft-status').textContent='Pedido enviado. Pronto para uma nova criação.';
+ updateFormHint();explainType();updateSkipReferences();
+}
 
 const ordinaryTitle=document.title;
 let artRevision=0,artAssets={};
