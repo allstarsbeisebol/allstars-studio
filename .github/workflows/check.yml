@@ -20,6 +20,10 @@ jobs:
         run: npm run test:syntax
       - name: Testar login e geração sem utilizar tokens reais
         run: node --test tests/backend.test.js
+      - name: Testar notificações e consentimento do navegador
+        run: |
+          node --check public/notify.js
+          node --test tests/notify.test.js
       - name: Validar JavaScript do painel web
         run: |
           python - <<'PY'
