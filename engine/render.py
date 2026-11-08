@@ -83,8 +83,8 @@ except (subprocess.CalledProcessError,subprocess.TimeoutExpired):
         "-c:v","libx264","-preset","veryfast","-crf","24","-c:a","aac","-b:a","160k",
         "-movflags","+faststart","-t",f"{duration:.3f}",str(output)],check=True)
     motion="fallback sem transições"
-for field,name in [("caption","legenda_instagram.txt"),("narration","roteiro.txt")]:
-    (out/name).write_text(str(ep.get(field,"")),encoding="utf-8")
+caption=str(ep.get("caption","")).strip()
+(out/"roteiro.txt").write_text(str(ep.get("narration","")),encoding="utf-8")
 sources=list(ep.get("sources",[]))
 media=out/"midia.json"
 if media.is_file():
@@ -92,6 +92,8 @@ if media.is_file():
         status=json.loads(media.read_text(encoding="utf-8"))
         if status.get("status") in ("downloaded","existing"):
             info=status.get("record",{})
+            credit="Foto: "+str(info.get("author",""))+" · "+str(info.get("license",""))+". Fonte: "+str(info.get("source_url",""))+". Licença: "+str(info.get("license_url",""))+". Tratamento gráfico: ALLSTARS."
+            caption=(caption+"\\n\\n"+credit).strip()
             sources.extend([
                 "",
                 "CRÉDITOS DA IMAGEM UTILIZADA",
@@ -103,4 +105,5 @@ if media.is_file():
             ])
     except (ValueError,OSError):pass
 (out/"fontes.txt").write_text("\n".join(sources),encoding="utf-8")
+(out/"legenda_instagram.txt").write_text(caption,encoding="utf-8")
 print("Reel pronto:",output,"| segundos:",round(duration,1),"| movimento:",motion)
