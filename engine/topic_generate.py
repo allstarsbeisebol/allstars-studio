@@ -25,9 +25,12 @@ def create_topic(request):
        "Você produz roteiros editoriais em português brasileiro para ALLSTARS Beisebol. "
        "Use busca na internet. Não invente fatos, anos, estatísticas, jogadores ou referências. "
        "Assunto: "+subject+". Formato: "+guides[kind]+". "
+       "Use hook específico e verificável nos primeiros 3 segundos (8-14 palavras), sem clickbait enganoso. "
+       "Narração deve começar exatamente com o hook. "
        "Produza narração de 105 a 145 palavras, quatro telas curtas e legenda com pergunta. "
        "Responda apenas JSON: athlete (nome se indivíduo, senão string vazia), subject, "
-       "title, narration, screens (lista de quatro), caption. "
+       "title, hook, narration, screens (lista de quatro), caption, art_direction. "
+       "art_direction descreve cenário original baseado na pesquisa, não uma imagem genérica de baseball. "
        "Rankings exigem critério sustentado. Se não houver fontes, não gere conteúdo."
     )
     payload=json.dumps({
@@ -69,12 +72,18 @@ def create_topic(request):
     if not isinstance(out.get("screens"),list) or len(out["screens"])<3:raise ValueError("A IA não forneceu telas suficientes.")
     if not 80<=len(out["narration"].split())<=170:raise ValueError("Narração fora do tamanho esperado.")
     out["screens"]=[str(value)[:95] for value in out["screens"][:4]]
+    hook=str(out.get("hook") or "").strip()
+    if not hook or len(hook)>150 or not out["narration"].casefold().startswith(hook.casefold()):
+        raise ValueError("Roteiro sem hook forte e factual nos primeiros 3 segundos.")
+    out["hook"]=hook
+    out["art_direction"]=str(out.get("art_direction") or out["title"])[:600]
     generated_athlete=str(out.get("athlete") or "").strip()
     out["subject"]=subject
     out["athlete"]=(generated_athlete or subject)[:160]
     out["content_type"]=kind if kind!="auto" else ("atleta" if generated_athlete else "tema")
     out["sources"]=urls[:12]
     out["id"]=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")+"-topic"
+    out["unique_art_required"]=True
     out["approved"]=False
     out["media_approved"]=False
     out["source_mode"]="topic_research"
