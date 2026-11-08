@@ -78,7 +78,7 @@ def create_context_art(ep,index=0):
     d.rectangle((98,100,982,120),fill=(*accent,235))
     for j in range(14):
         x=105+j*66
-        d.polygon([(x,128),(x+40,128),(x+10,155)],fill=(*RED if j%4==0 else WHITE,35))
+        d.polygon([(x,128),(x+40,128),(x+10,155)],fill=(RED if j%4==0 else WHITE)+(35,))
     center=(540,490);x,y=center
     if kind=="arremesso":
         # Zona de strike, bola e curva de trajetória.
@@ -126,7 +126,7 @@ def create_context_art(ep,index=0):
             x0=180+j*185;y0=270+j%2*78
             d.rounded_rectangle((x0,y0,x0+250,y0+390),radius=14,fill=(*WHITE,230),outline=(*GOLD,185),width=6)
             for k in range(5):d.line((x0+33,y0+120+44*k,x0+210,y0+120+44*k),fill=(*NAVY,115),width=10)
-            d.rectangle((x0+28,y0+28,x0+207,y0+92),fill=(*RED if j%2==0 else BLUE,220))
+            d.rectangle((x0+28,y0+28,x0+207,y0+92),fill=(RED if j%2==0 else BLUE)+(220,))
     # Contexto textual factual, vindo SOMENTE do episódio, sem inserir estatísticas inventadas.
     note=year_or_number(" ".join(str(ep.get(k,"")) for k in ("subject","title","hook","narration")))
     if note:
