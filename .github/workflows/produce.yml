@@ -41,7 +41,7 @@ jobs:
           mkdir -p output
           gh release download "preview-issue-${ISSUE_ID}" --repo "${{ github.repository }}" \
             --pattern selected.json --pattern capa.png --pattern capa_perfil_3x4.png \
-            --dir output --clobber
+            --pattern logo-oficial.png --dir output --clobber
           python engine/art_gate.py approve
           asset="$(python -c 'import json; print(json.load(open("output/selected.json")).get("art_image_asset",""))')"
           if [ -n "$asset" ]; then
@@ -103,6 +103,7 @@ jobs:
           path: |
             output/capa.png
             output/capa_perfil_3x4.png
+            output/logo-oficial.png
             output/allstars_reel.mp4
             output/narracao.mp3
             output/legenda_instagram.txt
