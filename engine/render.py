@@ -93,7 +93,7 @@ if media.is_file():
         if status.get("status") in ("downloaded","existing"):
             info=status.get("record",{})
             credit="Foto: "+str(info.get("author",""))+" · "+str(info.get("license",""))+". Fonte: "+str(info.get("source_url",""))+". Licença: "+str(info.get("license_url",""))+". Tratamento gráfico: ALLSTARS."
-            caption=(caption+"\\n\\n"+credit).strip()
+            caption=(caption+"\n\n"+credit).strip()
             sources.extend([
                 "",
                 "CRÉDITOS DA IMAGEM UTILIZADA",
