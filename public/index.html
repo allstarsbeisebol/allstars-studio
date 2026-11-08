@@ -3,6 +3,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
+/* Navegação e biblioteca otimizadas para desktop e mobile */
+.section-nav{position:sticky;top:0;z-index:20;display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;padding:10px 14px;background:rgba(7,22,50,.96);border-bottom:1px solid #486899;white-space:nowrap}
+.section-nav a{padding:8px 13px;border-radius:12px;border:1px solid #617fb1;color:#e7f1ff;text-decoration:none;font-weight:700;font-size:14px}
+.section-nav a:hover,.section-nav a:focus-visible{border-color:#F0C040;color:#F0C040}
+.library-tools{display:grid;grid-template-columns:1fr minmax(160px,220px) auto;align-items:end;gap:12px;margin:18px 0}
+.library-view{display:flex;gap:8px;margin-bottom:4px}
+.library-pagination{display:flex;justify-content:center;align-items:center;gap:12px;padding:18px 0}
+.library-grid.is-list{display:block}
+.library-grid.is-list .library-entry{display:grid;grid-template-columns:95px 1fr;gap:15px;margin-bottom:12px}
+.library-grid.is-list .library-entry img{width:95px;height:125px;object-fit:cover}
+#reference-links-text{font-family:ui-monospace,monospace;line-height:1.6;min-height:132px}
+@media(max-width:680px){.library-tools{grid-template-columns:1fr}.library-grid.is-list .library-entry{grid-template-columns:75px 1fr}.library-grid.is-list .library-entry img{width:75px;height:100px}}
+
 #reference-links-text{font-family:ui-monospace,monospace;line-height:1.65;min-height:132px}
 #draft-status{margin:7px 0}
 
@@ -29,6 +42,9 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 @media(max-width:680px){.cards,.result{grid-template-columns:1fr}.panel{padding:19px}.option{min-height:225px}h1{font-size:46px}.links a{width:100%}.result img{max-width:230px;margin:auto}.cards button{width:100%}}
 </style></head><body>
 <header><div class="wrap"><div class="brand">⚾ ALLSTARS <span>STUDIO</span></div><div class="sub">ALÉM DO JOGO · HISTÓRIAS REAIS DO BEISEBOL</div></div></header>
+<nav class="section-nav" aria-label="Navegação no Studio">
+  <a href="#options">Criar vídeo</a><a href="#progress">Andamento</a><a href="#downloads">Último Reel</a><a href="#library">Biblioteca</a><a href="#alert-settings">Avisos</a>
+</nav>
 <main>
 <section class="hero"><div class="eyebrow">ESTÚDIO DE PRODUÇÃO</div><h1>Seu próximo Reel.<br><span style="color:var(--gold)">Você escolhe quando criar.</span></h1><p class="muted">Selecione uma das duas opções. O estúdio prepara a narração, o vídeo vertical, a capa e a legenda para você baixar. Nenhuma programação semanal obrigatória.</p></section>
 <section class="panel login hidden" id="login"><h2>Entrar no estúdio</h2><p class="muted">Acesso de produção reservado à administração ALLSTARS. Entre uma vez neste navegador.</p>
@@ -122,9 +138,22 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
   <h2>Vídeos anteriores</h2>
   <p class="field-help">Aqui você pode recuperar vídeos já produzidos, assistir novamente e baixar os arquivos. Ver um vídeo antigo não cria outro vídeo nem consome a cota do Gemini.</p>
   <p class="muted">Acesse, assista e baixe novamente qualquer produção salva nas publicações do GitHub, inclusive os vídeos antigos. Não é necessário guardar os arquivos apenas neste navegador.</p>
-  <button id="library-refresh" type="button" class="secondary">↻ Ver meus vídeos anteriores</button>
+  <div class="library-tools">
+ <label for="library-search">Pesquisar vídeo
+   <input id="library-search" type="search" placeholder="Atleta, título ou tema" autocomplete="off">
+ </label>
+ <label for="library-sort">Ordenar
+   <select id="library-sort"><option value="recent">Mais recentes</option><option value="oldest">Mais antigos</option><option value="name">Título A–Z</option></select>
+ </label>
+ <div class="library-view" role="group" aria-label="Modo de visualização">
+   <button type="button" id="library-cards" class="secondary" aria-pressed="true" title="Visualização com capas">Cards</button>
+   <button type="button" id="library-list" class="outline" aria-pressed="false" title="Visualização compacta">Lista</button>
+ </div>
+</div>
+<button id="library-refresh" type="button" class="secondary">↻ Atualizar biblioteca</button>
   <p id="library-message" class="note">Entre com sua senha e clique em Carregar biblioteca para ver os vídeos anteriores.</p>
   <div id="library-items" class="library-grid"></div>
+<div class="library-pagination"><button type="button" id="library-prev" class="secondary" disabled>Anterior</button><span id="library-page" class="note" role="status"></span><button type="button" id="library-next" class="secondary" disabled>Próxima</button></div>
 </section>
 <section class="extras"><span>Identidade: <strong>ALLSTARS · Bíblia Visual 2026</strong></span><a href="https://baseballhall.org/" target="_blank" rel="noopener">Hall of Fame</a><a href="https://www.mlb.com/players" target="_blank" rel="noopener">MLB Players</a><a href="https://www.baseball-reference.com/" target="_blank" rel="noopener">Baseball-Reference</a><a href="https://www.statmuse.com/mlb/players" target="_blank" rel="noopener">StatMuse</a></section>
 <aside id="completion-toast" class="toast hidden" role="status" aria-live="polite" aria-atomic="true" data-kind="ready"><button type="button" class="toast-close" id="toast-close" aria-label="Fechar aviso">×</button><strong id="toast-title">Seu vídeo está pronto!</strong><p id="toast-message">Os arquivos já podem ser baixados.</p><button type="button" class="toast-action" id="toast-action">Ver downloads</button></aside>
