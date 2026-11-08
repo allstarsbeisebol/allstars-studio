@@ -135,8 +135,11 @@ def gemini(text,title,url,kind='atleta',subject=''):
       "Não invente jogadores, datas, números, recordes, resultados ou citações. "
       "Se o texto for coletivo, NÃO escolher um atleta aleatório, a menos que o tipo seja atleta e a fonte o sustente. "
       "Quando o assunto for notícia, não assumir que ela seja atual sem data na fonte. "
+      "Abra com gancho forte e verificável nos primeiros 3 segundos (8 a 14 palavras), sem fatos inventados. "
+      "A narração deve começar exatamente pelo hook. "
       "Narração em pt-BR de 105 a 145 palavras; 4 telas curtas; legenda para Instagram com pergunta e hashtags. "
-      "Responda APENAS JSON com athlete, subject, title, narration, screens, caption, evidence_paragraphs. "
+      "Responda APENAS JSON com athlete, subject, title, hook, narration, screens, caption, evidence_paragraphs, art_direction. "
+      "art_direction: descrição original de cenas coerentes com os fatos pesquisados, sem reutilizar capa temática. "
       "No tipo atleta, athlete deve ser o nome de uma pessoa identificada na fonte. "
       "Para tipo não individual, athlete pode ser vazio e subject deve ser o tema/assunto. "
       "Só mencione anos que apareçam explicitamente no texto. "
@@ -175,6 +178,11 @@ def gemini(text,title,url,kind='atleta',subject=''):
     if not isinstance(out.get("screens"),list) or len(out["screens"])<3:raise ValueError("Telas insuficientes.")
     if not 80<=len(out["narration"].split())<=170:raise ValueError("Narração fora do tamanho apropriado.")
     out["screens"]=[str(x)[:95] for x in out["screens"][:4]]
+    hook=str(out.get("hook") or "").strip()
+    if not hook or len(hook)>150 or not out["narration"].casefold().startswith(hook.casefold()):
+        raise ValueError("Roteiro sem gancho verificável no início da narração.")
+    out["hook"]=hook
+    out["art_direction"]=str(out.get("art_direction") or out["title"])[:600]
     if kind=="atleta" and not str(out.get("athlete","")).strip():raise ValueError("Não foi identificado um atleta na fonte.")
     out["subject"]=(subject or str(out.get("subject") or out.get("athlete") or title)).strip()[:160]
     out["athlete"]=str(out.get("athlete") or out["subject"]).strip()[:160]
@@ -194,7 +202,8 @@ def run():
     if not urls and not pasted:raise ValueError("Inclua referências para orientar o vídeo.")
     articles=[]
     unavailable=[]
-    for link in urls:
+    MAX_RESEARCH_LINKS=16
+    for link in urls[:MAX_RESEARCH_LINKS]:
         try: articles.append(read_page(link))
         except ValueError as exc:
             host=urllib.parse.urlsplit(link).hostname or ""
@@ -204,6 +213,8 @@ def run():
             else:
                 raise ValueError("Não foi possível ler a referência "+link[:120]+": "+str(exc)+
                     (" Cole a legenda ou o texto da publicação, além do link." if social else "")) from exc
+    if len(urls)>MAX_RESEARCH_LINKS:
+        unavailable.extend({"url":link,"reason":"Referência preservada, não lida nesta execução: orçamento de 16 páginas."} for link in urls[MAX_RESEARCH_LINKS:])
     if pasted:
         if len(pasted)<80:raise ValueError("O texto colado precisa conter pelo menos 80 caracteres para servir de referência.")
         articles.append({"title":"Texto fornecido pela administração (não verificado)", "text":pasted,
@@ -233,7 +244,7 @@ def run():
         print("Atleta já produzido; o pedido por link cria um novo episódio da história fornecida.")
     ep.update({"id":datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")+"-references",
       "sources":urls,
-      "approved":False,"media_approved":False,
+      "approved":False,"media_approved":False,"unique_art_required":True,
       "editorial_status":"RASCUNHO COM FONTES FORNECIDAS — conferir fatos, citações e direitos",
       "source_mode":"multiple_references" if len(articles)>1 else ("pasted_text" if pasted and not urls else "link"),
       "source_title":title,"requested_subject":req["subject"],
