@@ -3,6 +3,7 @@
 import argparse,json
 from pathlib import Path
 from poster import poster, official_logo
+from anime_assets import cover_from_approved_asset
 from PIL import Image, ImageDraw
 p=argparse.ArgumentParser()
 p.add_argument("--episode",default="data/episode.json")
@@ -10,8 +11,10 @@ p.add_argument("--output",default="output/capa.png")
 args=p.parse_args()
 episode=json.loads(Path(args.episode).read_text(encoding="utf-8"))
 dest=Path(args.output);dest.parent.mkdir(parents=True,exist_ok=True)
-image=poster(episode)
+curated=cover_from_approved_asset(episode)
+image=curated[0] if curated is not None else poster(episode)
 image.save(dest,optimize=True)
+print('Visual:', 'anime aprovado para este atleta' if curated is not None else 'arte gerada pelo compositor atual')
 # Prévia exata da grade de perfil 3:4, centralizada no Reel 9:16.
 # 1080x1440 corresponde ao corte y=240..1680 da arte vertical.
 preview=image.crop((0,240,1080,1680)).convert('RGBA')
