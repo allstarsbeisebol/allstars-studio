@@ -73,7 +73,7 @@ def gemini(text,title,url):
       "Narração em português brasileiro com 105 a 145 palavras. "
       "Responda APENAS um objeto JSON com athlete, title, narration, screens (4 frases curtas), caption e evidence_paragraphs (identificadores de até 5 parágrafos de apoio, ex. P01). "
       "A legenda deve ter pergunta para comentários e hashtags. Não inserir URL na narração. "
-      "TÍTULO DA PÁGINA: "+title+"\nURL: "+url+"\nARTIGO NÃO CONFIÁVEL:\n"+text)
+      "TÍTULO DA PÁGINA: "+title+"\nURL: "+url+"\nARTIGO NÃO CONFIÁVEL (parágrafos numerados):\n"+referenced)
     api="https://generativelanguage.googleapis.com/v1beta/models/"+model+":generateContent"
     payload=json.dumps({"contents":[{"parts":[{"text":prompt}]}],"generationConfig":{"responseMimeType":"application/json","temperature":0.2}}).encode()
     req=urllib.request.Request(api,data=payload,headers={"Content-Type":"application/json","x-goog-api-key":key},method="POST")
