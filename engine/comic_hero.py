@@ -48,22 +48,29 @@ def cartoon_player(athlete,scene=0):
     d.line((x+250,725,x+405,492),fill=ink,width=120)
     d.line((x+250,725,x+405,492),fill=skin,width=89)
     d.ellipse((x+343,420,x+469,535),fill=skin,outline=ink,width=13)
+    # Fingertip/knuckle strokes distinguish hands from featureless circles.
+    for delta in (0,20,40):
+        d.arc((x+352+delta,442,x+420+delta,505),35,135,fill=shade,width=5)
+    for delta in (0,17,34):
+        d.arc((x-399+delta,417,x-333+delta,490),30,145,fill=shade,width=4)
     # neck and face (no silhouette)
     d.rounded_rectangle((x-75,517,x+85,652),radius=35,fill=shade,outline=ink,width=14)
     d.ellipse((x-168,228,x+173,570),fill=ink)
     d.ellipse((x-152,244,x+160,551),fill=skin)
     d.polygon([(x-132,396),(x-107,477),(x-27,530),(x+71,520),(x+138,439),
                (x+126,525),(x+52,572),(x-47,568),(x-139,514)],fill=shade)
-    # eyes brows, anime-style highlights
+    # Adult graphic-novel expression: focused eyes, angular brows and jaw.
     for offset in (-76,72):
         cx=x+offset
-        d.arc((cx-48,359,cx+43,398),190,343,fill=ink,width=14)
-        d.ellipse((cx-24,397,cx+23,438),fill=white)
-        d.ellipse((cx-14,398,cx+17,442),fill=ink)
-        d.ellipse((cx-5,405,cx+5,416),fill=white)
-    d.line((x+1,438,x-7,468,x+13,470),fill=shade,width=12)
-    d.arc((x-41,470,x+72,509),10,150,fill=ink,width=8)
-    # soft comic hatch on cheeks
+        brow_angle=-13 if offset<0 else 13
+        d.line((cx-38,374+brow_angle,cx+39,371-brow_angle),fill=ink,width=15)
+        d.ellipse((cx-25,398,cx+24,426),fill=white)
+        d.ellipse((cx-13,398,cx+18,431),fill=ink)
+        d.ellipse((cx-6,402,cx+4,411),fill=white)
+    d.line((x+1,434,x-7,475,x+18,476),fill=shade,width=13)
+    d.line((x-39,510,x+44,507),fill=ink,width=9)
+    d.line((x-33,518,x+38,519),fill=(99,42,38,255),width=4)
+    # comic shading and strong cheek structure
     for off in (-115,105):
         d.line((x+off-12,463,x+off+18,473),fill=(164,62,68,135),width=5)
     # cap with gold stripe and outlined visor
