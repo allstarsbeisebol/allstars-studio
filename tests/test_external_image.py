@@ -58,6 +58,22 @@ class ExternalImageTests(unittest.TestCase):
                 with Image.open(output) as cover:self.assertEqual(cover.size,(1080,1920))
                 with Image.open(root/"capa_perfil_3x4.png") as profile:self.assertEqual(profile.size,(1080,1440))
 
+    def test_video_poster_uses_the_uploaded_artwork(self):
+        # As cenas internas devem usar a imagem escolhida, não substituir
+        # silenciosamente por um desenho genérico após aprovar.
+        from poster import poster
+        folder=Path(__file__).resolve().parents[1]/"output"
+        folder.mkdir(exist_ok=True)
+        source=folder/"external-r2-abcdef123456.jpg"
+        Image.new("RGB",(1080,1920),(25,110,200)).save(source,"JPEG",quality=84)
+        try:
+            ep=self.episode()
+            ep=advance(ep,"ALLSTARS_ART_CHANGE\\nREVISION: 1\\nACTION: external\\n"
+                          "IMAGE_ASSET: external-r2-abcdef123456.jpg\\nFIT: contain".replace("\\n","\n"))
+            frame=poster(ep,headline="Uma cena desta história",index=1,total=4)
+            self.assertEqual(frame.size,(1080,1920))
+        finally:source.unlink(missing_ok=True)
+
     def test_prompt_is_pertinent_and_has_no_fake_ai_api_cost(self):
         value=prompt(self.episode())
         self.assertIn("Jim Abbott",value)
