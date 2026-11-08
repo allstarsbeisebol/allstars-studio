@@ -18,6 +18,8 @@ if ep.get("unique_art_required"):
       "mode":"original_context_art",
       "premium":False,
       "new_for_episode":True,
+      "approved_by_editor":bool(ep.get("art_approved",False)),
+      "art_revision":int(ep.get("art_revision") or 0),
       "message":"Ilustração editorial inédita ligada ao roteiro e à pesquisa. Ainda não é anime premium gerado por modelo de imagem.",
       **art_metadata(ep)
     }
