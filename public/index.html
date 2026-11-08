@@ -133,7 +133,7 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 <nav class="section-nav" aria-label="Navegação no Studio">
   <button id="mobile-menu-toggle" class="mobile-menu-toggle" type="button" aria-controls="studio-nav-links" aria-expanded="false" aria-label="Abrir menu de navegação"><span class="mobile-menu-symbol" aria-hidden="true">☰</span><span>Menu</span></button>
   <div id="studio-nav-links" class="section-nav-links">
-    <a href="#overview" data-wizard-go="home">Início</a><a href="#options" data-wizard-go="content">Criar vídeo</a><a href="#progress" data-wizard-go="progress">Meu pedido</a><a href="#library" data-wizard-go="library">Biblioteca</a><a href="#alert-settings" data-wizard-go="alerts">Avisos</a>
+    <a href="#overview" data-wizard-go="home">Início</a><a href="#options" data-wizard-go="content">Criar vídeo</a><a href="#progress" id="nav-pending" data-wizard-go="progress">Meu pedido</a><a href="#library" data-wizard-go="library">Biblioteca</a><a href="#alert-settings" data-wizard-go="alerts">Avisos</a>
   </div>
 </nav>
 <main>
@@ -388,7 +388,8 @@ const WIZARD_VIEW_KEY='allstars-wizard-view-v1';
 let wizardView='home',draftStartScreen='content';
 function updateWizardHome(){
  $('home-continue').classList.toggle('hidden',!pending);
- $('home-create').textContent=pending?'Pedido em andamento — continuar':'＋ Criar novo vídeo';
+ $('home-create').classList.toggle('wizard-hidden',Boolean(pending));
+ $('nav-pending').textContent=pending?'Meu pedido':'Último Reel';
 }
 function showWizardScreen(requested,{focus=true,force=false}={}){
  const view=force?normalizeWizardScreen(requested):routeWizardScreen(requested,pending);
@@ -412,7 +413,7 @@ function showWizardScreen(requested,{focus=true,force=false}={}){
  $('wizard-progress').classList.toggle('wizard-hidden',step<0);
  if(step>=0){
   $('wizard-current-number').textContent='Etapa '+(step+1)+' de 5';
-  $('wizard-current-name').textContent=view==='progress'?'Preparando seu vídeo':wizardSteps[step];
+  $('wizard-current-name').textContent=view==='progress'?'Preparação e andamento':wizardSteps[step];
   $('wizard-step-hint').textContent=view==='progress'?'Você pode voltar ao início sem cancelar o pedido.':
    view==='art'?'Aprovar, revisar ou usar outra imagem: a escolha é sua.':
    'Avance e volte sem perder seu rascunho. Nada é enviado sem confirmação.';
