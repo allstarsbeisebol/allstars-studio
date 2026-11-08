@@ -73,6 +73,7 @@ jobs:
           name: allstars-producao-${{ github.run_number }}
           path: |
             output/capa.png
+            output/capa_perfil_3x4.png
             output/allstars_reel.mp4
             output/narracao.mp3
             output/legenda_instagram.txt
@@ -90,6 +91,7 @@ jobs:
         run: |
           gh release create "$RELEASE_TAG" \
             output/capa.png#capa.png \
+            output/capa_perfil_3x4.png#capa_perfil_3x4.png \
             output/allstars_reel.mp4#allstars_reel.mp4 \
             output/narracao.mp3#narracao.mp3 \
             output/legenda_instagram.txt#legenda_instagram.txt \
