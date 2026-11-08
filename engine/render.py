@@ -24,6 +24,7 @@ screens=[str(x).strip() for x in ep.get("screens",[]) if str(x).strip()]
 scenes=[ep.get("hook") or ep.get("title","ALÉM DO JOGO")]+screens[:5]
 if len(scenes)==1:scenes.append(ep.get("athlete","HISTÓRIAS REAIS"))
 photos=[]
+storyboard=[]
 for i,message in enumerate(scenes):
     path=out/f"cena_{i:02d}.jpg"
     # O cartaz aprovado é destinado à capa. Nas cenas internas usamos
@@ -32,6 +33,16 @@ for i,message in enumerate(scenes):
     poster(ep,headline=message,index=i,total=len(scenes)-1).save(
         path,quality=91,subsampling=0)
     photos.append(path)
+    if ep.get("unique_art_required"):
+        from story_art import art_metadata
+        storyboard.append({"scene":i,"title":str(message)[:150],**art_metadata(ep,i)})
+if storyboard:
+    (out/"storyboard.json").write_text(json.dumps({
+        "hook":str(ep.get("hook") or ep.get("title") or ""),
+        "hook_window_seconds":3,
+        "note":"O gancho está na abertura visual; a primeira frase do áudio deve ser conferida antes de publicar.",
+        "scenes":storyboard
+    },ensure_ascii=False,indent=2),encoding="utf-8")
 # Uso editorial: abertura mais curta, cenas centrais dividindo o tempo total.
 if len(scenes)>1 and duration>8:
     opener=min(3.3,duration*.16)
