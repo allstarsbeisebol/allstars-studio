@@ -106,3 +106,51 @@ test("status: mostra motivo seguro específico informado pelo workflow",async()=
     assert.match(res.body.message,/modelo não disponível/);
   }finally{globalThis.fetch=original;}
 });
+
+test("tema: cria pedido sem link preservando o assunto",async()=>{
+ const cookie=await loginCookie();
+ const old=globalThis.fetch;let payload;
+ globalThis.fetch=async(url,options={})=>{
+   if(options.method==="POST"){payload=JSON.parse(options.body);return {ok:true,json:async()=>({number:201})};}
+   return {ok:true,json:async()=>([])};
+ };
+ try{
+   const res=response();
+   await generate({method:"POST",headers:headers(cookie),body:{
+     mode:"auto",content_type:"tema",subject:"Hall da Fama do beisebol"
+   }},res);
+   assert.equal(res.code,202);
+   assert.match(payload.body,/TIPO: tema/);
+   assert.match(payload.body,/ASSUNTO: Hall da Fama do beisebol/);
+ }finally{globalThis.fetch=old;}
+});
+test("lista coletiva: link mantém formato escolhido em vez de exigir jogador",async()=>{
+ const cookie=await loginCookie();
+ const old=globalThis.fetch;let payload;
+ globalThis.fetch=async(url,options={})=>{
+   if(options.method==="POST"){payload=JSON.parse(options.body);return {ok:true,json:async()=>({number:202})};}
+   return {ok:true,json:async()=>([])};
+ };
+ try{
+   const res=response();
+   await generate({method:"POST",headers:headers(cookie),body:{
+     mode:"link",content_type:"explicativo",subject:"Como funciona o Hall da Fama",
+     url:"https://www.olympics.com/es/noticias/salon-fama-beisbol-mlb-todos-miembros"
+   }},res);
+   assert.equal(res.code,202);
+   assert.match(payload.body,/TIPO: explicativo/);
+   assert.match(payload.body,/LINK: https:\/\/www.olympics.com/);
+ }finally{globalThis.fetch=old;}
+});
+test("entrada: rejeita assunto com quebras de linha e tipos não suportados",async()=>{
+ const cookie=await loginCookie();
+ for(const data of [
+   {mode:"auto",content_type:"tema",subject:"Tema\nLINK: https://bad"},
+   {mode:"auto",content_type:"desconhecido",subject:"Hall da Fama"},
+   {mode:"auto",content_type:"noticia",subject:""}
+ ]){
+   const res=response();
+   await generate({method:"POST",headers:headers(cookie),body:data},res);
+   assert.equal(res.code,400);
+ }
+});
