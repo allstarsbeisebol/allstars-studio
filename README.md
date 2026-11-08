@@ -5,6 +5,24 @@ Estúdio online para solicitar e baixar Reels de beisebol, preservando a identid
 **Site:** https://allstars-studio-brown.vercel.app/
 **Repositório:** https://github.com/allstarsbeisebol/allstars-studio
 
+## Novo assistente de criação em 5 etapas (sem frameworks)
+
+O ALLSTARS Studio agora apresenta **uma tela por vez**, preservando o HTML/CSS/JavaScript original e o fluxo GitHub Actions:
+
+1. **Conteúdo:** tipo de vídeo e assunto (Automático é o padrão e não exige preenchimento).
+2. **Referências:** links ou texto, opcionais, com botões **Voltar**, **Pular referências** e **Conferir pedido**.
+3. **Conferência:** resumo claro antes do primeiro envio ao GitHub; **Voltar** retorna às referências sem perder os campos.
+4. **Imagem:** o Studio prepara a prévia, permite revisão, substituição por imagem colada ou gerada em outra IA e **aprovação explícita** antes de iniciar o MP4.
+5. **Resultado:** prévia e downloads do Reel após a produção.
+
+A tela inicial exibe **Criar novo vídeo**, **Continuar meu pedido** (quando houver pedido ativo) e **Minha biblioteca**. Biblioteca de vídeos/imagens e Avisos ficam em telas independentes, pelo menu principal. A barra indica a etapa atual e a quantidade total.
+
+**Segurança e continuidade:** o rascunho e a etapa de edição são salvos localmente. Voltar ou trocar de aba não apaga o pedido criado. Ao existir um Issue ativo, os atalhos de criação abrem o acompanhamento em vez de enviar outro pedido. Ao restaurar um pedido, o sistema consulta o estado real no GitHub, sem aprovar automaticamente nenhuma imagem. Depois de enviar, o formulário original não pode ser alterado: use a revisão de arte ou conclua o pedido antes de criar outro.
+
+O botão **Pular referências** só aparece enquanto não houver conteúdo de referência; se o assunto não tiver sido informado para um modo que exige assunto ou fonte, o Studio solicita o preenchimento. As proteções anteriores para links HTTPS, tamanho dos textos, direitos de imagem e aprovação da capa continuam ativas.
+
+**Arquivos:** `public/wizard.js` contém a lógica pura de etapas e prevenção de navegação incorreta. `public/index.html` apresenta as telas e conecta os eventos existentes, sem novas dependências ou APIs pagas. `tests/wizard.test.js` e `tests/test_wizard_ui.py` validam navegação e estrutura no CI.
+
 ## Uso pelo navegador
 1. Entre no site com a senha do estúdio.
 2. Escolha Automático, Atleta, Tema, Notícia, Lista ou Explicativo e informe um assunto se desejar.
