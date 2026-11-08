@@ -189,17 +189,31 @@ def run():
     issue=event.get("issue",{})
     body=issue.get("body") or ""
     req=parse(body)
-    url=req["url"]
-    if not url:raise ValueError("Pedido baseado em link sem campo LINK.")
-    article=read_page(url)
-    text,title=article["text"],article["title"]
+    urls=req["urls"]
+    pasted=req["reference_text"]
+    if not urls and not pasted:raise ValueError("Inclua referências para orientar o vídeo.")
+    articles=[]
+    for link in urls:
+        try: articles.append(read_page(link))
+        except ValueError as exc:raise ValueError("Não foi possível ler uma das fontes fornecidas: "+str(exc)) from exc
+    if pasted:
+        if len(pasted)<80:raise ValueError("O texto colado precisa conter pelo menos 80 caracteres para servir de referência.")
+        articles.append({"title":"Texto fornecido pela administração (não verificado)", "text":pasted,
+                         "submitted_url":"texto_colado", "url":"texto_colado",
+                         "verification_status":"PENDENTE — TEXTO FORNECIDO PELO USUÁRIO"})
+    combined="\\n\\n".join("[FONTE "+str(i+1)+" — "+item.get("title","Sem título")+"]\\n"+
+                         item.get("text","")[:12000] for i,item in enumerate(articles))
+    title=req["subject"] or " | ".join(item.get("title","Fonte") for item in articles)[:220]
+    article={"title":title,"text":combined}
+    text=combined
     kind=req["content_type"]
-    slug=urllib.parse.urlsplit(url).path.casefold()
-    broad_collection=any(mark in slug for mark in ("todos-miembros","all-members","lista-completa","full-list"))
+    broad_collection=any(any(mark in urllib.parse.urlsplit(link).path.casefold()
+                             for mark in ("todos-miembros","all-members","lista-completa","full-list"))
+                         for link in urls)
     if broad_collection and kind=="atleta":
-        raise ValueError("Este link é uma lista coletiva. Escolha Tema, Lista ou Explicativo para produzir o episódio.")
+        raise ValueError("Uma referência é uma lista coletiva. Escolha Tema, Lista ou Explicativo.")
     if broad_collection and kind=="auto":kind="tema"
-    ep=gemini(text,title,url,kind=kind,subject=req["subject"])
+    ep=gemini(text,title,", ".join(urls) or "Texto fornecido pelo usuário",kind=kind,subject=req["subject"])
     if kind=="atleta":
         ep["content_type"]="atleta"
     require_athlete=ep["content_type"]=="atleta"
@@ -209,16 +223,20 @@ def run():
     repeated=ep["athlete"].casefold().strip() in previously_produced
     if repeated:
         print("Atleta já produzido; o pedido por link cria um novo episódio da história fornecida.")
-    ep.update({"id":datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")+"-link",
-      "sources":[url],"approved":False,"media_approved":False,
-      "editorial_status":"RASCUNHO DE IA BASEADO EM LINK — fatos e direitos ainda não validados",
-      "source_mode":"link","source_title":title,"requested_subject":req["subject"],
-      "source_metadata":{key:article[key] for key in ("submitted_url","url","redirect_count","title","extraction_method","paragraph_count","word_count","content_sha256","published_at","author","verification_status")},
+    ep.update({"id":datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")+"-references",
+      "sources":urls,
+      "approved":False,"media_approved":False,
+      "editorial_status":"RASCUNHO COM FONTES FORNECIDAS — conferir fatos, citações e direitos",
+      "source_mode":"multiple_references" if len(articles)>1 else ("pasted_text" if pasted and not urls else "link"),
+      "source_title":title,"requested_subject":req["subject"],
+      "source_metadata":{"references":[{"title":item.get("title"),"url":item.get("url"),
+          "verification_status":item.get("verification_status","PENDENTE")}
+          for item in articles],"pasted_text_included":bool(pasted),"verified_independently":False},
       "evidence_paragraphs":ep.get("evidence_paragraphs",[]),
       "editorial_checks":check,"previously_produced":repeated})
     output=ROOT/"output";output.mkdir(exist_ok=True)
     (output/"selected.json").write_text(json.dumps(ep,ensure_ascii=False,indent=2),encoding="utf-8")
-    print("Rascunho baseado no link:",ep["athlete"],url)
+    print("Rascunho a partir de referências:",ep["subject"],len(urls),"links e texto colado:",bool(pasted))
     # Não registra em histórico até produção completa ser publicada.
 if __name__=="__main__":
     try:run()
