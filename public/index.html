@@ -8,9 +8,26 @@
 .overview-item{background:#10284e;border:1px solid #4b6491;border-radius:12px;padding:15px}
 .overview-item strong{font-size:20px;display:block;color:#F0C040;margin-top:6px}
 @media(max-width:680px){.studio-overview{grid-template-columns:1fr}}
-.section-nav{position:sticky;top:0;z-index:20;display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;padding:10px 14px;background:rgba(7,22,50,.96);border-bottom:1px solid #486899;white-space:nowrap}
-.section-nav a{padding:8px 13px;border-radius:12px;border:1px solid #617fb1;color:#e7f1ff;text-decoration:none;font-weight:700;font-size:14px}
+.section-nav{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:10px 14px;background:rgba(7,22,50,.97);border-bottom:1px solid #486899}
+.section-nav-links{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.section-nav a{display:block;padding:8px 13px;border-radius:12px;border:1px solid #617fb1;color:#e7f1ff;text-decoration:none;font-weight:700;font-size:14px}
 .section-nav a:hover,.section-nav a:focus-visible{border-color:#F0C040;color:#F0C040}
+.mobile-menu-toggle{display:none}
+.top-alerts{background:#10284e;border:1px solid #49648e;border-left:4px solid var(--gold);border-radius:13px;padding:12px 16px;margin:0 0 18px}
+.top-alerts #notify-enable{min-height:44px}
+.top-alerts .note{font-size:13px;line-height:1.4}
+@media(max-width:680px){
+ .section-nav{justify-content:flex-end;min-height:60px}
+ .mobile-menu-toggle{display:inline-flex;gap:9px;align-items:center;min-height:44px;padding:10px 15px;border:1px solid #6683b3;background:#17345f;color:#fff}
+ .mobile-menu-toggle[aria-expanded="true"]{border-color:var(--gold)}
+ .mobile-menu-symbol{font-size:24px;line-height:1}
+ .section-nav-links{display:none;position:absolute;top:100%;left:0;right:0;z-index:21;background:#0b2144;border-bottom:1px solid #6683b3;box-shadow:0 12px 24px #020a19c9;padding:12px 16px;flex-direction:column;align-items:stretch;gap:7px}
+ .section-nav-links.is-open{display:flex}
+ .section-nav-links a{padding:13px 15px;min-height:44px}
+ .top-alerts{align-items:stretch;gap:8px}
+ .top-alerts #notify-enable{width:100%;justify-content:center}
+ .top-alerts .note{min-width:0}
+}
 .library-tools{display:grid;grid-template-columns:1fr minmax(160px,220px) auto;align-items:end;gap:12px;margin:18px 0}
 .library-view{display:flex;gap:8px;margin-bottom:4px}
 #extra-reference{border:1px solid #49648e;border-radius:12px;padding:16px;margin:12px 0;background:#0c2243}
@@ -52,9 +69,13 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 </style></head><body>
 <header><div class="wrap"><div class="brand">⚾ ALLSTARS <span>STUDIO</span></div><div class="sub">ALÉM DO JOGO · HISTÓRIAS REAIS DO BEISEBOL</div></div></header>
 <nav class="section-nav" aria-label="Navegação no Studio">
-  <a href="#options">Criar vídeo</a><a href="#progress">Andamento</a><a href="#downloads">Último Reel</a><a href="#library">Biblioteca</a><a href="#alert-settings">Avisos</a>
+  <button id="mobile-menu-toggle" class="mobile-menu-toggle" type="button" aria-controls="studio-nav-links" aria-expanded="false" aria-label="Abrir menu de navegação"><span class="mobile-menu-symbol" aria-hidden="true">☰</span><span>Menu</span></button>
+  <div id="studio-nav-links" class="section-nav-links">
+    <a href="#options">Criar vídeo</a><a href="#progress">Andamento</a><a href="#downloads">Último Reel</a><a href="#library">Biblioteca</a><a href="#alert-settings">Avisos</a>
+  </div>
 </nav>
 <main>
+<div class="alert-settings top-alerts" id="alert-settings" role="region" aria-label="Avisos de conclusão de vídeos"><button type="button" id="notify-enable" class="btn outline" aria-pressed="false">🔔 Ativar avisos do navegador</button><span class="note" id="notify-explanation">Quando o vídeo terminar, mostraremos um aviso aqui. Para avisar também no navegador, ative a opção. Mantenha a página aberta.</span></div>
 <section class="hero"><div class="eyebrow">ESTÚDIO DE PRODUÇÃO</div><h1>Seu próximo Reel.<br><span style="color:var(--gold)">Você escolhe quando criar.</span></h1><p class="muted">Selecione uma das duas opções. O estúdio prepara a narração, o vídeo vertical, a capa e a legenda para você baixar. Nenhuma programação semanal obrigatória.</p></section>
 <section id="overview" class="studio-overview" aria-label="Visão geral">
  <div class="overview-item"><span class="note">Última produção</span><strong id="overview-last">Consultando...</strong><span class="note">Vídeo disponível para revisão</span></div>
@@ -125,7 +146,6 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
     <button type="button" id="generate">✓ Confirmar e iniciar produção</button>
   </div>
 </section>
-<div class="alert-settings" id="alert-settings"><button type="button" id="notify-enable" class="btn outline" aria-pressed="false">🔔 Ativar avisos do navegador</button><span class="note" id="notify-explanation">Quando o vídeo terminar, mostraremos um aviso aqui. Para avisar também no navegador, ative a opção. Mantenha a página aberta.</span></div>
 <section class="panel hidden" id="progress" aria-live="polite"><div class="eyebrow" id="progress-stage">ACOMPANHAR PEDIDO</div><h2 id="progress-title">Criando o vídeo...</h2><p id="progress-message" class="muted">Preparando o pedido...</p><p class="note">Você pode continuar nesta página enquanto acompanhamos a produção. Os vídeos concluídos ficam salvos na Biblioteca ALLSTARS; o pedido em andamento fica registrado neste navegador.</p><button class="secondary" id="refresh" type="button">↻ Atualizar situação</button></section>
 <section class="panel" id="downloads"><div class="eyebrow">ARQUIVOS PRODUZIDOS</div><h2 id="result-title">Último vídeo disponível</h2><p class="muted" id="result-message">Consultando os downloads...</p>
 <div id="result" class="result hidden"><div><img id="cover" alt="Capa do vídeo ALLSTARS" loading="lazy"></div><div><video id="video" controls preload="none" playsinline aria-label="Assista ao Reel"></video><p class="note">Prévia editorial. Confira fatos históricos, voz e direitos das imagens antes de publicar.</p><div class="links" id="files"></div></div></div>
@@ -176,6 +196,29 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 <script type="module">
 import {PREF_KEY,browserAvailable,alertsEnabled,enableAlerts,announceIssue} from './notify.js';
 const $=id=>document.getElementById(id);
+// O menu hambúrguer aparece no mobile e fecha ao navegar, tocar fora ou apertar Esc.
+const menuToggle=$('mobile-menu-toggle'),navLinks=$('studio-nav-links');
+function closeMobileMenu(){
+ navLinks.classList.remove('is-open');
+ menuToggle.setAttribute('aria-expanded','false');
+ menuToggle.setAttribute('aria-label','Abrir menu de navegação');
+}
+menuToggle.addEventListener('click',()=>{
+ const open=menuToggle.getAttribute('aria-expanded')!=='true';
+ navLinks.classList.toggle('is-open',open);
+ menuToggle.setAttribute('aria-expanded',String(open));
+ menuToggle.setAttribute('aria-label',open?'Fechar menu de navegação':'Abrir menu de navegação');
+});
+navLinks.addEventListener('click',event=>{if(event.target.closest('a'))closeMobileMenu();});
+document.addEventListener('click',event=>{
+ if(!event.target.closest('.section-nav'))closeMobileMenu();
+});
+document.addEventListener('keydown',event=>{
+ if(event.key==='Escape'&&menuToggle.getAttribute('aria-expanded')==='true'){
+  closeMobileMenu();menuToggle.focus();
+ }
+});
+window.addEventListener('resize',()=>{if(window.innerWidth>680)closeMobileMenu();});
 let authenticated=false,configured=false,pending=Number(localStorage.getItem('allstars-pending-issue')||0),timer=null;
 const DRAFT_KEY='allstars-studio-draft-v4';
 function saveDraft(){
