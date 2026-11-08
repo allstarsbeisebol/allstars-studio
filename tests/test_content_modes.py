@@ -22,16 +22,20 @@ class ContentModeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"Tipo"):parse("TIPO: absurdo")
         with self.assertRaisesRegex(ValueError,"assunto|Assunto"):parse("TIPO: lista")
     def test_multiple_links_and_pasted_text(self):
-        payload=base64.b64encode("Texto sobre beisebol público com acentos e fontes.".encode()).decode()
-        req=parse("MODO: link\\nTIPO: tema\\nASSUNTO: Regras do jogo\\nLINK: https://www.mlb.com/test\\nLINK: https://www.instagram.com/p/demo/\\nTEXTO_BASE64: "+payload)
-        self.assertEqual(len(req["urls"]),2)
+        payload=base64.b64encode("Texto público com acentos e fontes.".encode()).decode()
+        body="\n".join([
+            "MODO: link","TIPO: tema","ASSUNTO: Regras do jogo",
+            "LINK: https://www.mlb.com/test","LINK: https://www.instagram.com/p/demo/",
+            "TEXTO_BASE64: "+payload])
+        req=parse(body)
+        self.assertEqual(req["urls"],["https://www.mlb.com/test","https://www.instagram.com/p/demo/"])
         self.assertIn("acentos",req["reference_text"])
         self.assertEqual(req["url"],"https://www.mlb.com/test")
     def test_invalid_sources(self):
         with self.assertRaises(ValueError):
-            parse("TIPO: tema\\nLINK: http://insecure.com")
+            parse("TIPO: tema"+"\n"+"LINK: http://insecure.com")
         with self.assertRaises(ValueError):
-            parse("TIPO: tema\\nTEXTO_BASE64: invalid!")
+            parse("TIPO: tema"+"\n"+"TEXTO_BASE64: invalid!")
     def test_years_checked_without_single_player(self):
         article={"title":"Hall da Fama","text":"A exposição abriu em 1939. O Hall da Fama tem extensa história."}
         ep={"athlete":"Hall da Fama","title":"O Hall desde 1939","narration":"O Hall tem história desde 1939.","screens":["EXPLICANDO O HALL"],"evidence_paragraphs":["P01"]}
