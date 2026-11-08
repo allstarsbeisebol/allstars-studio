@@ -31,6 +31,45 @@ Estúdio online para solicitar e baixar Reels de beisebol, preservando a identid
 - Imagens enviadas são anexadas à prévia em GitHub Releases e convertidas por `engine/import_art.py`. A arte original aprovada também é utilizada como base das cenas do Reel; a origem é creditada como **imagem fornecida pelo editor**, não como arte gerada pelo Studio.
 - **Atenção à permissão:** para receber upload na Vercel, `ALLSTARS_GITHUB_TOKEN` precisa de **Contents: Read and write** no repositório, além de **Issues: Read and write**. Caso falte, o Studio informa a permissão necessária. O histórico de imagens externas não é salvo como commits Git; fica vinculado ao release da prévia.
 
+## Biblioteca visual privada no Supabase (etapa de integração)
+
+**Projeto:** `allstars-studio` (`alrgqmwnynybawenyugb`), organização `allstarsbeisebol`, região `sa-east-1`. O banco e o bucket `allstars-visual` já existem. O bucket é **privado**, limitado a 5 MB por imagem, com RLS e acesso sem permissões anônimas.
+
+O site mantém os vídeos e prévias no **GitHub Releases**. O Supabase é um segundo acervo, preparado para registrar imagens de forma organizada:
+
+- **Enviadas:** `uploaded_original` para uma imagem pronta enviada pelo editor; `edited_variant` para o recorte e a composição derivados dela.
+- **Criadas:** `generated_external` para uma imagem criada no ChatGPT/Gemini/outra IA e importada manualmente; `generated_studio` para as capas desenhadas pelo compositor do ALLSTARS.
+- **Aprovação e aprendizado:** as imagens não entram no aprendizado automaticamente. Na Biblioteca → **Artes e memória editorial**, avalie uma arte criada, informe nota **4 ou 5**, escreva o que funcionou e clique em **Aprovar como referência**. A preferência é guardada na tabela `allstars_style_memory`, somente se a imagem tiver direitos confirmados. A opção **Não usar mais no aprendizado** desativa esse uso.
+- **Uso de memória:** no início do próximo pedido, o GitHub Actions consulta preferências aprovadas para complementar **o prompt enviado a outras IAs**. Não reutiliza a imagem anterior nem treina um modelo.
+- **Segurança:** imagens privadas somente com URLs assinadas de curta duração, sem chave de serviço no navegador. Permissões administrativas são verificadas por cookie no servidor. Arquivos publicados no GitHub Releases continuam públicos; **não envie imagens pessoais ou confidenciais**.
+
+### Configuração única necessária
+
+A conexão do Supabase já existe no ChatGPT, mas **não transmite automaticamente credenciais para a Vercel ou o GitHub Actions**. Os dois serviços precisam das variáveis protegidas:
+
+| Destino | Variável | Valor (não publicar no código) |
+|---|---|---|
+| Vercel → projeto `allstars-studio` → Environment Variables | `SUPABASE_URL` | `https://alrgqmwnynybawenyugb.supabase.co` |
+| Vercel → projeto `allstars-studio` → Environment Variables | `SUPABASE_SERVICE_ROLE_KEY` | Chave secreta de serviço do projeto ALLSTARS, configurada diretamente na Vercel |
+| GitHub → repositório `allstarsbeisebol/allstars-studio` → Settings → Secrets and variables → Actions | `SUPABASE_URL` | Mesma URL do projeto |
+| GitHub → repositório `allstarsbeisebol/allstars-studio` → Settings → Secrets and variables → Actions | `SUPABASE_SERVICE_ROLE_KEY` | Chave secreta configurada diretamente no GitHub |
+
+Configure na Vercel pelo menos **Production**. Habilite também **Preview** se testar as APIs em prévias de PR. Após configurar variáveis na Vercel, publique novamente a revisão em produção. O GitHub Actions lê suas próprias secrets, não as da Vercel.
+
+**Nunca cole a chave secreta no chat ou em um commit.** Não use a chave pública (publishable/anon) no lugar da credencial do servidor; o bucket continua privado e o acesso direto anônimo permanece bloqueado. As chaves atuais de GitHub e de login do Studio devem ser preservadas.
+
+Quando o Supabase não estiver configurado, as operações antigas de produção continuam pelo GitHub. O site mostra um aviso de biblioteca pendente e não finge ter arquivado imagens. O fluxo do GitHub Actions também ignora a sincronização sem credenciais; nenhuma API paga foi adicionada.
+
+O histórico anterior do GitHub Releases **não será migrado automaticamente** para evitar duplicatas e consumo desnecessário de armazenamento. O arquivo novo começa a se formar nas criações seguintes; uma importação histórica poderá ser feita de forma seletiva após validação. O plano gratuito tem cotas e possibilidade de pausa por inatividade, portanto convém revisar uso de storage e egress periodicamente.
+
+### Arquivos técnicos
+
+- `lib/visual-storage.js`: operações Supabase server-side (PostgREST e Storage), assinatura de links, histórico e avaliações.
+- `api/visual-library.js`, `api/visual-review.js`: rotas autenticadas para navegar e avaliar as artes.
+- `api/art-upload.js`: registra separadamente a origem do arquivo e tenta arquivar cópia no Supabase após aceitar a prévia pelo GitHub.
+- `engine/visual_sync.py`: arquivamento das capas de novos pedidos e marcação após o MP4; consulta as preferências aprovadas.
+- `engine/external_prompt.py`: usa as orientações aprovadas sem copiar artes antigas.
+
 ## Narração e roteiro
 - Gemini ajuda a pesquisar e preparar histórias a partir de assunto ou fontes. Os textos seguem revisão editorial obrigatória; fatos extraídos de uma fonte não são automaticamente verificados por uma segunda fonte.
 - Todo roteiro de pesquisa com Gemini deve ter hook factual de 8 a 14 palavras no começo da narração; o primeiro quadro do Reel dura aproximadamente três segundos.
