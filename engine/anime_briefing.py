@@ -13,13 +13,13 @@ p.add_argument("--output",default="output/briefing_arte_anime.txt")
 args=p.parse_args()
 ep=json.loads(Path(args.episode).read_text(encoding="utf-8"))
 style=json.loads((ROOT/"brand/anime_direction.json").read_text(encoding="utf-8"))
-athlete=str(ep.get("athlete","")).strip()
-if not athlete:raise SystemExit("Atleta ausente no roteiro")
+athlete=str(ep.get("subject") or ep.get("athlete","")).strip()
+if not athlete:raise SystemExit("Assunto ausente no roteiro")
 headline=str(ep.get("title","ALÉM DO JOGO")).strip()
 sources=ep.get("sources",[])
 briefing=f"""ALLSTARS STUDIO — DIREÇÃO DE ARTE ANIME APROVADA
 Série: ALÉM DO JOGO
-Atleta: {athlete}
+Assunto/atleta: {athlete}
 Headline do roteiro: {headline}
 
 FORMATO
