@@ -1,3 +1,5 @@
+> **Atualização — 8 de novembro de 2026:** Este é um guia histórico. O endereço principal e o fluxo atual estão documentados em [README.md](README.md). Use o painel [ALLSTARS Studio na Vercel](https://allstars-studio-brown.vercel.app/) para criar, acompanhar e baixar, sem abrir Issues manualmente. Novos vídeos recebem ilustração contextual inédita; o acabamento anime premium continua em evolução.
+
 # ALLSTARS Studio — uso com dois botões
 
 ## Painel integrado (Vercel)
@@ -33,7 +35,7 @@ A versão integrada exige um **backend seguro**; GitHub Pages sozinho não pode 
 - Adicione `ALLSTARS_ADMIN_PASSWORD` com uma senha forte escolhida por você. Target: **Production**. Tipo: **Encrypted**.
 - Crie um [GitHub fine-grained Personal Access Token](https://github.com/settings/personal-access-tokens/new), limitando o acesso à conta `liuhelpme`, **somente** ao repositório `allstars-studio`, com permissão de repositório **Issues: Read and write** (Metadata: Read já vem por padrão). Cole o token somente na variável `ALLSTARS_GITHUB_TOKEN` da Vercel, target Production, tipo Encrypted. **Nunca** cole o token em chat, Issue, link, arquivo público ou no HTML.
 - Faça um novo deploy de produção após salvar as variáveis. Quando o endpoint `/api/login` responder `{"configured":true}` e a senha permitir login, os dois botões funcionarão no site.
-- Para o modo **Com link**, também é necessário colocar `GEMINI_API_KEY` em [GitHub Actions Secrets](https://github.com/liuhelpme/allstars-studio/settings/secrets/actions). A chave é criada no [Google AI Studio](https://aistudio.google.com/apikey); confira os limites gratuitos e opções de faturamento antes de ativar.
+- Para o modo **Com link**, também é necessário colocar `GEMINI_API_KEY` em [GitHub Actions Secrets](https://github.com/allstarsbeisebol/allstars-studio/settings/secrets/actions). A chave é criada no [Google AI Studio](https://aistudio.google.com/apikey); confira os limites gratuitos e opções de faturamento antes de ativar.
 
 **Não é necessário enviar senha, token ou chave de API ao ChatGPT.** São segredos privados, armazenados apenas nas configurações dos respectivos serviços. O token do GitHub vence de acordo com a duração escolhida; substitua-o na Vercel quando expirar.
 
