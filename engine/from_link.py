@@ -209,7 +209,7 @@ def run():
         articles.append({"title":"Texto fornecido pela administração (não verificado)", "text":pasted,
                          "submitted_url":"texto_colado", "url":"texto_colado",
                          "verification_status":"PENDENTE — TEXTO FORNECIDO PELO USUÁRIO"})
-    combined="\\n\\n".join("[FONTE "+str(i+1)+" — "+item.get("title","Sem título")+"]\\n"+
+    combined="\n\n".join("[FONTE "+str(i+1)+" — "+item.get("title","Sem título")+"]\n"+
                          item.get("text","")[:12000] for i,item in enumerate(articles))
     title=req["subject"] or " | ".join(item.get("title","Fonte") for item in articles)[:220]
     article={"title":title,"text":combined}
