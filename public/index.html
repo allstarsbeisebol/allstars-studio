@@ -422,31 +422,46 @@ async function loadLatest(){
   }
  }catch{$('result-message').textContent='Quando uma produção terminar, seus arquivos aparecerão aqui.';}
 }
-async function loadLibrary(){
- const list=$('library-items'),message=$('library-message');
- if(!authenticated){message.textContent='Faça login para acessar a biblioteca de vídeos.';return;}
- message.textContent='Consultando produções anteriores...';
- try{
-  const data=await request('/api/library');
-  list.replaceChildren();
-  for(const item of data.items||[]){
+let libraryData=[],libraryPage=0,libraryMode='cards';
+function paintLibrary(){
+ const list=$('library-items'),term=$('library-search').value.trim().toLocaleLowerCase('pt-BR'),sort=$('library-sort').value;
+ let results=libraryData.filter(item=>(item.title||'').toLocaleLowerCase('pt-BR').includes(term)||(item.tag||'').toLocaleLowerCase('pt-BR').includes(term));
+ results=[...results].sort((a,b)=>sort==='name'?(a.title||'').localeCompare(b.title||''):sort==='oldest'?new Date(a.date||0)-new Date(b.date||0):new Date(b.date||0)-new Date(a.date||0));
+ const pages=Math.max(1,Math.ceil(results.length/12));libraryPage=Math.min(libraryPage,pages-1);
+ list.replaceChildren();list.classList.toggle('is-list',libraryMode==='list');
+ for(const item of results.slice(libraryPage*12,(libraryPage+1)*12)){
    const card=document.createElement('div');card.className='library-entry';
    const image=document.createElement('img');image.alt='Capa de '+item.title;image.loading='lazy';
-   if(item.assets['capa.png'])image.src=item.assets['capa.png'];else image.hidden=true;
+   if(item.assets?.['capa.png'])image.src=item.assets['capa.png'];else image.hidden=true;
    const body=document.createElement('div');body.className='library-meta';
    const title=document.createElement('strong');title.textContent=item.title;
-   const date=document.createElement('p');date.className='note';date.textContent=item.date?new Date(item.date).toLocaleDateString('pt-BR'):'Produção salva no GitHub';
+   const date=document.createElement('p');date.className='note';date.textContent=item.date?new Date(item.date).toLocaleDateString('pt-BR'):'Produção salva';
    const actions=document.createElement('div');actions.className='library-actions';
-   const open=document.createElement('button');open.className='secondary';open.type='button';open.textContent='Ver arquivos';open.addEventListener('click',()=>{
-    renderFiles(item.assets,item.title);$('downloads').scrollIntoView({behavior:'smooth',block:'start'});
+   const open=document.createElement('button');open.className='secondary';open.type='button';open.textContent='Ver arquivos';open.title='Prévia, narração, roteiro e downloads';open.addEventListener('click',()=>{
+     renderFiles(item.assets,item.title);$('downloads').scrollIntoView({behavior:'smooth',block:'start'});
    });actions.append(open);
-   if(item.assets['allstars_reel.mp4']){
-    const video=document.createElement('a');video.href=item.assets['allstars_reel.mp4'];video.target='_blank';video.rel='noopener';video.className='btn secondary';video.textContent='Baixar vídeo';actions.append(video);
+   if(item.assets?.['allstars_reel.mp4']){
+     const video=document.createElement('a');video.href=item.assets['allstars_reel.mp4'];video.target='_blank';video.rel='noopener';video.className='btn secondary';video.textContent='Baixar MP4';actions.append(video);
    }
    body.append(title,date,actions);card.append(image,body);list.append(card);
-  }
-  message.textContent=(data.items||[]).length+' vídeo(s) na biblioteca.'+(data.has_more?' Mostrando os 100 registros mais recentes.':'');
- }catch(e){message.textContent=e.message;}
+ }
+ $('library-page').textContent=results.length?'Página '+(libraryPage+1)+' de '+pages+' · '+results.length+' vídeo(s)':'Nenhum vídeo encontrado.';
+ $('library-prev').disabled=libraryPage===0;$('library-next').disabled=libraryPage+1>=pages;
+ $('library-message').textContent=libraryData.length+' produção(ões) na biblioteca.'+(libraryData.length>=100?' Exibindo até 100 registros recentes.':'');
+}
+async function loadLibrary(){
+ const message=$('library-message');
+ if(!authenticated){message.textContent='Faça login para acessar a biblioteca.';return;}
+ message.textContent='Consultando vídeos anteriores...';
+ try{const data=await request('/api/library');libraryData=data.items||[];libraryPage=0;paintLibrary();}
+ catch(e){message.textContent=e.message;}
+}
+$('library-search').addEventListener('input',()=>{libraryPage=0;paintLibrary();});
+$('library-sort').addEventListener('change',()=>{libraryPage=0;paintLibrary();});
+$('library-prev').addEventListener('click',()=>{libraryPage=Math.max(0,libraryPage-1);paintLibrary();});
+$('library-next').addEventListener('click',()=>{libraryPage++;paintLibrary();});
+for(const [id,mode] of [['library-cards','cards'],['library-list','list']]){
+ $(id).addEventListener('click',()=>{libraryMode=mode;for(const n of ['cards','list'])$('library-'+n).setAttribute('aria-pressed',String(n===mode));paintLibrary();});
 }
 $('library-refresh').addEventListener('click',loadLibrary);
 init();
