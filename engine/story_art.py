@@ -7,6 +7,7 @@ próprias com prova de origem (id/roteiro/tema), nunca uma capa em cache.
 from __future__ import annotations
 import hashlib, math, random, re
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from scene_direction import is_league_story
 
 NAVY=(8,24,54); BLUE=(49,95,172); RED=(206,35,62); GOLD=(240,192,64)
 WHITE=(247,249,255)
@@ -31,6 +32,7 @@ def lines_for(draw,text,max_width,size=48,limit=2):
     return lines[:limit],f
 
 def classify(ep):
+    if is_league_story(ep):return "liga"
     if ep.get("content_type")=="lista":return "ranking"
     priority=" ".join(str(ep.get(k,"")) for k in ("subject","title")).casefold()
     extra=" ".join(str(ep.get(k,"")) for k in ("hook","narration","art_direction")).casefold()
@@ -74,6 +76,9 @@ def create_context_art(ep,index=0):
                "contrato":("contrato","documento"),"retorno":("superação","superacao","volta")}
     kind=next((name for name,terms in scene_map.items()
                if any(term in style_hint for term in terms)),classify(ep))
+    if kind=="liga":
+        from narrative_league import league_scene
+        return league_scene(ep,index)
     panel=Image.new("RGBA",(W,H),(*NAVY,255))
     d=ImageDraw.Draw(panel,"RGBA")
     # Halo de cor específico por história, sem imagens externas ou elementos reutilizados.
@@ -92,12 +97,8 @@ def create_context_art(ep,index=0):
         x=rng.randrange(-250,1200);y=rng.randrange(0,1100)
         d.line((x,y,x+rng.randint(160,500),y-rng.randint(100,440)),
                fill=(*WHITE,rng.randint(10,38)),width=rng.randint(2,9))
-    # História impressa como quadros autorais, não um poster-base compartilhado.
-    d.rounded_rectangle((86,84,996,955),radius=52,fill=(3,15,36,150),outline=(*GOLD,175),width=4)
-    d.rectangle((98,100,982,120),fill=(*accent,235))
-    for j in range(14):
-        x=105+j*66
-        d.polygon([(x,128),(x+40,128),(x+10,155)],fill=(RED if j%4==0 else WHITE)+(35,))
+    # Apenas a imagem narrativa aqui. Marcas, título e legendas pertencem
+    # ao compositor editorial da capa, nunca a esta camada.
     center=(540,490);x,y=center
     if kind=="arremesso":
         # Zona de strike, bola e curva de trajetória.
@@ -116,13 +117,22 @@ def create_context_art(ep,index=0):
             d.line((x,y,bx,by),fill=(*RED,160),width=10)
         d.ellipse((595,200,895,500),fill=WHITE,outline=(*RED,210),width=15)
         d.arc((635,235,760,465),-80,100,fill=RED,width=11);d.arc((725,235,850,465),80,270,fill=RED,width=11)
-    elif kind in ("legado","ranking"):
-        count=5 if kind=="ranking" else 3
-        for i in range(count):
-            xx=186+i*(720//count);yy=278+i%2*85
-            d.rounded_rectangle((xx,yy,xx+180,yy+305),radius=22,fill=(*BLUE,210),outline=(*GOLD,210),width=5)
-            d.text((xx+44,yy+77),str(i+1).zfill(2),font=font(90),fill=WHITE)
-            d.ellipse((xx+62,yy+202,xx+125,yy+265),fill=(*GOLD,230))
+    elif kind=="ranking":
+        # Números só têm sentido quando a história é explicitamente um ranking.
+        for i in range(5):
+            xx=120+i*176;yy=268+i%2*65
+            d.rounded_rectangle((xx,yy,xx+153,yy+300),radius=20,fill=(*BLUE,205),outline=(*GOLD,180),width=5)
+            d.text((xx+35,yy+83),str(i+1).zfill(2),font=font(75),fill=WHITE)
+    elif kind=="legado":
+        # Legado coletivo: campo e torcida, não uma fileira aleatória de cartões numerados.
+        d.polygon([(120,700),(540,260),(960,700),(540,922)],fill=(46,100,74,135),outline=(*GOLD,155))
+        for edge in (((120,700),(540,260)),((540,260),(960,700)),((960,700),(540,922))):
+            d.line((*edge[0],*edge[1]),fill=(*WHITE,155),width=10)
+        for j in range(9):
+            xx=160+j*92
+            yy=358+int(50*math.sin(j*1.3))
+            d.ellipse((xx,yy,xx+33,yy+33),fill=(*GOLD,180))
+            d.line((xx+16,yy+33,xx+16,yy+132),fill=(*WHITE,95),width=15)
     elif kind=="retorno":
         d.arc((175,180,905,860),35,310,fill=(*GOLD,240),width=45)
         d.polygon([(758,198),(918,215),(849,351)],fill=(*GOLD,250))
@@ -146,18 +156,7 @@ def create_context_art(ep,index=0):
             d.rounded_rectangle((x0,y0,x0+250,y0+390),radius=14,fill=(*WHITE,230),outline=(*GOLD,185),width=6)
             for k in range(5):d.line((x0+33,y0+120+44*k,x0+210,y0+120+44*k),fill=(*NAVY,115),width=10)
             d.rectangle((x0+28,y0+28,x0+207,y0+92),fill=(RED if j%2==0 else BLUE)+(220,))
-    # Contexto textual factual, vindo SOMENTE do episódio, sem inserir estatísticas inventadas.
-    note=year_or_number(" ".join(str(ep.get(k,"")) for k in ("subject","title","hook","narration")))
-    if note:
-        d.rounded_rectangle((100,835,385,940),radius=13,fill=(*GOLD,235))
-        d.text((126,849),note,font=font(63),fill=NAVY)
-    # Cenas diferem entre si e continuam associadas ao tema pesquisado.
-    headline=str(ep.get("hook") if index==0 else (ep.get("screens") or [ep.get("title","")])[min(index-1,len(ep.get("screens") or [1])-1)])
-    short=headline or str(ep.get("title") or ep.get("subject") or "")
-    sentences,f=lines_for(d,short.upper(),830,38,2)
-    d.rounded_rectangle((110,972,968,1144),radius=20,fill=(3,12,29,240),outline=(*accent,190),width=4)
-    for j,line in enumerate(sentences):
-        d.text((145,997+j*54),line,font=f,fill=WHITE)
+    # Sem texto, legendas ou marca nesta camada; o Studio aplica o layout final.
     panel.info["allstars_art_key"]=seed
     return panel
 
