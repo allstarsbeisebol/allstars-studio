@@ -23,7 +23,11 @@ export default async function handler(req,res){
   try{
     // Evitar novos pedidos se já houver produção sob demanda aguardando conclusão.
     const open=await fetch("https://api.github.com/repos/"+REPO+"/issues?state=open&per_page=100",{headers});
-    if(!open.ok)throw Error("Não foi possível consultar pedidos.");
+    if(!open.ok){
+      if(open.status===401||open.status===403)return json(res,503,{error:"A credencial GitHub configurada na Vercel não consegue consultar o novo repositório allstarsbeisebol/allstars-studio ("+open.status+"). Atualize ALLSTARS_GITHUB_TOKEN no projeto ALLSTARS Beisebol e autorize este repositório."});
+      if(open.status===404)return json(res,503,{error:"O token da Vercel não tem acesso ao repositório allstarsbeisebol/allstars-studio. Autorize o novo repositório no GitHub."});
+      throw Error("Não foi possível consultar pedidos.");
+    }
     const items=await open.json();
     if(items.some(item=>!item.pull_request&&typeof item.title==="string"&&item.title.startsWith("[ALLSTARS] Criar novo episódio"))){
       return json(res,409,{error:"Já existe um episódio em produção. Conclua esse pedido antes de iniciar outro."});
@@ -33,7 +37,15 @@ export default async function handler(req,res){
       ?"MODO: link\n"+extras+"LINK: "+source+"\n\nGerar roteiro baseado nessa fonte, respeitando o tipo escolhido e sem inventar fatos."
       :"MODO: auto\n"+extras+"\n"+(subject?"Criar roteiro sobre o assunto indicado; obter fontes verificáveis.":"Gerar próxima história inédita da biblioteca ALLSTARS."));
     const issue=await fetch("https://api.github.com/repos/"+REPO+"/issues",{method:"POST",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({title:mode==="link"?"[ALLSTARS] Criar novo episódio por link":"[ALLSTARS] Criar novo episódio",body})});
-    if(!issue.ok){const status=issue.status;return json(res,502,{error:"Não foi possível iniciar o gerador no GitHub ("+status+")."});}
+    if(!issue.ok){
+      const status=issue.status;
+      if(status===401)return json(res,503,{error:"O token GitHub configurado na Vercel é inválido ou expirou (401). Atualize ALLSTARS_GITHUB_TOKEN."});
+      if(status===403)return json(res,503,{error:"O GitHub recusou criar o episódio (403). Autorize ALLSTARS_GITHUB_TOKEN a escrever Issues no repositório allstarsbeisebol/allstars-studio. No token Fine-grained: Repository access = allstarsbeisebol/allstars-studio; Issues = Read and write."});
+      if(status===404)return json(res,503,{error:"O token GitHub não enxerga o novo repositório allstarsbeisebol/allstars-studio (404). Conceda acesso ao repositório no token."});
+      if(status===422)return json(res,502,{error:"O GitHub rejeitou o conteúdo do pedido (422). Verifique se Issues está habilitado e tente novamente."});
+      if(status===429)return json(res,503,{error:"O GitHub limitou temporariamente as solicitações (429). Tente novamente após a liberação."});
+      return json(res,502,{error:"Não foi possível iniciar o gerador no GitHub ("+status+")."});
+    }
     const data=await issue.json();
     return json(res,202,{accepted:true,request_id:data.number,message:"Produção solicitada. O progresso será atualizado aqui."});
   }catch(e){return json(res,502,{error:"Não foi possível conectar ao gerador. Confira as configurações de integração."});}
