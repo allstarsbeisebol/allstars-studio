@@ -1,4 +1,4 @@
-# Referências para criação por link: ArtCraft, REA, Craft Anything
+# Referências para criação por link: ArtCraft, REA, Craft Anything e Ghidra
 
 Análise realizada para o ALLSTARS Studio, que oferece dois botões: **Gerar automaticamente** e **Gerar a partir de link**. Objetivo: Reel vertical com narração pausada, capa na Bíblia Visual 2026, logomarca oficial, MP4/PNG/MP3 e legendas, sem custos automáticos de APIs pagas.
 
@@ -6,6 +6,7 @@ Análise realizada para o ALLSTARS Studio, que oferece dois botões: **Gerar aut
 
 - [ArtCraft](https://github.com/storytold/artcraft), licença Apache-2.0: referência criativa para composição 2D, cena por camadas, primeiro plano/fundo, enquadramento e edição. O aplicativo usa provedores/modelos que podem exigir créditos/serviços externos; não é um serviço gratuito de renderização 100% automatizada no GitHub Actions. **Não instalar como dependência do servidor.**
 - [REA](https://github.com/morluto/rea), MIT: fornece ferramentas para agentes inspecionarem funcionamento de programas e websites, com resultados rastreáveis. **Não é um extrator especializado em fatos esportivos**, nem deve ser usado para contornar paywalls ou copiar código de terceiros. Aproveitar o conceito de *evidência + limite + procedência* no módulo editorial.
+- [Ghidra — NSA](https://github.com/NationalSecurityAgency/ghidra), licença Apache-2.0: ferramenta de engenharia reversa para inspecionar código compilado, desmontar/descompilar executáveis e automatizar análises via scripts. Pode complementar o **REA** na depuração de componentes binários ou programas fechados, quando houver necessidade legítima de análise. **Não lê notícias esportivas, não gera capas e não monta vídeos**; portanto não incluir em GitHub Actions nem como dependência do ALLSTARS Studio. Sua instalação demanda ambiente próprio (incluindo JDK), e versões específicas podem conter vulnerabilidades descritas nos avisos oficiais.
 - [Craft Anything](https://github.com/storytold/craft-anything), código aberto, estágio alpha: pipeline *Study → Build → Check → Ready*. Útil como inspiração para validar a qualidade do resultado; a versão atual trabalha com agentes de programação e reconstrução de sites/apps, não com roteiros jornalísticos. **Não instalar no pipeline de Reel.**
 
 ## Mudanças já incorporadas em código
