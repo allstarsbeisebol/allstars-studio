@@ -4,7 +4,7 @@ import json, py_compile
 from pathlib import Path
 
 root=Path(__file__).resolve().parents[1]
-scripts=["engine/generate.py","engine/select_episode.py","engine/render.py","engine/speech.py","engine/produce_select.py","engine/publish_manifest.py","engine/poster.py","engine/cover.py","engine/subtitles.py"]
+scripts=["engine/generate.py","engine/select_episode.py","engine/render.py","engine/speech.py","engine/produce_select.py","engine/publish_manifest.py","engine/poster.py","engine/cover.py","engine/subtitles.py","engine/commons_media.py"]
 for script in scripts:
     py_compile.compile(str(root/script), doraise=True)
     print("OK Python:",script)
