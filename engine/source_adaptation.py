@@ -29,11 +29,14 @@ def describe_reference(req):
         sentence=re.split(r"(?<=[.!?])\s+",pasted,maxsplit=1)[0]
         return sentence[:160], "user_text_hint"
     for url in req.get("urls",[]):
-        path=urllib.parse.urlsplit(url).path
+        parsed=urllib.parse.urlsplit(url)
+        path=parsed.path
+        social=(parsed.hostname or "").casefold().removeprefix("www.") in (
+            "instagram.com","facebook.com","m.facebook.com","fb.watch","tiktok.com","youtube.com","youtu.be")
         parts=[urllib.parse.unquote(p) for p in path.split("/") if p]
         for part in reversed(parts):
             clean=re.sub(r"\.(?:html?|php|aspx|pdf)$","",part,flags=re.I).strip()
-            if not clean or OPAQUE.fullmatch(clean):continue
+            if not clean or (OPAQUE.fullmatch(clean) and (social or ("-" not in clean and "_" not in clean))):continue
             stop={"a","o","e","de","do","da","dos","das","em","no","na","um","uma","the","of","and"}
             terms=[w for w in re.split(r"[-_+.]+",clean)
                    if w and w.casefold() not in GENERIC_PATHS and w.casefold() not in stop]
