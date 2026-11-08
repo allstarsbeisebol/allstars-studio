@@ -392,7 +392,7 @@ async function poll(){
  clearTimeout(timer);timer=setTimeout(poll,16000);
 }
 $('refresh').addEventListener('click',poll);
-const labels=[['allstars_reel.mp4','↓ Vídeo MP4'],['capa.png','↓ Capa PNG'],['capa_perfil_3x4.png','↓ Capa perfil 3:4'],['narracao.mp3','↓ Áudio MP3'],['legenda_instagram.txt','↓ Legenda do post'],['legendas.srt','↓ Legendas sincronizadas'],['roteiro.txt','↓ Roteiro'],['fontes.txt','↓ Fontes'],['pesquisa.json','↓ Pesquisa'],['midia.json','↓ Licença e crédito de imagem'],['briefing_arte_anime.txt','↓ Direção de arte anime'],['qualidade_visual.json','↓ Status da arte']];
+const labels=[['allstars_reel.mp4','↓ Vídeo MP4'],['capa.png','↓ Capa PNG'],['capa_perfil_3x4.png','↓ Capa perfil 3:4'],['narracao.mp3','↓ Áudio MP3'],['legenda_instagram.txt','↓ Legenda do post'],['legendas.srt','↓ Legendas sincronizadas'],['roteiro.txt','↓ Roteiro'],['fontes.txt','↓ Fontes'],['pesquisa.json','↓ Pesquisa'],['midia.json','↓ Licença e crédito de imagem'],['briefing_arte_anime.txt','↓ Direção de arte anime'],['qualidade_visual.json','↓ Status da arte'],['storyboard.json','↓ Storyboard contextual']];
 function renderFiles(assets,title){
  $('result-title').textContent=title;
  $('result-message').textContent='Arquivos disponíveis para baixar.';
@@ -415,7 +415,7 @@ async function loadLatest(){
   const files={'allstars_reel.mp4':data.video};
   // Os demais campos são vinculados por seus nomes reais.
   files['capa.png']=data.cover;files['capa_perfil_3x4.png']=data.profile_cover;files['narracao.mp3']=data.audio;files['legenda_instagram.txt']=data.caption;
-  files['roteiro.txt']=data.script;files['fontes.txt']=data.sources;files['pesquisa.json']=data.research;files['midia.json']=data.media;files['briefing_arte_anime.txt']=data.anime_briefing;files['qualidade_visual.json']=data.visual_quality;files['legendas.srt']=data.subtitles;
+  files['roteiro.txt']=data.script;files['fontes.txt']=data.sources;files['pesquisa.json']=data.research;files['midia.json']=data.media;files['briefing_arte_anime.txt']=data.anime_briefing;files['qualidade_visual.json']=data.visual_quality;files['legendas.srt']=data.subtitles;files['storyboard.json']=data.storyboard;
   renderFiles(files,(data.subject||data.athlete||'ALLSTARS')+' — '+data.title);
   if(data.visual_premium===false){
    $('result-message').textContent='Prévia com arte de contingência: ainda não atende ao estilo anime premium aprovado. Revise antes de publicar.';
