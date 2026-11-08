@@ -17,6 +17,10 @@ athlete=str(ep.get("subject") or ep.get("athlete","")).strip()
 if not athlete:raise SystemExit("Assunto ausente no roteiro")
 headline=str(ep.get("title","ALÉM DO JOGO")).strip()
 sources=ep.get("sources",[])
+is_individual=ep.get("content_type","atleta")=="atleta"
+scene_direction=("Criar personagem de anime original adulto em ação coerente com a história; nunca inventar traços reais de uma pessoa sem referência."
+                 if is_individual else
+                 "Criar cena narrativa anime original e específica para este assunto: estádio, estádio histórico ilustrado, bolas, equipamentos, atletas genéricos não identificáveis ou diagramas esportivos estilizados, conforme o contexto. Nunca inserir jogador real aleatório nem repetir o rosto de Jim Abbott.")
 briefing=f"""ALLSTARS STUDIO — DIREÇÃO DE ARTE ANIME APROVADA
 Série: ALÉM DO JOGO
 Assunto/atleta: {athlete}
@@ -34,7 +38,7 @@ Personagem de anime original adulto, ação de beisebol anatomicamente correta,
 expressão determinada, sombras cel-shading refinadas, estádio noturno
 com refletores, profundidade, pinceladas esportivas azul/vermelho,
 tipografia grande e legível. Não imitar personagens de séries existentes.
-Evitar o visual de desenho infantil, boneco geométrico, silhueta e
+Adotar a linguagem de direção, luz, texturas e enquadramento da prévia Jim Abbott aprovada,\nsem copiar sua composição ou imagem em outras histórias.\nEvitar o visual de desenho infantil, boneco geométrico, silhueta e
 posições impossíveis. NÃO inventar características físicas específicas.
 
 VERIFICAÇÃO HISTÓRICA
