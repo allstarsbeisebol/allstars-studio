@@ -173,6 +173,19 @@ def run():
     url=found.group(1).strip()
     article=read_page(url)
     text,title=article['text'],article['title']
+    # Uma página de lista/índice não constitui narrativa individual do atleta.
+    # Não selecionar um integrante ao acaso nem apresentar biografia inventada.
+    slug=urllib.parse.urlsplit(url).path.casefold()
+    broad_collection=(
+        "todos-miembros" in slug or "all-members" in slug
+        or "lista-completa" in slug or "full-list" in slug
+    )
+    if broad_collection:
+        raise ValueError(
+            "Este link é uma lista coletiva do Hall da Fama, não uma história "
+            "individual. Para criar um Reel ALÉM DO JOGO com fatos confiáveis, "
+            "cole uma matéria ou biografia de um atleta específico."
+        )
     ep=gemini(text,title,url)
     check=verify_reference(article,ep)
     history=json.loads((ROOT/"data/history.json").read_text(encoding="utf-8"))
