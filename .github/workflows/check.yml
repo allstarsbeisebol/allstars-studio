@@ -33,6 +33,9 @@ jobs:
           Path('/tmp/allstars-ui.mjs').write_text(script,encoding='utf-8')
           PY
           node --check /tmp/allstars-ui.mjs
+      - name: Compilar sintaxe Python dos módulos de produção por link
+        run: |
+          python -m py_compile engine/from_link.py engine/request_select.py engine/article_extract.py engine/editorial_guard.py
       - name: Validar extração de matérias e preservação de fontes
         run: python -m unittest discover -s tests -p 'test_article_extract.py' -v
       - name: Validar consistência histórica dos roteiros por link
