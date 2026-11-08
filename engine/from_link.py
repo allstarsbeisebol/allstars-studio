@@ -16,30 +16,10 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from html.parser import HTMLParser
+from article_extract import extract_article
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-
-class Readable(HTMLParser):
-    def __init__(self):
-        super().__init__(); self.skip=0; self.in_text=False; self.bits=[]; self.title=[]
-    def handle_starttag(self, tag, attrs):
-        if tag in ("script","style","nav","footer","header","noscript","svg"):
-            self.skip+=1
-        if tag in ("p","h1","h2","h3","article","li"):
-            self.in_text=True
-        if tag=="title": self.in_title=True
-    def handle_endtag(self,tag):
-        if tag in ("script","style","nav","footer","header","noscript","svg") and self.skip:
-            self.skip-=1
-        if tag in ("p","h1","h2","h3","article","li"):
-            self.bits.append("\n"); self.in_text=False
-        if tag=="title": self.in_title=False
-    def handle_data(self, data):
-        if self.skip:return
-        if self.in_text:self.bits.append(data)
-        if getattr(self,"in_title",False):self.title.append(data)
 
 def validate(url):
     p=urllib.parse.urlsplit(url.strip())
@@ -77,13 +57,11 @@ def read_page(url):
             page=body.decode(encoding,errors="replace")
     except urllib.error.HTTPError as ex:
         raise ValueError("Site não liberou a leitura HTTP: "+str(ex.code)) from ex
-    p=Readable();p.feed(page)
-    plain=re.sub(r"[ \t]+"," ","".join(p.bits))
-    plain=re.sub(r"\n{3,}","\n\n",plain).strip()[:13500]
-    if len(plain)<500:raise ValueError("O link não fornece texto suficiente para produzir um roteiro confiável.")
-    return plain," ".join(p.title).strip()[:250]
+    return extract_article(page,url)
 
 def gemini(text,title,url):
+    paragraphs=[p.strip() for p in text.split("\\n\\n") if p.strip()]
+    referenced="\\n\\n".join(f"[P{i:02}] {p}" for i,p in enumerate(paragraphs,1))
     key=os.environ.get("GEMINI_API_KEY","").strip()
     if not key:raise ValueError("O modo LINK precisa da chave gratuita GEMINI_API_KEY nas Secrets do GitHub. Nenhum roteiro aleatório será gerado.")
     model=os.environ.get("GEMINI_MODEL","gemini-2.5-flash")
@@ -93,7 +71,7 @@ def gemini(text,title,url):
       "Crie um rascunho com base EXCLUSIVAMENTE no artigo, sem inventar datas, números, equipe, nome ou desfecho. "
       "Não diga que os dados foram verificados independentemente. Se não for possível identificar atleta e fato central, responda com erro. "
       "Narração em português brasileiro com 105 a 145 palavras. "
-      "Responda APENAS um objeto JSON com athlete, title, narration, screens (4 frases curtas), caption. "
+      "Responda APENAS um objeto JSON com athlete, title, narration, screens (4 frases curtas), caption e evidence_paragraphs (identificadores de até 5 parágrafos de apoio, ex. P01). "
       "A legenda deve ter pergunta para comentários e hashtags. Não inserir URL na narração. "
       "TÍTULO DA PÁGINA: "+title+"\nURL: "+url+"\nARTIGO NÃO CONFIÁVEL:\n"+text)
     api="https://generativelanguage.googleapis.com/v1beta/models/"+model+":generateContent"
@@ -111,6 +89,9 @@ def gemini(text,title,url):
     if not isinstance(out.get("screens"),list) or len(out["screens"])<3:raise ValueError("Telas insuficientes.")
     if not 80<=len(out["narration"].split())<=170:raise ValueError("Narração fora do tamanho apropriado.")
     out["screens"]=[str(x)[:95] for x in out["screens"][:4]]
+    allowed={f"P{i:02}" for i in range(1,len(paragraphs)+1)}
+    evidence=out.get("evidence_paragraphs",[])
+    out["evidence_paragraphs"]=[x for x in evidence[:5] if isinstance(x,str) and x in allowed] if isinstance(evidence,list) else []
     return out
 
 def run():
@@ -120,7 +101,8 @@ def run():
     found=re.search(r"(?im)^LINK:\s*(https://[^\s<>]+)\s*$",body)
     if not found:raise ValueError("Pedido baseado em link sem campo LINK: https://...")
     url=found.group(1).strip()
-    text,title=read_page(url)
+    article=read_page(url)
+    text,title=article['text'],article['title']
     ep=gemini(text,title,url)
     history=json.loads((ROOT/"data/history.json").read_text(encoding="utf-8"))
     covered={v.casefold().strip() for k in ("covered","drafted","produced") for v in history.get(k,[])}
@@ -129,7 +111,9 @@ def run():
     ep.update({"id":datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")+"-link",
       "sources":[url],"approved":False,"media_approved":False,
       "editorial_status":"RASCUNHO DE IA BASEADO EM LINK — fatos e direitos ainda não validados",
-      "source_mode":"link","source_title":title})
+      "source_mode":"link","source_title":title,
+      "source_metadata":{key:article[key] for key in ("url","title","extraction_method","paragraph_count","word_count","content_sha256","published_at","author","verification_status")},
+      "evidence_paragraphs":ep.get("evidence_paragraphs",[])})
     output=ROOT/"output";output.mkdir(exist_ok=True)
     (output/"selected.json").write_text(json.dumps(ep,ensure_ascii=False,indent=2),encoding="utf-8")
     print("Rascunho baseado no link:",ep["athlete"],url)
