@@ -13,8 +13,11 @@ def parse(body):
     if kind not in TYPES:raise ValueError("Tipo de conteúdo inválido.")
     subject=fields.get("ASSUNTO","")
     if len(subject)>160 or any(ord(ch)<32 for ch in subject):raise ValueError("Assunto inválido: máximo 160 caracteres.")
-    if len(urls)>5 or any(not u.startswith("https://") or len(u)>1900 for u in urls) or len(set(urls))!=len(urls):
-        raise ValueError("Informe até 5 links HTTPS públicos diferentes.")
+    if any(not u.startswith("https://") or len(u)>1900 for u in urls):
+        raise ValueError("As referências precisam ser URLs HTTPS públicas.")
+    urls=list(dict.fromkeys(urls))
+    if len("\n".join(urls))>24000:
+        raise ValueError("As referências excedem 24 mil caracteres. Divida o projeto em duas solicitações.")
     encoded=fields.get("TEXTO_BASE64","")
     try:
         text=base64.b64decode(encoded,validate=True).decode("utf-8") if encoded else ""
