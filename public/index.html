@@ -3,6 +3,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
+#reference-links-text{font-family:ui-monospace,monospace;line-height:1.65;min-height:132px}
+#draft-status{margin:7px 0}
+
 :root{color-scheme:dark;--navy:#1A3566;--blue:#315FAC;--red:#CE233E;--gold:#F0C040;--fg:#fff;--muted:#c1cee6;font-family:Barlow,Arial,sans-serif}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 90% -20%,#315FAC88,transparent 50%),#071632;color:var(--fg)}button,input,select{font:inherit}button,a{touch-action:manipulation}a{color:var(--gold)}
 header{background:var(--navy);border-bottom:3px solid var(--red);padding:18px 22px}.wrap{max-width:980px;margin:auto}.brand{font-family:'Barlow Condensed',Impact,sans-serif;font-weight:900;letter-spacing:1px;font-size:28px}.brand span{color:var(--gold)}.sub{font-size:12px;color:#b9ccec;letter-spacing:1.3px}
@@ -60,10 +63,8 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
     </div>
     <div class="wide">
       <label>2. Você tem links que ajudam a contar essa história? <span class="note">(opcional)</span></label>
-      <div id="reference-links" class="link-list">
-        <div class="link-row"><input class="reference-url" type="url" inputmode="url" aria-label="Link de referência 1" placeholder="https://www.mlb.com/..."></div>
-      </div>
-      <button id="add-link" class="secondary" type="button" style="margin-top:10px">+ Adicionar outro link</button>
+      <textarea id="reference-links-text" rows="5" spellcheck="false" aria-describedby="reference-count" placeholder="Cole vários links ao mesmo tempo, separados por espaços ou linhas. O Studio identifica e remove duplicados."></textarea>
+      <p class="field-help" id="reference-count" role="status">0 links identificados. Cole tudo de uma vez.</p>
       <p class="note">Pode incluir notícias e publicações públicas do Instagram ou Facebook. Se a rede social impedir a leitura automática, cole a legenda abaixo. Conteúdo público não autoriza reutilizar fotos e vídeos de terceiros.</p>
     </div>
     <div class="wide">
@@ -72,6 +73,8 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
       <p class="note">Atenção: as referências enviadas entram em pedidos públicos no GitHub. Cole somente conteúdo público; não inclua dados pessoais, senhas ou informações confidenciais. Textos de terceiros devem ser usados como referência, não copiados na íntegra para publicação.</p>
     </div>
     <p id="form-hint" class="notice" aria-live="polite">Sem assunto nem referência, o Studio escolhe uma história da biblioteca.</p>
+    <p id="draft-status" class="field-help" role="status">Seu rascunho será salvo automaticamente neste navegador.</p>
+    <button id="clear-form" type="button" class="outline">Limpar formulário</button>
     <div class="wide step-actions">
       <h3>3. Conferir antes de produzir</h3>
       <p class="field-help">Ao continuar, nada será produzido ainda. Você verá um resumo do pedido e poderá voltar para corrigir.</p>
@@ -82,6 +85,7 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 <section class="panel hidden" id="confirm-panel" tabindex="-1" aria-labelledby="confirm-title">
   <div class="eyebrow">ETAPA FINAL · CONFIRA SEU PEDIDO</div>
   <h2 id="confirm-title">Está tudo certo?</h2>
+  <p class="field-help">Cada Reel começa com um gancho histórico nos três primeiros segundos e usa uma direção de arte vinculada ao assunto. O material continua sujeito à revisão editorial.</p>
   <p class="muted">Leia o resumo abaixo antes de começar. Depois de confirmar, o Studio enviará o pedido e iniciará a produção. Isso pode levar alguns minutos e não há botão para cancelar uma produção já iniciada.</p>
   <div id="confirm-summary" class="order-summary" aria-live="polite"></div>
   <div class="notice"><strong>Antes de confirmar:</strong> o pedido e as referências fornecidas ficam registrados no GitHub público. Não envie informações privadas. O resultado será uma prévia para sua revisão, não uma postagem automática nas redes sociais.</div>
@@ -129,6 +133,21 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 import {PREF_KEY,browserAvailable,alertsEnabled,enableAlerts,announceIssue} from './notify.js';
 const $=id=>document.getElementById(id);
 let authenticated=false,configured=false,pending=Number(localStorage.getItem('allstars-pending-issue')||0),timer=null;
+const DRAFT_KEY='allstars-studio-draft-v4';
+function saveDraft(){
+ const value={content_type:$('content-type').value,subject:$('subject').value,urls:$('reference-links-text').value,reference_text:$('reference-text').value};
+ try{localStorage.setItem(DRAFT_KEY,JSON.stringify(value));$('draft-status').textContent='Rascunho salvo neste navegador.';}catch{}
+}
+function restoreDraft(){
+ try{
+  const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');if(!d||typeof d!=='object')return;
+  for(const [key,id] of [['subject','subject'],['urls','reference-links-text'],['reference_text','reference-text']])if(typeof d[key]==='string')$(id).value=d[key];
+  if(['auto','atleta','tema','noticia','lista','explicativo'].includes(d.content_type))$('content-type').value=d.content_type;
+  $('draft-status').textContent='Rascunho recuperado.';updateFormHint();explainType();
+ }catch{}
+}
+function clearDraft(){localStorage.removeItem(DRAFT_KEY);$('draft-status').textContent='Pedido enviado. Rascunho local limpo.';}
+
 const ordinaryTitle=document.title;
 let toastTarget='downloads';
 function showToast(kind,title,message,target='downloads'){
@@ -219,7 +238,11 @@ $('login-form').addEventListener('submit',async event=>{
   await loadLibrary();
  }catch(e){$('login-message').textContent=e.message;}
 });
-function getReferences(){return [...document.querySelectorAll('.reference-url')].map(el=>el.value.trim()).filter(Boolean);}
+function getReferences(){
+ const raw=$('reference-links-text').value;
+ const matches=raw.match(/https:\/\/[^\s<>"'\u0000-\u001F]+/gi)||[];
+ return [...new Set(matches.map(x=>x.replace(/[),;.\]}]+$/g,'').trim()).filter(Boolean))];
+}
 const explanations={
  auto:'**Automático (recomendado para começar):** o Studio escolhe uma história já cadastrada. Vantagem: você não precisa pesquisar. Limitação: não escolhe o assunto.',
  atleta:'**Atleta:** cria um vídeo sobre a trajetória ou o feito de um jogador. Vantagem: foco numa pessoa. Limitação: a história precisa ter fontes confiáveis.',
@@ -237,7 +260,10 @@ function showFormProblem(message){
  $('options').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function validateDraft(){
+ const rawLinks=$('reference-links-text').value;
  const urls=getReferences(),reference_text=$('reference-text').value.trim(),subject=$('subject').value.trim(),content_type=$('content-type').value;
+ if(rawLinks.trim()&&!urls.length){showFormProblem('Não encontrei URLs HTTPS no campo de links.');return null;}
+ if(urls.join('\n').length>24000){showFormProblem('As referências excedem 24 mil caracteres. Separe em dois projetos.');return null;}
  for(const url of urls){
   try{const u=new URL(url);if(u.protocol!=='https:'||u.username||u.password)throw Error('invalid');}
   catch{showFormProblem('Corrija um link: ele precisa começar com https:// e não pode exigir usuário ou senha no endereço.');return null;}
@@ -270,18 +296,17 @@ function updateFormHint(){
   'O Studio cruzará suas referências. Caso a rede social bloqueie a leitura, cole a legenda ou o texto da postagem neste campo. Confira os fatos antes de publicar.':
   subject?'O Studio pesquisará o assunto e exigirá referências públicas antes de montar o vídeo.':
   'Sem assunto nem referências, o Studio escolhe uma história da biblioteca.';
- $('add-link').disabled=document.querySelectorAll('.reference-url').length>=5;
+ $('reference-count').textContent=urls.length+' link(s) identificados automaticamente, sem duplicados.';
 }
-$('add-link').addEventListener('click',()=>{
- const list=$('reference-links');if(list.children.length>=5)return;
- const row=document.createElement('div');row.className='link-row';
- const input=document.createElement('input');input.type='url';input.inputMode='url';input.className='reference-url';input.placeholder='https://...';input.setAttribute('aria-label','Link de referência '+(list.children.length+1));
- const remove=document.createElement('button');remove.type='button';remove.className='secondary';remove.textContent='Remover';remove.addEventListener('click',()=>{row.remove();updateFormHint();});
- row.append(input,remove);list.append(row);input.focus();updateFormHint();
-});
-$('reference-links').addEventListener('input',updateFormHint);
-for(const id of ['content-type','subject','reference-text'])$(id).addEventListener('input',()=>{updateFormHint();if(id==='content-type')explainType();$('confirm-panel').classList.add('hidden');});
+$('reference-links-text').addEventListener('input',()=>{updateFormHint();saveDraft();$('confirm-panel').classList.add('hidden');});
+for(const id of ['content-type','subject','reference-text'])$(id).addEventListener('input',()=>{updateFormHint();if(id==='content-type')explainType();$('confirm-panel').classList.add('hidden');saveDraft();});
 explainType();
+restoreDraft();
+$('clear-form').addEventListener('click',()=>{
+ if(!confirm('Limpar o formulário? O rascunho salvo neste navegador será apagado.'))return;
+ for(const id of ['subject','reference-links-text','reference-text'])$(id).value='';
+ $('content-type').value='auto';localStorage.removeItem(DRAFT_KEY);$('confirm-panel').classList.add('hidden');$('draft-status').textContent='Formulário limpo.';updateFormHint();explainType();
+});
 async function create(){
  $('completion-toast').classList.add('hidden');
  document.title=ordinaryTitle;
@@ -299,7 +324,7 @@ async function create(){
   const data=await request('/api/generate',{method:'POST',body:JSON.stringify({
    mode:urls.length||reference_text?'link':'auto',content_type,subject,urls,reference_text
   })});
-  pending=data.request_id;localStorage.setItem('allstars-pending-issue',String(pending));
+  pending=data.request_id;localStorage.setItem('allstars-pending-issue',String(pending));clearDraft();
   $('progress-stage').textContent='EM PRODUÇÃO';
   $('progress-title').textContent='Vídeo solicitado';
   await poll();
