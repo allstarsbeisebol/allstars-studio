@@ -8,7 +8,7 @@ permissions:
   contents: write
   issues: write
 concurrency:
-  group: allstars-issue-\${{ github.event.issue.number }}
+  group: allstars-issue-${{ github.event.issue.number }}
   cancel-in-progress: false
 jobs:
   art-preview:
@@ -24,8 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 22
     env:
-      ISSUE_ID: \${{ github.event.issue.number }}
-      GH_TOKEN: \${{ github.token }}
+      ISSUE_ID: ${{ github.event.issue.number }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -33,16 +33,16 @@ jobs:
           python-version: "3.11"
       - name: Criar roteiro ou recuperar versão para ajuste
         env:
-          GEMINI_API_KEY: \${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: gemini-3.5-flash-lite
-          ALLSTARS_ISSUE_ID: \${{ github.event.issue.number }}
+          ALLSTARS_ISSUE_ID: ${{ github.event.issue.number }}
         run: |
           mkdir -p output
-          if [ "\${{ github.event_name }}" = "issues" ]; then
+          if [ "${{ github.event_name }}" = "issues" ]; then
             python engine/request_select.py
             python engine/art_gate.py prepare
           else
-            gh release download "preview-issue-\${ISSUE_ID}" --repo "\${{ github.repository }}" \
+            gh release download "preview-issue-${ISSUE_ID}" --repo "${{ github.repository }}" \
               --pattern selected.json --dir output --clobber
             python engine/art_gate.py revise
           fi
@@ -63,15 +63,15 @@ jobs:
       - name: Publicar capa e roteiro no espaço de revisão do pedido
         run: |
           set -eu
-          tag="preview-issue-\${ISSUE_ID}"
-          if gh release view "$tag" --repo "\${{ github.repository }}" >/dev/null 2>&1; then
+          tag="preview-issue-${ISSUE_ID}"
+          if gh release view "$tag" --repo "${{ github.repository }}" >/dev/null 2>&1; then
             gh release upload "$tag" \
               output/selected.json#selected.json \
               output/capa.png#capa.png \
               output/capa_perfil_3x4.png#capa_perfil_3x4.png \
               output/briefing_arte_anime.txt#briefing_arte_anime.txt \
               output/qualidade_visual.json#qualidade_visual.json \
-              --repo "\${{ github.repository }}" --clobber
+              --repo "${{ github.repository }}" --clobber
           else
             gh release create "$tag" \
               output/selected.json#selected.json \
@@ -79,14 +79,14 @@ jobs:
               output/capa_perfil_3x4.png#capa_perfil_3x4.png \
               output/briefing_arte_anime.txt#briefing_arte_anime.txt \
               output/qualidade_visual.json#qualidade_visual.json \
-              --repo "\${{ github.repository }}" \
-              --title "ALLSTARS · Prévia da capa · pedido #\${ISSUE_ID}" \
+              --repo "${{ github.repository }}" \
+              --title "ALLSTARS · Prévia da capa · pedido #${ISSUE_ID}" \
               --notes "Etapa de prévia; não é vídeo final. Imagem contextual inédita, sujeito a aprovação editorial." \
               --prerelease --latest=false
           fi
           revision="$(python -c 'import json; print(json.load(open("output/selected.json"))["art_revision"])')"
-          gh issue comment "$ISSUE_ID" --repo "\${{ github.repository }}" \
-             --body "ALLSTARS_ART_READY REVISION=\${revision} TAG=\${tag}"
+          gh issue comment "$ISSUE_ID" --repo "${{ github.repository }}" \
+             --body "ALLSTARS_ART_READY REVISION=${revision} TAG=${tag}"
       - name: Informar erro na etapa visual sem iniciar o vídeo
         if: failure()
         run: |
@@ -96,8 +96,8 @@ jobs:
           else
             reason="A prévia da capa não pôde ser preparada. Veja os detalhes da execução."
           fi
-          gh issue comment "$ISSUE_ID" --repo "\${{ github.repository }}" \
-             --body "ALLSTARS_ART_FAILED: \${reason} Registro: https://github.com/\${{ github.repository }}/actions/runs/\${{ github.run_id }}"
-          if [ "\${{ github.event_name }}" = "issues" ]; then
-            gh issue close "$ISSUE_ID" --repo "\${{ github.repository }}" --reason "not planned"
+          gh issue comment "$ISSUE_ID" --repo "${{ github.repository }}" \
+             --body "ALLSTARS_ART_FAILED: ${reason} Registro: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            gh issue close "$ISSUE_ID" --repo "${{ github.repository }}" --reason "not planned"
           fi
