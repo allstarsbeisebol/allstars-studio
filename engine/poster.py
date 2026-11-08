@@ -213,10 +213,7 @@ def poster(episode,headline=None,index=0,total=1):
     paint(d,22,145,NAVY,10+index)
     d.line((0,105,110,105),fill=GOLD,width=8)
     d.text((128,38),"ALÉM DO JOGO",font=face(76),fill=WHITE,stroke_width=1,stroke_fill=INK)
-    number=episode.get("episode_number")
-    try:num=int(number)
-    except (ValueError,TypeError):num=0
-    tag=f"EP. {num:02d}" if num else "ALLSTARS"
+    tag="ALLSTARS"
     ft=face(43)
     right=W-d.textbbox((0,0),tag,font=ft)[2]-48
     d.text((right,68),tag,font=ft,fill=GOLD)
