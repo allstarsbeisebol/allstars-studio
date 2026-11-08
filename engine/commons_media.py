@@ -129,7 +129,7 @@ def main():
     episode=json.loads(path.read_text(encoding="utf-8"))
     root=Path(__file__).resolve().parents[1]
     from anime_assets import find_approved_anime
-    anime=find_approved_anime(episode)
+    anime=find_approved_anime(episode) if episode.get("content_type","atleta")=="atleta" else None
     if anime is not None:
         info=anime[1]
         result={
@@ -143,7 +143,7 @@ def main():
         }
     else:
         try:
-            result=acquire(episode,root)
+            result=acquire(episode,root) if episode.get("content_type","atleta")=="atleta" else {"status":"not_applicable","reason":"Episódio temático: não vincular imagem a um único atleta."}
         except Exception as error:
             # Uma falha de pesquisa não deve impedir a produção do Reel.
             result={"status":"unavailable","reason":str(error)[:160]}
