@@ -41,7 +41,10 @@ export default async function handler(req,res){
   const ready=String(comments[readyIndex].body).match(/REVISION=(\d+) TAG=preview-issue-(\d+)/);
   if(Number(ready[1])!==revision||ready[2]!==id)
     return json(res,409,{error:"A imagem foi atualizada. Revise a versão mais recente antes de agir."});
-  if(comments.slice(readyIndex+1).some(c=>/^(ALLSTARS_ART_CHANGE|ALLSTARS_ART_APPROVE)/.test(String(c.body||""))))
+  const subsequent=comments.slice(readyIndex+1);
+  const lastCommand=subsequent.findLastIndex(c=>/^(ALLSTARS_ART_CHANGE|ALLSTARS_ART_APPROVE)/.test(String(c.body||"")));
+  const lastFailed=subsequent.findLastIndex(c=>String(c.body||"").startsWith("ALLSTARS_ART_FAILED:"));
+  if(lastCommand>=0&&lastFailed<lastCommand)
     return json(res,409,{error:"Já existe uma ação solicitada para esta versão. Aguarde a atualização."});
   const body=action==="approve"
    ?"ALLSTARS_ART_APPROVE\nREVISION: "+revision
