@@ -87,6 +87,7 @@ jobs:
             output/midia.json
             output/briefing_arte_anime.txt
             output/qualidade_visual.json
+            output/storyboard.json
             output/legendas.srt
             output/legendas_metadata.json
           retention-days: 30
@@ -107,6 +108,7 @@ jobs:
             output/midia.json#midia.json \
             output/briefing_arte_anime.txt#briefing_arte_anime.txt \
             output/qualidade_visual.json#qualidade_visual.json \
+            output/storyboard.json#storyboard.json \
             output/legendas.srt#legendas.srt \
             output/legendas_metadata.json#legendas_metadata.json \
             --repo "${{ github.repository }}" \
@@ -143,5 +145,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue comment "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --body "Vídeo gerado. Baixe pelo site https://allstarsbeisebol.github.io/allstars-studio/#downloads ou consulte https://github.com/allstarsbeisebol/allstars-studio/releases/tag/episodio-${{ github.run_number }}. Prévia editorial: confira os fatos e direitos antes da publicação."
+          gh issue comment "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --body "Vídeo gerado. Baixe pelo site https://allstars-studio-brown.vercel.app/#downloads ou consulte https://github.com/allstarsbeisebol/allstars-studio/releases/tag/episodio-${{ github.run_number }}. Prévia editorial: confira os fatos e direitos antes da publicação."
           gh issue close "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --reason completed

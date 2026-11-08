@@ -3,6 +3,31 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
+/* Navegação e biblioteca otimizadas para desktop e mobile */
+.studio-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.overview-item{background:#10284e;border:1px solid #4b6491;border-radius:12px;padding:15px}
+.overview-item strong{font-size:20px;display:block;color:#F0C040;margin-top:6px}
+@media(max-width:680px){.studio-overview{grid-template-columns:1fr}}
+.section-nav{position:sticky;top:0;z-index:20;display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;padding:10px 14px;background:rgba(7,22,50,.96);border-bottom:1px solid #486899;white-space:nowrap}
+.section-nav a{padding:8px 13px;border-radius:12px;border:1px solid #617fb1;color:#e7f1ff;text-decoration:none;font-weight:700;font-size:14px}
+.section-nav a:hover,.section-nav a:focus-visible{border-color:#F0C040;color:#F0C040}
+.library-tools{display:grid;grid-template-columns:1fr minmax(160px,220px) auto;align-items:end;gap:12px;margin:18px 0}
+.library-view{display:flex;gap:8px;margin-bottom:4px}
+#extra-reference{border:1px solid #49648e;border-radius:12px;padding:16px;margin:12px 0;background:#0c2243}
+#extra-reference summary{cursor:pointer;font-weight:700;color:#F0C040}
+.library-more{margin-top:12px;padding:8px;border:1px solid #49648e;border-radius:10px}
+.library-more summary{cursor:pointer;font-size:14px;font-weight:700}
+.library-more .links{padding:8px 2px;gap:10px}
+.library-pagination{display:flex;justify-content:center;align-items:center;gap:12px;padding:18px 0}
+.library-grid.is-list{display:block}
+.library-grid.is-list .library-entry{display:grid;grid-template-columns:95px 1fr;gap:15px;margin-bottom:12px}
+.library-grid.is-list .library-entry img{width:95px;height:125px;object-fit:cover}
+#reference-links-text{font-family:ui-monospace,monospace;line-height:1.6;min-height:132px}
+@media(max-width:680px){.library-tools{grid-template-columns:1fr}.library-grid.is-list .library-entry{grid-template-columns:75px 1fr}.library-grid.is-list .library-entry img{width:75px;height:100px}}
+
+#reference-links-text{font-family:ui-monospace,monospace;line-height:1.65;min-height:132px}
+#draft-status{margin:7px 0}
+
 :root{color-scheme:dark;--navy:#1A3566;--blue:#315FAC;--red:#CE233E;--gold:#F0C040;--fg:#fff;--muted:#c1cee6;font-family:Barlow,Arial,sans-serif}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 90% -20%,#315FAC88,transparent 50%),#071632;color:var(--fg)}button,input,select{font:inherit}button,a{touch-action:manipulation}a{color:var(--gold)}
 header{background:var(--navy);border-bottom:3px solid var(--red);padding:18px 22px}.wrap{max-width:980px;margin:auto}.brand{font-family:'Barlow Condensed',Impact,sans-serif;font-weight:900;letter-spacing:1px;font-size:28px}.brand span{color:var(--gold)}.sub{font-size:12px;color:#b9ccec;letter-spacing:1.3px}
@@ -26,8 +51,16 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 @media(max-width:680px){.cards,.result{grid-template-columns:1fr}.panel{padding:19px}.option{min-height:225px}h1{font-size:46px}.links a{width:100%}.result img{max-width:230px;margin:auto}.cards button{width:100%}}
 </style></head><body>
 <header><div class="wrap"><div class="brand">⚾ ALLSTARS <span>STUDIO</span></div><div class="sub">ALÉM DO JOGO · HISTÓRIAS REAIS DO BEISEBOL</div></div></header>
+<nav class="section-nav" aria-label="Navegação no Studio">
+  <a href="#options">Criar vídeo</a><a href="#progress">Andamento</a><a href="#downloads">Último Reel</a><a href="#library">Biblioteca</a><a href="#alert-settings">Avisos</a>
+</nav>
 <main>
 <section class="hero"><div class="eyebrow">ESTÚDIO DE PRODUÇÃO</div><h1>Seu próximo Reel.<br><span style="color:var(--gold)">Você escolhe quando criar.</span></h1><p class="muted">Selecione uma das duas opções. O estúdio prepara a narração, o vídeo vertical, a capa e a legenda para você baixar. Nenhuma programação semanal obrigatória.</p></section>
+<section id="overview" class="studio-overview" aria-label="Visão geral">
+ <div class="overview-item"><span class="note">Última produção</span><strong id="overview-last">Consultando...</strong><span class="note">Vídeo disponível para revisão</span></div>
+ <div class="overview-item"><span class="note">Pedido em andamento</span><strong id="overview-pending">Nenhum</strong><a class="note" href="#progress">Ver acompanhamento</a></div>
+ <div class="overview-item"><span class="note">Minha biblioteca</span><strong id="overview-library">Faça login</strong><a class="note" href="#library">Buscar produções</a></div>
+</section>
 <section class="panel login hidden" id="login"><h2>Entrar no estúdio</h2><p class="muted">Acesso de produção reservado à administração ALLSTARS. Entre uma vez neste navegador.</p>
 <form id="login-form"><label for="password">Senha do estúdio</label><input id="password" type="password" autocomplete="current-password" required maxlength="300" placeholder="Sua senha de acesso"><button style="width:100%;margin-top:15px" type="submit">Entrar e continuar</button></form><p id="login-message" role="status" class="note"></p></section>
 <section id="setup" class="panel hidden"><h2>Conexão inicial pendente</h2><p class="muted">O aplicativo visual já está preparado. Falta configurar as credenciais seguras do serviço de produção uma única vez. Nenhum dado secreto deve ser colocado no código ou na página pública.</p><a href="https://vercel.com/allstars-beisebol/allstars-studio/settings/environment-variables" target="_blank" rel="noopener" class="btn secondary">Abrir configuração segura</a></section>
@@ -60,18 +93,19 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
     </div>
     <div class="wide">
       <label>2. Você tem links que ajudam a contar essa história? <span class="note">(opcional)</span></label>
-      <div id="reference-links" class="link-list">
-        <div class="link-row"><input class="reference-url" type="url" inputmode="url" aria-label="Link de referência 1" placeholder="https://www.mlb.com/..."></div>
-      </div>
-      <button id="add-link" class="secondary" type="button" style="margin-top:10px">+ Adicionar outro link</button>
+      <textarea id="reference-links-text" rows="5" spellcheck="false" aria-describedby="reference-count" placeholder="Cole vários links ao mesmo tempo, separados por espaços ou linhas. O Studio identifica e remove duplicados."></textarea>
+      <p class="field-help" id="reference-count" role="status">0 links identificados. Cole tudo de uma vez.</p>
       <p class="note">Pode incluir notícias e publicações públicas do Instagram ou Facebook. Se a rede social impedir a leitura automática, cole a legenda abaixo. Conteúdo público não autoriza reutilizar fotos e vídeos de terceiros.</p>
     </div>
-    <div class="wide">
-      <label for="reference-text">Quer colar uma legenda ou um texto? <span class="note">(opcional)</span></label>
+    <details class="wide" id="extra-reference">
+      <summary>+ Incluir legenda ou texto de referência (opcional)</summary>
+      <label for="reference-text">Texto adicional para a pesquisa</label>
       <textarea id="reference-text" maxlength="8000" placeholder="Cole uma legenda, trecho de artigo ou informação para orientar o vídeo. Indique a origem sempre que possível."></textarea>
       <p class="note">Atenção: as referências enviadas entram em pedidos públicos no GitHub. Cole somente conteúdo público; não inclua dados pessoais, senhas ou informações confidenciais. Textos de terceiros devem ser usados como referência, não copiados na íntegra para publicação.</p>
-    </div>
+    </details>
     <p id="form-hint" class="notice" aria-live="polite">Sem assunto nem referência, o Studio escolhe uma história da biblioteca.</p>
+    <p id="draft-status" class="field-help" role="status">Seu rascunho será salvo automaticamente neste navegador.</p>
+    <button id="clear-form" type="button" class="outline">Limpar formulário</button>
     <div class="wide step-actions">
       <h3>3. Conferir antes de produzir</h3>
       <p class="field-help">Ao continuar, nada será produzido ainda. Você verá um resumo do pedido e poderá voltar para corrigir.</p>
@@ -82,6 +116,7 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 <section class="panel hidden" id="confirm-panel" tabindex="-1" aria-labelledby="confirm-title">
   <div class="eyebrow">ETAPA FINAL · CONFIRA SEU PEDIDO</div>
   <h2 id="confirm-title">Está tudo certo?</h2>
+  <p class="field-help">Cada Reel começa com um gancho histórico nos três primeiros segundos e usa uma direção de arte vinculada ao assunto. O material continua sujeito à revisão editorial.</p>
   <p class="muted">Leia o resumo abaixo antes de começar. Depois de confirmar, o Studio enviará o pedido e iniciará a produção. Isso pode levar alguns minutos e não há botão para cancelar uma produção já iniciada.</p>
   <div id="confirm-summary" class="order-summary" aria-live="polite"></div>
   <div class="notice"><strong>Antes de confirmar:</strong> o pedido e as referências fornecidas ficam registrados no GitHub público. Não envie informações privadas. O resultado será uma prévia para sua revisão, não uma postagem automática nas redes sociais.</div>
@@ -118,9 +153,22 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
   <h2>Vídeos anteriores</h2>
   <p class="field-help">Aqui você pode recuperar vídeos já produzidos, assistir novamente e baixar os arquivos. Ver um vídeo antigo não cria outro vídeo nem consome a cota do Gemini.</p>
   <p class="muted">Acesse, assista e baixe novamente qualquer produção salva nas publicações do GitHub, inclusive os vídeos antigos. Não é necessário guardar os arquivos apenas neste navegador.</p>
-  <button id="library-refresh" type="button" class="secondary">↻ Ver meus vídeos anteriores</button>
+  <div class="library-tools">
+ <label for="library-search">Pesquisar vídeo
+   <input id="library-search" type="search" placeholder="Atleta, título ou tema" autocomplete="off">
+ </label>
+ <label for="library-sort">Ordenar
+   <select id="library-sort"><option value="recent">Mais recentes</option><option value="oldest">Mais antigos</option><option value="name">Título A–Z</option></select>
+ </label>
+ <div class="library-view" role="group" aria-label="Modo de visualização">
+   <button type="button" id="library-cards" class="secondary" aria-pressed="true" title="Visualização com capas">Cards</button>
+   <button type="button" id="library-list" class="outline" aria-pressed="false" title="Visualização compacta">Lista</button>
+ </div>
+</div>
+<button id="library-refresh" type="button" class="secondary">↻ Atualizar biblioteca</button>
   <p id="library-message" class="note">Entre com sua senha e clique em Carregar biblioteca para ver os vídeos anteriores.</p>
   <div id="library-items" class="library-grid"></div>
+<div class="library-pagination"><button type="button" id="library-prev" class="secondary" disabled>Anterior</button><span id="library-page" class="note" role="status"></span><button type="button" id="library-next" class="secondary" disabled>Próxima</button></div>
 </section>
 <section class="extras"><span>Identidade: <strong>ALLSTARS · Bíblia Visual 2026</strong></span><a href="https://baseballhall.org/" target="_blank" rel="noopener">Hall of Fame</a><a href="https://www.mlb.com/players" target="_blank" rel="noopener">MLB Players</a><a href="https://www.baseball-reference.com/" target="_blank" rel="noopener">Baseball-Reference</a><a href="https://www.statmuse.com/mlb/players" target="_blank" rel="noopener">StatMuse</a></section>
 <aside id="completion-toast" class="toast hidden" role="status" aria-live="polite" aria-atomic="true" data-kind="ready"><button type="button" class="toast-close" id="toast-close" aria-label="Fechar aviso">×</button><strong id="toast-title">Seu vídeo está pronto!</strong><p id="toast-message">Os arquivos já podem ser baixados.</p><button type="button" class="toast-action" id="toast-action">Ver downloads</button></aside>
@@ -129,6 +177,21 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 import {PREF_KEY,browserAvailable,alertsEnabled,enableAlerts,announceIssue} from './notify.js';
 const $=id=>document.getElementById(id);
 let authenticated=false,configured=false,pending=Number(localStorage.getItem('allstars-pending-issue')||0),timer=null;
+const DRAFT_KEY='allstars-studio-draft-v4';
+function saveDraft(){
+ const value={content_type:$('content-type').value,subject:$('subject').value,urls:$('reference-links-text').value,reference_text:$('reference-text').value};
+ try{localStorage.setItem(DRAFT_KEY,JSON.stringify(value));$('draft-status').textContent='Rascunho salvo neste navegador.';}catch{}
+}
+function restoreDraft(){
+ try{
+  const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');if(!d||typeof d!=='object')return;
+  for(const [key,id] of [['subject','subject'],['urls','reference-links-text'],['reference_text','reference-text']])if(typeof d[key]==='string')$(id).value=d[key];
+  if(['auto','atleta','tema','noticia','lista','explicativo'].includes(d.content_type))$('content-type').value=d.content_type;
+  $('draft-status').textContent='Rascunho recuperado.';if(d.reference_text)$('extra-reference').open=true;updateFormHint();explainType();
+ }catch{}
+}
+function clearDraft(){localStorage.removeItem(DRAFT_KEY);$('draft-status').textContent='Pedido enviado. Rascunho local limpo.';}
+
 const ordinaryTitle=document.title;
 let toastTarget='downloads';
 function showToast(kind,title,message,target='downloads'){
@@ -198,6 +261,7 @@ async function request(path,options={}){
 }
 async function init(){
  syncNotifyButton();
+ $('overview-pending').textContent=pending?'Pedido #'+pending:'Nenhum pedido pendente';
  try{
   const state=await request('/api/login');
   authenticated=state.authenticated;configured=state.configured;
@@ -219,7 +283,11 @@ $('login-form').addEventListener('submit',async event=>{
   await loadLibrary();
  }catch(e){$('login-message').textContent=e.message;}
 });
-function getReferences(){return [...document.querySelectorAll('.reference-url')].map(el=>el.value.trim()).filter(Boolean);}
+function getReferences(){
+ const raw=$('reference-links-text').value;
+ const matches=raw.match(/https:\/\/[^\s,;<>"'\u0000-\u001F]+/gi)||[];
+ return [...new Set(matches.map(x=>x.replace(/[),;.\]}]+$/g,'').trim()).filter(Boolean))];
+}
 const explanations={
  auto:'**Automático (recomendado para começar):** o Studio escolhe uma história já cadastrada. Vantagem: você não precisa pesquisar. Limitação: não escolhe o assunto.',
  atleta:'**Atleta:** cria um vídeo sobre a trajetória ou o feito de um jogador. Vantagem: foco numa pessoa. Limitação: a história precisa ter fontes confiáveis.',
@@ -237,7 +305,10 @@ function showFormProblem(message){
  $('options').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function validateDraft(){
+ const rawLinks=$('reference-links-text').value;
  const urls=getReferences(),reference_text=$('reference-text').value.trim(),subject=$('subject').value.trim(),content_type=$('content-type').value;
+ if(rawLinks.trim()&&!urls.length){showFormProblem('Não encontrei URLs HTTPS no campo de links.');return null;}
+ if(urls.join('\n').length>24000){showFormProblem('As referências excedem 24 mil caracteres. Separe em dois projetos.');return null;}
  for(const url of urls){
   try{const u=new URL(url);if(u.protocol!=='https:'||u.username||u.password)throw Error('invalid');}
   catch{showFormProblem('Corrija um link: ele precisa começar com https:// e não pode exigir usuário ou senha no endereço.');return null;}
@@ -256,6 +327,7 @@ function openReview(){
   ['Assunto',draft.subject||'O Studio escolherá a história'],
   ['Links de referência',draft.urls.length?draft.urls.length+' link(s) informado(s)':'Nenhum'],
   ['Texto colado',draft.reference_text?draft.reference_text.length+' caracteres informados':'Nenhum'],
+  ['Leitura automática',draft.urls.length>16?'Os 16 primeiros URLs serão lidos; os outros serão preservados para conferência.':'As referências acessíveis serão analisadas; as fontes não são fatos verificados.'],
   ['Depois de confirmar','O pedido será registrado e a produção começará. Os arquivos aparecerão na área de downloads.']
  ];
  for(const [label,value] of lines){const p=document.createElement('p');const strong=document.createElement('strong');strong.textContent=label+': ';p.append(strong,document.createTextNode(value));summary.append(p);}
@@ -270,18 +342,17 @@ function updateFormHint(){
   'O Studio cruzará suas referências. Caso a rede social bloqueie a leitura, cole a legenda ou o texto da postagem neste campo. Confira os fatos antes de publicar.':
   subject?'O Studio pesquisará o assunto e exigirá referências públicas antes de montar o vídeo.':
   'Sem assunto nem referências, o Studio escolhe uma história da biblioteca.';
- $('add-link').disabled=document.querySelectorAll('.reference-url').length>=5;
+ $('reference-count').textContent=urls.length+' link(s) identificados automaticamente, sem duplicados.';
 }
-$('add-link').addEventListener('click',()=>{
- const list=$('reference-links');if(list.children.length>=5)return;
- const row=document.createElement('div');row.className='link-row';
- const input=document.createElement('input');input.type='url';input.inputMode='url';input.className='reference-url';input.placeholder='https://...';input.setAttribute('aria-label','Link de referência '+(list.children.length+1));
- const remove=document.createElement('button');remove.type='button';remove.className='secondary';remove.textContent='Remover';remove.addEventListener('click',()=>{row.remove();updateFormHint();});
- row.append(input,remove);list.append(row);input.focus();updateFormHint();
-});
-$('reference-links').addEventListener('input',updateFormHint);
-for(const id of ['content-type','subject','reference-text'])$(id).addEventListener('input',()=>{updateFormHint();if(id==='content-type')explainType();$('confirm-panel').classList.add('hidden');});
+$('reference-links-text').addEventListener('input',()=>{updateFormHint();saveDraft();$('confirm-panel').classList.add('hidden');});
+for(const id of ['content-type','subject','reference-text'])$(id).addEventListener('input',()=>{updateFormHint();if(id==='content-type')explainType();$('confirm-panel').classList.add('hidden');saveDraft();});
 explainType();
+restoreDraft();
+$('clear-form').addEventListener('click',()=>{
+ if(!confirm('Limpar o formulário? O rascunho salvo neste navegador será apagado.'))return;
+ for(const id of ['subject','reference-links-text','reference-text'])$(id).value='';
+ $('content-type').value='auto';localStorage.removeItem(DRAFT_KEY);$('confirm-panel').classList.add('hidden');$('extra-reference').open=false;$('draft-status').textContent='Formulário limpo.';updateFormHint();explainType();
+});
 async function create(){
  $('completion-toast').classList.add('hidden');
  document.title=ordinaryTitle;
@@ -299,7 +370,7 @@ async function create(){
   const data=await request('/api/generate',{method:'POST',body:JSON.stringify({
    mode:urls.length||reference_text?'link':'auto',content_type,subject,urls,reference_text
   })});
-  pending=data.request_id;localStorage.setItem('allstars-pending-issue',String(pending));
+  pending=data.request_id;localStorage.setItem('allstars-pending-issue',String(pending));$('overview-pending').textContent='Pedido #'+pending;clearDraft();
   $('progress-stage').textContent='EM PRODUÇÃO';
   $('progress-title').textContent='Vídeo solicitado';
   await poll();
@@ -316,7 +387,7 @@ async function poll(){
    clearTimeout(timer);timer=null;
    $('progress-title').textContent='Seu episódio está pronto!';
    $('progress-message').textContent='Use os botões abaixo para baixar.';
-   localStorage.removeItem('allstars-pending-issue');pending=0;
+   localStorage.removeItem('allstars-pending-issue');pending=0;$('overview-pending').textContent='Nenhum pedido pendente';
    renderFiles(data.assets||{},data.athlete||'Novo vídeo');
    announceEnd(finishedIssue,'ready','');
    await loadLibrary();
@@ -325,7 +396,7 @@ async function poll(){
   }
   if(data.state==='error'){
    const failedIssue=pending;
-   clearTimeout(timer);timer=null;localStorage.removeItem('allstars-pending-issue');pending=0;
+   clearTimeout(timer);timer=null;localStorage.removeItem('allstars-pending-issue');pending=0;$('overview-pending').textContent='Nenhum pedido pendente';
    $('progress-stage').textContent='PRODUÇÃO ENCERRADA COM ERRO';
    $('progress-title').textContent='Não foi possível concluir o vídeo';
    $('progress-message').textContent=data.message;
@@ -338,7 +409,7 @@ async function poll(){
  clearTimeout(timer);timer=setTimeout(poll,16000);
 }
 $('refresh').addEventListener('click',poll);
-const labels=[['allstars_reel.mp4','↓ Vídeo MP4'],['capa.png','↓ Capa PNG'],['capa_perfil_3x4.png','↓ Capa perfil 3:4'],['narracao.mp3','↓ Áudio MP3'],['legenda_instagram.txt','↓ Legenda do post'],['legendas.srt','↓ Legendas sincronizadas'],['roteiro.txt','↓ Roteiro'],['fontes.txt','↓ Fontes'],['pesquisa.json','↓ Pesquisa'],['midia.json','↓ Licença e crédito de imagem'],['briefing_arte_anime.txt','↓ Direção de arte anime'],['qualidade_visual.json','↓ Status da arte']];
+const labels=[['allstars_reel.mp4','↓ Vídeo MP4'],['capa.png','↓ Capa PNG'],['capa_perfil_3x4.png','↓ Capa perfil 3:4'],['narracao.mp3','↓ Áudio MP3'],['legenda_instagram.txt','↓ Legenda do post'],['legendas.srt','↓ Legendas sincronizadas'],['roteiro.txt','↓ Roteiro'],['fontes.txt','↓ Fontes'],['pesquisa.json','↓ Pesquisa'],['midia.json','↓ Licença e crédito de imagem'],['briefing_arte_anime.txt','↓ Direção de arte anime'],['qualidade_visual.json','↓ Status da arte'],['storyboard.json','↓ Storyboard contextual']];
 function renderFiles(assets,title){
  $('result-title').textContent=title;
  $('result-message').textContent='Arquivos disponíveis para baixar.';
@@ -357,42 +428,72 @@ async function loadLatest(){
   const res=await fetch('./latest.json?version='+Date.now(),{cache:'no-store'});
   if(!res.ok)throw Error('indisponível');
   const data=await res.json();
-  if(!data.available){$('result-message').textContent='Ainda não há vídeos prontos.';return;}
+  if(!data.available){$('result-message').textContent='Ainda não há vídeos prontos.';$('overview-last').textContent='Sem produção';return;}
+  $('overview-last').textContent=String(data.subject||data.athlete||'Vídeo pronto').slice(0,55);
   const files={'allstars_reel.mp4':data.video};
   // Os demais campos são vinculados por seus nomes reais.
   files['capa.png']=data.cover;files['capa_perfil_3x4.png']=data.profile_cover;files['narracao.mp3']=data.audio;files['legenda_instagram.txt']=data.caption;
-  files['roteiro.txt']=data.script;files['fontes.txt']=data.sources;files['pesquisa.json']=data.research;files['midia.json']=data.media;files['briefing_arte_anime.txt']=data.anime_briefing;files['qualidade_visual.json']=data.visual_quality;files['legendas.srt']=data.subtitles;
+  files['roteiro.txt']=data.script;files['fontes.txt']=data.sources;files['pesquisa.json']=data.research;files['midia.json']=data.media;files['briefing_arte_anime.txt']=data.anime_briefing;files['qualidade_visual.json']=data.visual_quality;files['legendas.srt']=data.subtitles;files['storyboard.json']=data.storyboard;
   renderFiles(files,(data.subject||data.athlete||'ALLSTARS')+' — '+data.title);
-  if(data.visual_premium===false){
-   $('result-message').textContent='Prévia com arte de contingência: ainda não atende ao estilo anime premium aprovado. Revise antes de publicar.';
+  if(data.visual_mode==='original_context_art'){
+   $('result-message').textContent='Arte editorial inédita ligada a este roteiro, com cena e composição novas. Ainda não corresponde ao acabamento anime premium aprovado; revise antes de publicar.';
+  }else if(data.visual_premium===false){
+   $('result-message').textContent='A capa ainda não atende ao acabamento anime premium aprovado. Revise antes de publicar.';
   }
- }catch{$('result-message').textContent='Quando uma produção terminar, seus arquivos aparecerão aqui.';}
+  if(data.hook)document.title='⚾ '+data.hook.slice(0,68)+' · ALLSTARS Studio';
+ }catch{$('result-message').textContent='Quando uma produção terminar, seus arquivos aparecerão aqui.';$('overview-last').textContent='Indisponível';}
 }
-async function loadLibrary(){
- const list=$('library-items'),message=$('library-message');
- if(!authenticated){message.textContent='Faça login para acessar a biblioteca de vídeos.';return;}
- message.textContent='Consultando produções anteriores...';
- try{
-  const data=await request('/api/library');
-  list.replaceChildren();
-  for(const item of data.items||[]){
+let libraryData=[],libraryPage=0,libraryMode='cards';
+function paintLibrary(){
+ const list=$('library-items'),term=$('library-search').value.trim().toLocaleLowerCase('pt-BR'),sort=$('library-sort').value;
+ let results=libraryData.filter(item=>(item.title||'').toLocaleLowerCase('pt-BR').includes(term)||(item.tag||'').toLocaleLowerCase('pt-BR').includes(term));
+ results=[...results].sort((a,b)=>sort==='name'?(a.title||'').localeCompare(b.title||''):sort==='oldest'?new Date(a.date||0)-new Date(b.date||0):new Date(b.date||0)-new Date(a.date||0));
+ const pages=Math.max(1,Math.ceil(results.length/12));libraryPage=Math.min(libraryPage,pages-1);
+ list.replaceChildren();list.classList.toggle('is-list',libraryMode==='list');
+ for(const item of results.slice(libraryPage*12,(libraryPage+1)*12)){
    const card=document.createElement('div');card.className='library-entry';
    const image=document.createElement('img');image.alt='Capa de '+item.title;image.loading='lazy';
-   if(item.assets['capa.png'])image.src=item.assets['capa.png'];else image.hidden=true;
+   if(item.assets?.['capa.png'])image.src=item.assets['capa.png'];else image.hidden=true;
    const body=document.createElement('div');body.className='library-meta';
    const title=document.createElement('strong');title.textContent=item.title;
-   const date=document.createElement('p');date.className='note';date.textContent=item.date?new Date(item.date).toLocaleDateString('pt-BR'):'Produção salva no GitHub';
+   const date=document.createElement('p');date.className='note';date.textContent=item.date?new Date(item.date).toLocaleDateString('pt-BR'):'Produção salva';
    const actions=document.createElement('div');actions.className='library-actions';
-   const open=document.createElement('button');open.className='secondary';open.type='button';open.textContent='Ver arquivos';open.addEventListener('click',()=>{
-    renderFiles(item.assets,item.title);$('downloads').scrollIntoView({behavior:'smooth',block:'start'});
+   const open=document.createElement('button');open.className='secondary';open.type='button';open.textContent='Ver arquivos';open.title='Prévia, narração, roteiro e downloads';open.addEventListener('click',()=>{
+     renderFiles(item.assets,item.title);$('downloads').scrollIntoView({behavior:'smooth',block:'start'});
    });actions.append(open);
-   if(item.assets['allstars_reel.mp4']){
-    const video=document.createElement('a');video.href=item.assets['allstars_reel.mp4'];video.target='_blank';video.rel='noopener';video.className='btn secondary';video.textContent='Baixar vídeo';actions.append(video);
+   if(item.assets?.['allstars_reel.mp4']){
+     const video=document.createElement('a');video.href=item.assets['allstars_reel.mp4'];video.target='_blank';video.rel='noopener';video.className='btn secondary';video.textContent='Baixar MP4';actions.append(video);
    }
-   body.append(title,date,actions);card.append(image,body);list.append(card);
-  }
-  message.textContent=(data.items||[]).length+' vídeo(s) na biblioteca.'+(data.has_more?' Mostrando os 100 registros mais recentes.':'');
- }catch(e){message.textContent=e.message;}
+   const more=document.createElement('details');more.className='library-more';
+   const moreTitle=document.createElement('summary');moreTitle.textContent='Mais opções';more.append(moreTitle);
+   const extra=document.createElement('div');extra.className='links';
+   for(const [asset,label] of [['roteiro.txt','Ler roteiro'],['fontes.txt','Conferir fontes'],['storyboard.json','Ver storyboard'],['qualidade_visual.json','Ver qualidade da arte']]){
+     const url=item.assets?.[asset];
+     if(typeof url!=='string'||!url.startsWith('https://github.com/allstarsbeisebol/allstars-studio/releases/download/'))continue;
+     const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener';link.textContent=label;extra.append(link);
+   }
+   if(item.release){const link=document.createElement('a');link.href=item.release;link.target='_blank';link.rel='noopener';link.textContent='Abrir publicação';extra.append(link);}
+   more.append(extra);
+   body.append(title,date,actions,more);card.append(image,body);list.append(card);
+ }
+ $('library-page').textContent=results.length?'Página '+(libraryPage+1)+' de '+pages+' · '+results.length+' vídeo(s)':'Nenhum vídeo encontrado.';
+ $('library-prev').disabled=libraryPage===0;$('library-next').disabled=libraryPage+1>=pages;
+ $('overview-library').textContent=libraryData.length+' vídeos';
+ $('library-message').textContent=libraryData.length+' produção(ões) na biblioteca.'+(libraryData.length>=100?' Exibindo até 100 registros recentes.':'');
+}
+async function loadLibrary(){
+ const message=$('library-message');
+ if(!authenticated){message.textContent='Faça login para acessar a biblioteca.';return;}
+ message.textContent='Consultando vídeos anteriores...';
+ try{const data=await request('/api/library');libraryData=data.items||[];libraryPage=0;paintLibrary();}
+ catch(e){message.textContent=e.message;}
+}
+$('library-search').addEventListener('input',()=>{libraryPage=0;paintLibrary();});
+$('library-sort').addEventListener('change',()=>{libraryPage=0;paintLibrary();});
+$('library-prev').addEventListener('click',()=>{libraryPage=Math.max(0,libraryPage-1);paintLibrary();});
+$('library-next').addEventListener('click',()=>{libraryPage++;paintLibrary();});
+for(const [id,mode] of [['library-cards','cards'],['library-list','list']]){
+ $(id).addEventListener('click',()=>{libraryMode=mode;for(const n of ['cards','list'])$('library-'+n).setAttribute('aria-pressed',String(n===mode));paintLibrary();});
 }
 $('library-refresh').addEventListener('click',loadLibrary);
 init();

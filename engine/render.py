@@ -21,9 +21,10 @@ proc=subprocess.run(["ffprobe","-v","error","-show_entries","format=duration","-
 duration=float(proc.stdout.strip())
 if duration<=1:raise SystemExit("Áudio inválido ou muito curto")
 screens=[str(x).strip() for x in ep.get("screens",[]) if str(x).strip()]
-scenes=[ep.get("title","ALÉM DO JOGO")]+screens[:5]
+scenes=[ep.get("hook") or ep.get("title","ALÉM DO JOGO")]+screens[:5]
 if len(scenes)==1:scenes.append(ep.get("athlete","HISTÓRIAS REAIS"))
 photos=[]
+storyboard=[]
 for i,message in enumerate(scenes):
     path=out/f"cena_{i:02d}.jpg"
     # O cartaz aprovado é destinado à capa. Nas cenas internas usamos
@@ -32,6 +33,16 @@ for i,message in enumerate(scenes):
     poster(ep,headline=message,index=i,total=len(scenes)-1).save(
         path,quality=91,subsampling=0)
     photos.append(path)
+    if ep.get("unique_art_required"):
+        from story_art import art_metadata
+        storyboard.append({"scene":i,"title":str(message)[:150],**art_metadata(ep,i)})
+if storyboard:
+    (out/"storyboard.json").write_text(json.dumps({
+        "hook":str(ep.get("hook") or ep.get("title") or ""),
+        "hook_window_seconds":3,
+        "note":"O gancho está na abertura visual; a primeira frase do áudio deve ser conferida antes de publicar.",
+        "scenes":storyboard
+    },ensure_ascii=False,indent=2),encoding="utf-8")
 # Uso editorial: abertura mais curta, cenas centrais dividindo o tempo total.
 if len(scenes)>1 and duration>8:
     opener=min(3.3,duration*.16)
@@ -112,6 +123,10 @@ if media.is_file():
                 "Licença (detalhes): "+str(info.get("license_url","")),
                 "Conferir licença e direitos antes de publicar."
             ])
+        elif status.get("visual_mode")=="original_context_art":
+            warning="Ilustração gráfica contextual inédita criada para este roteiro pelo ALLSTARS Studio. Representação simbólica; não é fotografia histórica nem arte anime premium."
+            caption=(caption+"\n\n"+warning).strip()
+            sources.extend(["","CRÉDITOS DA ILUSTRAÇÃO CONTEXTUAL",warning,"Criação: ALLSTARS Studio. Ver storyboard.json para rastrear as cenas."])
         elif status.get("visual_mode")=="original_cartoon" or status.get("status") not in ("downloaded","existing"):
             warning=("Composição temática ilustrativa original do ALLSTARS Studio; não é fotografia documental." if ep.get("content_type","atleta")!="atleta" else "Arte ilustrativa original em estilo cartoon; personagem fictício, não é retrato histórico fiel do atleta.")
             caption=(caption+"\n\n"+warning).strip()

@@ -17,6 +17,7 @@ def slug(name):
 
 def find_approved_anime(episode):
     """Return (RGB image, metadata) only for exact name-matching approved work."""
+    if episode.get("unique_art_required"):return None
     athlete=str(episode.get("athlete","")).strip()
     identifier=slug(athlete)
     if not identifier:return None

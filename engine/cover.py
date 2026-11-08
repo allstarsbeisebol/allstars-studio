@@ -11,7 +11,7 @@ p.add_argument("--output",default="output/capa.png")
 args=p.parse_args()
 episode=json.loads(Path(args.episode).read_text(encoding="utf-8"))
 dest=Path(args.output);dest.parent.mkdir(parents=True,exist_ok=True)
-curated=cover_from_approved_asset(episode)
+curated=cover_from_approved_asset(episode) if not episode.get("unique_art_required") else None
 image=curated[0] if curated is not None else poster(episode)
 if curated is not None:
     # A arte aprovada é uma composição completa. Preserve a ilustração

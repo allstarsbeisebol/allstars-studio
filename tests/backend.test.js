@@ -198,16 +198,31 @@ test("fontes: aceita três links e texto colado sem divulgar texto plano na issu
   assert.deepEqual(payload.body.match(/LINK: (.+)/g).map(x=>x.slice(6)),links);
  }finally{globalThis.fetch=original;}
 });
-test("fontes: rejeita link duplicado, lista longa e texto excessivo",async()=>{
+test("fontes: vários links colados preservados e duplicados normalizados",async()=>{
+ const cookie=await loginCookie(),original=globalThis.fetch;
+ let created=null;
+ globalThis.fetch=async(url,options={})=>{
+   if(options.method==="POST"){created=JSON.parse(options.body);return {ok:true,json:async()=>({number:419})};}
+   return {ok:true,json:async()=>[]};
+ };
+ try{
+  const refs=Array.from({length:27},(_,i)=>"https://example.com/artigo-"+i);
+  const res=response();
+  await generate({method:"POST",headers:headers(cookie),body:{mode:"link",content_type:"tema",urls:[...refs,refs[0],refs[1]]}},res);
+  assert.equal(res.code,202);
+  assert.equal((created.body.match(/LINK: /g)||[]).length,27);
+  assert.ok(created.body.includes("LINK: "+refs[26]));
+ }finally{globalThis.fetch=original;}
+});
+
+test("fontes: rejeita URLs inseguras, texto excessivo e pedido grande",async()=>{
  const cookie=await loginCookie();
  for(const body of [
-  {mode:"link",urls:Array(6).fill("https://example.com/a")},
-  {mode:"link",urls:["https://example.com/a","https://example.com/a"]},
-  {mode:"link",urls:["http://example.com/a"]},
-  {mode:"link",reference_text:"x".repeat(8001)}
+   {mode:"link",urls:["http://example.com/a"]},
+   {mode:"link",reference_text:"x".repeat(8001)},
+   {mode:"link",urls:Array.from({length:30},(_,i)=>"https://example.com/"+i+"-"+"a".repeat(850))}
  ]){
-  const res=response();
-  await generate({method:"POST",headers:headers(cookie),body},res);
+  const res=response();await generate({method:"POST",headers:headers(cookie),body},res);
   assert.equal(res.code,400);
  }
 });

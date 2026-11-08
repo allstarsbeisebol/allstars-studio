@@ -2,7 +2,12 @@ name: "ALLSTARS | Verificar integridade"
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
+concurrency:
+  group: allstars-check-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -38,6 +43,8 @@ jobs:
           python -m py_compile engine/from_link.py engine/request_select.py engine/article_extract.py engine/editorial_guard.py engine/content_request.py engine/topic_generate.py
       - name: Testar recuperação de páginas lentas sem Gemini
         run: python -m unittest discover -s tests -p 'test_link_timeout.py' -v
+      - name: Validar colagem extensa de fontes
+        run: python -m unittest discover -s tests -p 'test_reference_batch.py' -v
       - name: Validar extração de matérias e preservação de fontes
         run: python -m unittest discover -s tests -p 'test_article_extract.py' -v
       - name: Validar tipo de conteúdo e temas coletivos
@@ -52,6 +59,8 @@ jobs:
           python -c "import json; d=json.load(open('output/pesquisa.json')); assert len(d['research_sites']) == 4"
       - name: Instalar Pillow para validar a identidade visual
         run: python -m pip install "Pillow>=10.4,<12"
+      - name: Testar arte contextual única, nova a cada execução
+        run: python -m unittest discover -s tests -p 'test_original_art.py' -v
       - name: Verificar que artes anime só pertencem ao atleta aprovado
         run: python -m unittest discover -s tests -p 'test_anime_assets.py' -v
       - name: Confirmar imagem anime Jim Abbott aprovada e vinculada ao no-hitter
@@ -94,6 +103,35 @@ jobs:
           test -s output/allstars_reel.mp4
           test -s output/legendas.srt
           ffprobe -v error output/allstars_reel.mp4 >/dev/null
+      - name: Testar capa e vídeo de episódio novo com arte contextual inédita
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          ep=json.loads(Path("data/episode.json").read_text(encoding="utf-8"))
+          ep["id"]="teste-art-ep"
+          ep["episode_number"]=987654
+          ep["unique_art_required"]=True
+          ep["subject"]="No-hitter histórico 1993"
+          ep["title"]="A história do no-hitter"
+          ep["hook"]="Como um jogo sem rebatidas entrou para a história?"
+          ep["art_direction"]="Arremessador, zona de strike, cronologia e bola"
+          Path("output/new-art-episode.json").write_text(json.dumps(ep,ensure_ascii=False),encoding="utf-8")
+          PY
+          python engine/cover.py --episode output/new-art-episode.json --output output/new-art-cover.png
+          python engine/visual_quality.py --episode output/new-art-episode.json --output output/new-art-quality.json
+          python engine/render.py --episode output/new-art-episode.json --audio output/test-audio.wav --out-dir output/new-art
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          q=json.loads(Path("output/new-art-quality.json").read_text(encoding="utf-8"))
+          st=json.loads(Path("output/new-art/storyboard.json").read_text(encoding="utf-8"))
+          assert q["new_for_episode"] is True and q["premium"] is False,q
+          assert st["hook_window_seconds"]==3 and st["scenes"],st
+          assert Path("output/new-art-cover.png").stat().st_size>30000
+          assert Path("output/new-art/allstars_reel.mp4").stat().st_size>30000
+          PY
+          ffprobe -v error output/new-art/allstars_reel.mp4 >/dev/null
       - name: Testar Reel com imagem aprovada Jim Abbott sem Gemini e sem API paga
         run: |
           python - <<'PY'

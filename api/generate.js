@@ -32,11 +32,13 @@ export default async function handler(req,res){
   if(!types.has(contentType))return json(res,400,{error:"Escolha um tipo de conteúdo válido."});
   const subject=typeof req.body?.subject==="string"?req.body.subject.trim():"";
   if(subject.length>160||/[\r\n\x00-\x1F]/.test(subject))return json(res,400,{error:"O assunto deve ter até 160 caracteres em uma única linha."});
+  // O limite é o tamanho total seguro do pedido, não a quantidade de caixas no formulário.
   const rawUrls=Array.isArray(req.body?.urls)?req.body.urls:[req.body?.url||""];
-  if(rawUrls.length>5||rawUrls.some(x=>typeof x!=="string"))return json(res,400,{error:"Informe no máximo 5 links de referência."});
-  const urls=rawUrls.map(x=>x.trim()).filter(Boolean);
+  if(rawUrls.some(x=>typeof x!=="string"))return json(res,400,{error:"As referências devem ser links em texto."});
+  const urls=[...new Set(rawUrls.map(x=>x.trim()).filter(Boolean))];
+  if(urls.join("\n").length>24000)return json(res,400,{error:"As referências excedem o tamanho seguro do pedido (24 mil caracteres). Separe em dois projetos."});
   const sources=urls.map(allowedUrl);
-  if(sources.some(x=>!x)||new Set(sources).size!==sources.length)return json(res,400,{error:"Use links HTTPS públicos diferentes, sem repetição."});
+  if(sources.some(x=>!x))return json(res,400,{error:"Confira os links: aceitamos endereços HTTPS públicos."});
   const referenceText=typeof req.body?.reference_text==="string"?req.body.reference_text.trim():"";
   if(referenceText.length>8000)return json(res,400,{error:"O texto colado deve ter no máximo 8.000 caracteres."});
   if(mode==="link"&&!sources.length&&!referenceText)return json(res,400,{error:"Informe um link ou cole um texto de referência."});
