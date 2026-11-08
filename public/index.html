@@ -920,7 +920,8 @@ async function poll(){
    renderFiles(data.assets||{},data.athlete||'Novo vídeo');
    announceEnd(finishedIssue,'ready','');
    await loadLibrary();
-   $('downloads').scrollIntoView({behavior:'smooth'});
+   updateWizardHome();
+   if(wizardView==='progress'||wizardView==='art')showWizardScreen('result');
    return;
   }
   if(data.state==='error'){
@@ -931,9 +932,12 @@ async function poll(){
    $('progress-title').textContent='Não foi possível concluir o vídeo';
    $('progress-message').textContent=data.message;
    announceEnd(failedIssue,'error',data.message||'Confira os detalhes da produção.');
+   updateWizardHome();
+   if(wizardView==='progress'||wizardView==='art')showWizardScreen('progress',{force:true});
    return;
   }
   const creatingVideo=data.state==='rendering';
+  if(wizardView==='art')showWizardScreen('progress');
   $('progress-stage').textContent=creatingVideo?'VÍDEO EM PRODUÇÃO':'PREPARANDO IMAGEM';
   $('progress-title').textContent=creatingVideo?'Produzindo seu vídeo...':'Preparando a imagem para sua aprovação...';
   $('progress-message').textContent=data.message||(creatingVideo?'Montando os arquivos.':'Pesquisando e criando a capa.');
@@ -1001,7 +1005,7 @@ function paintLibrary(){
    const date=document.createElement('p');date.className='note';date.textContent=item.date?new Date(item.date).toLocaleDateString('pt-BR'):'Produção salva';
    const actions=document.createElement('div');actions.className='library-actions';
    const open=document.createElement('button');open.className='secondary';open.type='button';open.textContent='Ver arquivos';open.title='Prévia, narração, roteiro e downloads';open.addEventListener('click',()=>{
-     renderFiles(item.assets,item.title);$('downloads').scrollIntoView({behavior:'smooth',block:'start'});
+     renderFiles(item.assets,item.title);showWizardScreen('result');
    });actions.append(open);
    if(item.assets?.['allstars_reel.mp4']){
      const video=document.createElement('a');video.href=item.assets['allstars_reel.mp4'];video.target='_blank';video.rel='noopener';video.className='btn secondary';video.textContent='Baixar MP4';actions.append(video);
