@@ -51,7 +51,7 @@ jobs:
           assert html.count('id="notify-enable"')==1
           assert html.count('id="mobile-menu-toggle"')==1
           assert html.count('id="studio-nav-links"')==1
-          assert html.index('id="alert-settings"')<html.index('<section class="hero">')
+          assert html.index('id="alert-settings"')<html.index('<section class="hero"')
           assert 'aria-controls="studio-nav-links"' in html
           assert 'aria-expanded="false"' in html
           assert 'if(event.key===\'Escape\'' in html
