@@ -28,10 +28,10 @@ jobs:
         run: |
           mkdir -p output
           curl --fail --location --retry 3 --silent --show-error \
-            https://github.com/liuhelpme/allstars-studio/releases/download/episodio-9/narracao.mp3 \
+            https://github.com/allstarsbeisebol/allstars-studio/releases/download/episodio-9/narracao.mp3 \
             --output output/narracao-jim-original.mp3
           curl --fail --location --retry 3 --silent --show-error \
-            https://github.com/liuhelpme/allstars-studio/releases/download/episodio-9/roteiro.txt \
+            https://github.com/allstarsbeisebol/allstars-studio/releases/download/episodio-9/roteiro.txt \
             --output output/roteiro-jim-original.txt
           python - <<'PY'
           import json

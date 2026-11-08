@@ -1,5 +1,5 @@
 import {authorized,configured,json} from "../lib/security.js";
-const REPO="liuhelpme/allstars-studio";
+const REPO="allstarsbeisebol/allstars-studio";
 export default async function handler(req,res){
   if(req.method!=="GET")return json(res,405,{error:"Método não permitido."});
   if(!configured()||!authorized(req))return json(res,401,{error:"Autenticação necessária."});
@@ -10,7 +10,7 @@ export default async function handler(req,res){
     const q=await fetch("https://api.github.com/repos/"+REPO+"/issues/"+id,{headers});
     if(!q.ok)return json(res,502,{error:"Não foi possível verificar a produção."});
     const issue=await q.json();
-    if(!issue.title?.startsWith("[ALLSTARS] Criar novo episódio")||issue.user?.login!=="liuhelpme")return json(res,404,{error:"Pedido não encontrado."});
+    if(!issue.title?.startsWith("[ALLSTARS] Criar novo episódio")||!["liuhelpme","allstarsbeisebol"].includes(issue.user?.login))return json(res,404,{error:"Pedido não encontrado."});
     const commentsRes=await fetch("https://api.github.com/repos/"+REPO+"/issues/"+id+"/comments?per_page=100",{headers});
     if(!commentsRes.ok)return json(res,502,{error:"Não foi possível consultar a produção."});
     const comments=await commentsRes.json();

@@ -76,9 +76,9 @@ test("status: libera downloads após conclusão registrada",async()=>{
   const cookie=await loginCookie();const original=globalThis.fetch;
   globalThis.fetch=async(url)=>{
     let data;
-    if(url.endsWith("/issues/99"))data={title:"[ALLSTARS] Criar novo episódio",user:{login:"liuhelpme"},state:"closed"};
+    if(url.endsWith("/issues/99"))data={title:"[ALLSTARS] Criar novo episódio",user:{login:"allstarsbeisebol"},state:"closed"};
     else if(url.includes("/comments"))data=[{body:"Episódio gerado. Consulte .../episodio-9."}];
-    else data={name:"Episódio 9",html_url:"https://github.com/liuhelpme/allstars-studio/releases/tag/episodio-9",assets:[{name:"allstars_reel.mp4",browser_download_url:"https://github.com/example.mp4"}]};
+    else data={name:"Episódio 9",html_url:"https://github.com/allstarsbeisebol/allstars-studio/releases/tag/episodio-9",assets:[{name:"allstars_reel.mp4",browser_download_url:"https://github.com/example.mp4"}]};
     return {ok:true,json:async()=>data};
   };
   try{
@@ -93,8 +93,8 @@ test("status: mostra motivo seguro específico informado pelo workflow",async()=
   const cookie=await loginCookie();
   const original=globalThis.fetch;
   globalThis.fetch=async(url)=>{
-    const issue={title:"[ALLSTARS] Criar novo episódio por link",user:{login:"liuhelpme"},state:"closed"};
-    const comments=[{body:"Não foi possível gerar este episódio. Motivo: Gemini HTTP 404 (gemini-3.5-flash-lite): modelo não disponível para esta chave/projeto. O pedido não foi substituído por outra história. Registro: https://github.com/liuhelpme/allstars-studio/actions/runs/999"}];
+    const issue={title:"[ALLSTARS] Criar novo episódio por link",user:{login:"allstarsbeisebol"},state:"closed"};
+    const comments=[{body:"Não foi possível gerar este episódio. Motivo: Gemini HTTP 404 (gemini-3.5-flash-lite): modelo não disponível para esta chave/projeto. O pedido não foi substituído por outra história. Registro: https://github.com/allstarsbeisebol/allstars-studio/actions/runs/999"}];
     return {ok:true,json:async()=>url.endsWith("/issues/151")?issue:comments};
   };
   try{

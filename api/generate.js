@@ -1,5 +1,5 @@
 import {authorized,configured,sameOrigin,allowedUrl,json} from "../lib/security.js";
-const REPO="liuhelpme/allstars-studio";
+const REPO="allstarsbeisebol/allstars-studio";
 export default async function handler(req,res){
   if(req.method!=="POST")return json(res,405,{error:"Método não permitido."});
   if(!sameOrigin(req))return json(res,403,{error:"Origem não autorizada."});
@@ -22,7 +22,7 @@ export default async function handler(req,res){
   const headers={"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","User-Agent":"ALLSTARS-Studio"};
   try{
     // Evitar novos pedidos se já houver produção sob demanda aguardando conclusão.
-    const open=await fetch("https://api.github.com/repos/"+REPO+"/issues?state=open&creator=liuhelpme&per_page=100",{headers});
+    const open=await fetch("https://api.github.com/repos/"+REPO+"/issues?state=open&per_page=100",{headers});
     if(!open.ok)throw Error("Não foi possível consultar pedidos.");
     const items=await open.json();
     if(items.some(item=>!item.pull_request&&typeof item.title==="string"&&item.title.startsWith("[ALLSTARS] Criar novo episódio"))){
