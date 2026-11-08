@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "status": "approved_by_user",
+  "approved_reference": "além_do_jogo_o_no_hitter_de_jim_abbott.png",
+  "series": "ALÉM DO JOGO",
+  "format": "1080x1920",
+  "aspect_ratio": "9:16",
+  "visual_direction": "Pôster editorial premium de anime esportivo de beisebol, personagem adulto com anatomia correta, ação crível, rosto expressivo, lineart preciso, cel shading de alta qualidade, iluminação noturna cinematográfica, arquibancada em profundidade, multidão desfocada, energia da jogada e profundidade de composição.",
+  "inspirations": [
+    "drama e precisão do beisebol competitivo",
+    "emoção das histórias de superação",
+    "acabamento de cartaz cinematográfico japonês"
+  ],
+  "mandatory": [
+    "Personagem em ação específica relacionada ao feito real",
+    "Preferir fotografia licenciada ou arte anime aprovada e vinculada ao atleta",
+    "Nunca reutilizar a imagem de um atleta para outro",
+    "Manter logomarca oficial original e cores da Bíblia Visual",
+    "Headline marcante em português com informação verdadeira",
+    "Faixa de legendas fora da área principal do rosto",
+    "Margens laterais de legenda 15% (162 px)",
+    "Prévia vertical de feed 3:4, com logo visível",
+    "Registrar origem da arte e marcar ilustrativa quando não é foto"
+  ],
+  "avoid": [
+    "formas geométricas simplificadas",
+    "silhueta genérica",
+    "traços infantis",
+    "cartoon rudimentar",
+    "anatomia errada",
+    "braços ou mãos trocados",
+    "copiar personagens de animes conhecidos",
+    "retrato atribuído erroneamente ao atleta",
+    "usar cartaz completo de outro episódio como corpo do atleta"
+  ],
+  "palette": {
+    "royal_blue": "#315FAC",
+    "navy": "#1A3566",
+    "red": "#CE233E",
+    "gold": "#F0C040",
+    "white": "#FFFFFF"
+  },
+  "safe_area": {
+    "subtitle_box": [
+      162,
+      930,
+      918,
+      1150
+    ],
+    "subtitle_lines_max": 2,
+    "profile_crop": [
+      0,
+      240,
+      1080,
+      1680
+    ]
+  },
+  "cost_policy": "Não usar geração de imagens paga automaticamente. A API Gemini para geração de imagens não oferece nível gratuito no catálogo consultado em novembro/2026.",
+  "automated_today": "Arquivos de arte anime já aprovados e incluídos no repositório podem ser reutilizados no episódio correto; geração inédita de anime premium via API não é ativada sem acordo de custo."
+}
