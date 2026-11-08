@@ -83,6 +83,6 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 ass=out/"legendas.ass"
 with ass.open("w",encoding="utf-8") as f:
     f.write(header)
-    f.write("\\n".join(ass_dialogues(layout,lambda x:hhmmss(x,True)))+"\\n")
+    f.write("\n".join(ass_dialogues(layout,lambda x:hhmmss(x,True)))+"\n")
 (out/"legendas_metadata.json").write_text(json.dumps({"mode":method,"segments":len(groups),"duration_seconds":round(duration,2),"source":"Narração original do episódio","warning":"Revisar sincronização antes de publicar.","canvas":[1080,1920],"subtitle_box":[LEFT,TOP,RIGHT,BOTTOM],"max_lines":2,"max_width_px":RIGHT-LEFT,"caption_center":CENTER},ensure_ascii=False,indent=2),encoding="utf-8")
 print("Legendas:",ass,"|",srt,"|",len(groups),"trechos | sincronização:",method)
