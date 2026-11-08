@@ -110,7 +110,7 @@ jobs:
             output/legendas.srt#legendas.srt \
             output/legendas_metadata.json#legendas_metadata.json \
             --repo "${{ github.repository }}" \
-            --title "ALLSTARS - episodio ${{ github.run_number }}" \
+            --title "$(python -c 'import json; episode=json.load(open("output/selected.json")); print("ALLSTARS | "+str(episode.get("title") or episode.get("subject") or "Vídeo")[:110])')" \
             --notes "PREVIA EDITORIAL: confira fontes, narracao e direitos de uso antes de postar." \
             --latest
       - name: Atualizar downloads do site
