@@ -31,6 +31,8 @@ jobs:
           node --check /tmp/allstars-ui.mjs
       - name: Validar extração de matérias e preservação de fontes
         run: python -m unittest discover -s tests -p 'test_article_extract.py' -v
+      - name: Validar consistência histórica dos roteiros por link
+        run: python -m unittest discover -s tests -p 'test_editorial_guard.py' -v
       - name: Conferir scripts, dados e histórico
         run: python engine/check.py
       - name: Conferir fontes de pesquisa
