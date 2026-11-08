@@ -208,11 +208,10 @@ def run():
         except ValueError as exc:
             host=urllib.parse.urlsplit(link).hostname or ""
             social=host in ("instagram.com","www.instagram.com","facebook.com","www.facebook.com","m.facebook.com","fb.watch")
-            if social and pasted:
-                unavailable.append({"url":link,"reason":"Postagem social não pôde ser lida automaticamente; apenas o texto colado serviu como evidência."})
-            else:
-                raise ValueError("Não foi possível ler a referência "+link[:120]+": "+str(exc)+
-                    (" Cole a legenda ou o texto da publicação, além do link." if social else "")) from exc
+            unavailable.append({"url":link,
+                "reason":("Rede social exige login ou bloqueou a leitura; cole a legenda original."
+                          if social else "Página não pôde ser lida: "+str(exc)[:120])})
+            # Não perder todas as referências quando somente um URL falha.
     if len(urls)>MAX_RESEARCH_LINKS:
         unavailable.extend({"url":link,"reason":"Referência preservada, não lida nesta execução: orçamento de 16 páginas."} for link in urls[MAX_RESEARCH_LINKS:])
     if pasted:
@@ -220,6 +219,8 @@ def run():
         articles.append({"title":"Texto fornecido pela administração (não verificado)", "text":pasted,
                          "submitted_url":"texto_colado", "url":"texto_colado",
                          "verification_status":"PENDENTE — TEXTO FORNECIDO PELO USUÁRIO"})
+    if not articles:
+        raise ValueError("Nenhuma referência acessível. Cole o texto original ou envie uma fonte pública legível.")
     combined="\n\n".join("[FONTE "+str(i+1)+" — "+item.get("title","Sem título")+"]\n"+
                          item.get("text","")[:3500] for i,item in enumerate(articles))
     title=req["subject"] or " | ".join(item.get("title","Fonte") for item in articles)[:220]
@@ -250,7 +251,9 @@ def run():
       "source_title":title,"requested_subject":req["subject"],
       "source_metadata":{"references":[{"title":item.get("title"),"url":item.get("url"),
           "verification_status":item.get("verification_status","PENDENTE")}
-          for item in articles],"pasted_text_included":bool(pasted),"verified_independently":False,"unavailable_social_links":unavailable},
+          for item in articles],"pasted_text_included":bool(pasted),"verified_independently":False,"submitted_reference_count":len(urls),
+       "readable_reference_count":len(articles)-(1 if pasted else 0),
+       "unread_references":unavailable,"unavailable_social_links":unavailable},
       "evidence_paragraphs":ep.get("evidence_paragraphs",[]),
       "editorial_checks":check,"previously_produced":repeated})
     output=ROOT/"output";output.mkdir(exist_ok=True)
