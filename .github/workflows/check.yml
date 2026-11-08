@@ -62,7 +62,6 @@ jobs:
           node --test tests/art-editorial.test.js
           python -m py_compile engine/art_gate.py engine/source_adaptation.py
           python -m unittest discover -s tests -p 'test_source_adaptation.py' -v
-          python -m unittest discover -s tests -p 'test_art_gate.py' -v
       - name: Conferir separação entre prévia, aprovação e produção final
         run: |
           python - <<'PY'
@@ -103,6 +102,8 @@ jobs:
           python -c "import json; d=json.load(open('output/pesquisa.json')); assert len(d['research_sites']) == 4"
       - name: Instalar Pillow para validar a identidade visual
         run: python -m pip install "Pillow>=10.4,<12"
+      - name: Validar aprovação de arte com Pillow instalado
+        run: python -m unittest discover -s tests -p 'test_art_gate.py' -v
       - name: Testar arte contextual única, nova a cada execução
         run: python -m unittest discover -s tests -p 'test_original_art.py' -v
       - name: Verificar que artes anime só pertencem ao atleta aprovado
