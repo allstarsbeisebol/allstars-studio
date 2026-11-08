@@ -6,6 +6,7 @@ As legendas são prévia editorial, não substituem revisão humana.
 """
 import argparse, json, re, subprocess, os, math
 from pathlib import Path
+from subtitle_layout import partition, ass_dialogues, LEFT, RIGHT, TOP, BOTTOM, CENTER
 
 p=argparse.ArgumentParser()
 p.add_argument("--episode",default="output/selected.json")
@@ -46,16 +47,8 @@ if not times:
         start=duration*cursor/total;cursor+=weight
         times.append((start,duration*cursor/total))
 
-groups=[];i=0
-while i<len(words):
-    j=min(len(words),i+6)
-    # evitar grupos muito rápidos/longos de acordo com a narração
-    while j<len(words) and times[j-1][1]-times[i][0]<1.30 and j-i<9:j+=1
-    start=max(0,times[i][0]-.06)
-    end=min(duration,max(start+.35,times[j-1][1]+.06))
-    label=" ".join(words[i:j])
-    groups.append((start,end,label))
-    i=j
+layout=partition(words,times)
+groups=[(r["start"],min(duration,r["end"]),r["text"]) for r in layout]
 
 def hhmmss(t,centiseconds=False):
     hours=int(t//3600);minutes=int(t//60)%60;sec=int(t)%60
@@ -70,7 +63,8 @@ with srt.open("w",encoding="utf-8") as f:
 def escape_ass(s):
     return str(s).replace("{","(").replace("}",")").replace("\\","/").replace("\n"," ")
 
-# ASS: legendas altas o suficiente para não cobrir a marca (área inferior reservada).
+# ASS: texto em caixa central aprovada, com 15% livres em cada lateral.
+# A caixa 756x220 encontra-se em x=162..918 e y=930..1150.
 header="""[Script Info]
 Title: ALLSTARS Beisebol - Alem do Jogo
 ScriptType: v4.00+
@@ -81,7 +75,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: ALLSTARS,DejaVu Sans,58,&H00FFFFFF,&H00C0F0F0,&H001A3566,&HD0000010,-1,0,0,0,100,100,0,0,3,5,0,2,60,60,328,1
+Style: ALLSTARS,DejaVu Sans,52,&H00FFFFFF,&H00C0F0F0,&H001A3566,&HAA000010,-1,0,0,0,100,100,0,0,1,3,0,5,162,162,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -89,7 +83,6 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 ass=out/"legendas.ass"
 with ass.open("w",encoding="utf-8") as f:
     f.write(header)
-    for start,end,label in groups:
-        f.write(f"Dialogue: 0,{hhmmss(start,True)},{hhmmss(end,True)},ALLSTARS,,0,0,0,,{escape_ass(label)}\n")
-(out/"legendas_metadata.json").write_text(json.dumps({"mode":method,"segments":len(groups),"duration_seconds":round(duration,2),"source":"Narração original do episódio","warning":"Revisar sincronização antes de publicar."},ensure_ascii=False,indent=2),encoding="utf-8")
+    f.write("\\n".join(ass_dialogues(layout,lambda x:hhmmss(x,True)))+"\\n")
+(out/"legendas_metadata.json").write_text(json.dumps({"mode":method,"segments":len(groups),"duration_seconds":round(duration,2),"source":"Narração original do episódio","warning":"Revisar sincronização antes de publicar.","canvas":[1080,1920],"subtitle_box":[LEFT,TOP,RIGHT,BOTTOM],"max_lines":2,"max_width_px":RIGHT-LEFT,"caption_center":CENTER},ensure_ascii=False,indent=2),encoding="utf-8")
 print("Legendas:",ass,"|",srt,"|",len(groups),"trechos | sincronização:",method)
