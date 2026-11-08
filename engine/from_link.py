@@ -193,9 +193,17 @@ def run():
     pasted=req["reference_text"]
     if not urls and not pasted:raise ValueError("Inclua referências para orientar o vídeo.")
     articles=[]
+    unavailable=[]
     for link in urls:
         try: articles.append(read_page(link))
-        except ValueError as exc:raise ValueError("Não foi possível ler uma das fontes fornecidas: "+str(exc)) from exc
+        except ValueError as exc:
+            host=urllib.parse.urlsplit(link).hostname or ""
+            social=host in ("instagram.com","www.instagram.com","facebook.com","www.facebook.com","m.facebook.com","fb.watch")
+            if social and pasted:
+                unavailable.append({"url":link,"reason":"Postagem social não pôde ser lida automaticamente; apenas o texto colado serviu como evidência."})
+            else:
+                raise ValueError("Não foi possível ler a referência "+link[:120]+": "+str(exc)+
+                    (" Cole a legenda ou o texto da publicação, além do link." if social else "")) from exc
     if pasted:
         if len(pasted)<80:raise ValueError("O texto colado precisa conter pelo menos 80 caracteres para servir de referência.")
         articles.append({"title":"Texto fornecido pela administração (não verificado)", "text":pasted,
@@ -231,7 +239,7 @@ def run():
       "source_title":title,"requested_subject":req["subject"],
       "source_metadata":{"references":[{"title":item.get("title"),"url":item.get("url"),
           "verification_status":item.get("verification_status","PENDENTE")}
-          for item in articles],"pasted_text_included":bool(pasted),"verified_independently":False},
+          for item in articles],"pasted_text_included":bool(pasted),"verified_independently":False,"unavailable_social_links":unavailable},
       "evidence_paragraphs":ep.get("evidence_paragraphs",[]),
       "editorial_checks":check,"previously_produced":repeated})
     output=ROOT/"output";output.mkdir(exist_ok=True)
