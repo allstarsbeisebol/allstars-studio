@@ -29,6 +29,8 @@ jobs:
         run: |
           node --check public/notify.js
           node --test tests/notify.test.js
+          node --check public/wizard.js
+          node --test tests/wizard.test.js
       - name: Validar JavaScript do painel web
         run: |
           python - <<'PY'
@@ -38,6 +40,8 @@ jobs:
           Path('/tmp/allstars-ui.mjs').write_text(script,encoding='utf-8')
           PY
           node --check /tmp/allstars-ui.mjs
+      - name: Validar telas guiadas, rascunho e acessibilidade estrutural
+        run: python -m unittest discover -s tests -p 'test_wizard_ui.py' -v
       - name: Verificar menu mobile acessível e botão de avisos no topo
         run: |
           python - <<'PY'
