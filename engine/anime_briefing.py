@@ -16,6 +16,8 @@ style=json.loads((ROOT/"brand/anime_direction.json").read_text(encoding="utf-8")
 athlete=str(ep.get("subject") or ep.get("athlete","")).strip()
 if not athlete:raise SystemExit("Assunto ausente no roteiro")
 headline=str(ep.get("title","ALÉM DO JOGO")).strip()
+hook=str(ep.get("hook") or headline).strip()
+research_direction=str(ep.get("art_direction") or "A cena deve representar apenas os fatos explícitos no roteiro e nas fontes.")[:600]
 sources=ep.get("sources",[])
 is_individual=ep.get("content_type","atleta")=="atleta"
 scene_direction=("Criar personagem de anime original adulto em ação coerente com a história; nunca inventar traços reais de uma pessoa sem referência."
@@ -25,6 +27,8 @@ briefing=f"""ALLSTARS STUDIO — DIREÇÃO DE ARTE ANIME APROVADA
 Série: ALÉM DO JOGO
 Assunto/atleta: {athlete}
 Headline do roteiro: {headline}
+Gancho narrado nos três segundos iniciais: {hook}
+Direção específica DESTA PESQUISA: {research_direction}
 
 FORMATO
 Capa vertical 1080x1920 (9:16), compatível com recorte do perfil 3:4.
@@ -55,7 +59,7 @@ FONTES INFORMADAS NO ROTEIRO
 {chr(10).join(str(x) for x in sources) or "Não informadas"}
 
 DIREITOS E CUSTOS
-Arte original para aprovação do projeto, com crédito adequado.
+Arte contextual original para esta produção, com crédito adequado. Composição local não equivale a anime premium.
 Não usar geração paga automaticamente nem copiar key art protegida.
 """
 out=Path(args.output);out.parent.mkdir(parents=True,exist_ok=True)
