@@ -123,6 +123,10 @@ if media.is_file():
                 "Licença (detalhes): "+str(info.get("license_url","")),
                 "Conferir licença e direitos antes de publicar."
             ])
+        elif status.get("visual_mode")=="original_context_art":
+            warning="Ilustração gráfica contextual inédita criada para este roteiro pelo ALLSTARS Studio. Representação simbólica; não é fotografia histórica nem arte anime premium."
+            caption=(caption+"\n\n"+warning).strip()
+            sources.extend(["","CRÉDITOS DA ILUSTRAÇÃO CONTEXTUAL",warning,"Criação: ALLSTARS Studio. Ver storyboard.json para rastrear as cenas."])
         elif status.get("visual_mode")=="original_cartoon" or status.get("status") not in ("downloaded","existing"):
             warning=("Composição temática ilustrativa original do ALLSTARS Studio; não é fotografia documental." if ep.get("content_type","atleta")!="atleta" else "Arte ilustrativa original em estilo cartoon; personagem fictício, não é retrato histórico fiel do atleta.")
             caption=(caption+"\n\n"+warning).strip()
