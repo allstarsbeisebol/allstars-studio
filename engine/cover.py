@@ -19,7 +19,7 @@ if curated is not None:
     image=image.convert("RGBA")
     stamp=Image.new("RGBA",image.size,(0,0,0,0))
     draw=ImageDraw.Draw(stamp,"RGBA")
-    draw.rectangle((0,1655,1080,1920),fill=(4,14,33,244))
+    draw.rectangle((0,1655,1080,1920),fill=(4,14,33,255))
     image.alpha_composite(stamp)
     mark=official_logo()
     scale=min(510/max(1,mark.width),190/max(1,mark.height))
