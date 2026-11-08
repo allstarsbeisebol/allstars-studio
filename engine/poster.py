@@ -135,7 +135,11 @@ def thematic_hero(base,episode):
     base.alpha_composite(layer,(0,185))
     return True
 
-def add_hero(base,episode):
+def add_hero(base,episode,index=0):
+    if episode.get("unique_art_required"):
+        from story_art import create_context_art
+        base.alpha_composite(create_context_art(episode,index),(0,120))
+        return False
     if episode.get("content_type","atleta") not in ("atleta",):
         return thematic_hero(base,episode)
     curated=hero_from_approved_asset(episode)
@@ -203,7 +207,7 @@ def headline_fit(message):
 
 def poster(episode,headline=None,index=0,total=1):
     base=gradient();draw_stadium(base,2026+index)
-    has_photo=add_hero(base,episode)
+    has_photo=add_hero(base,episode,index)
     dark=Image.new("RGBA",(W,H),(0,0,0,0));d=ImageDraw.Draw(dark,"RGBA")
     for y in range(850,1740,4):
         alpha=int(min(235,(y-850)/890*238))
