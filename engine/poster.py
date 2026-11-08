@@ -123,19 +123,37 @@ def paint(draw,top,bottom,hue,seed):
         draw.line((x,y,min(W,x+r.randint(15,130)),y+r.randint(-8,8)),fill=(*hue,r.randint(55,235)),width=r.randint(2,9))
 
 def headline_fit(message):
-    d=ImageDraw.Draw(Image.new("RGB",(1,1)))
-    for size in range(133,43,-3):
-        ft=face(size)
-        lines=[];cur=""
-        for word in str(message).upper().strip().split():
-            test=(cur+" "+word).strip()
-            if cur and d.textbbox((0,0),test,font=ft)[2]>930:
-                lines.append(cur);cur=word
-            else:cur=test
-        if cur:lines.append(cur)
-        if len(lines)<=4 and all(d.textbbox((0,0),l,font=ft)[2]<=930 for l in lines):
-            return ft,lines
-    return face(46),lines[:4]
+    """Tipografia grande, mas dentro da faixa editorial e sem cortar palavras."""
+    draw=ImageDraw.Draw(Image.new("RGB",(1,1)))
+    original=re.sub(r"\\s+"," ",str(message).upper()).strip()
+    text=original[:135]
+    for size in range(138,41,-3):
+        font=face(size)
+        lines=[];line=""
+        for word in text.split():
+            attempt=(line+" "+word).strip()
+            if line and draw.textbbox((0,0),attempt,font=font)[2]>920:
+                lines.append(line);line=word
+            else:line=attempt
+        if line:lines.append(line)
+        max_width=max([draw.textbbox((0,0),line,font=font)[2] for line in lines] or [0])
+        if len(lines)<=5 and max_width<=920 and int(size*1.08)*len(lines)<=505:
+            return font,lines
+    # Apenas títulos extremamente longos recebem indicação visual de corte.
+    font=face(43)
+    lines=[];line=""
+    for word in text.split():
+        attempt=(line+" "+word).strip()
+        if line and draw.textbbox((0,0),attempt,font=font)[2]>920:
+            lines.append(line);line=word
+        else:line=attempt
+    if line:lines.append(line)
+    if len(lines)>5:
+        lines=lines[:5]
+        while draw.textbbox((0,0),lines[-1]+"…",font=font)[2]>920:
+            lines[-1]=" ".join(lines[-1].split()[:-1])
+        lines[-1]+="…"
+    return font,lines
 
 def poster(episode,headline=None,index=0,total=1):
     base=gradient();draw_stadium(base,2026+index)
@@ -158,8 +176,8 @@ def poster(episode,headline=None,index=0,total=1):
     d.text((right,68),tag,font=ft,fill=GOLD)
     text=headline or episode.get("cover_headline") or episode.get("title") or "ALÉM DO JOGO"
     f,lines=headline_fit(text)
-    lh=int(f.size*1.10)
-    start=1135-max(0,len(lines)-2)*42
+    lh=int(f.size*1.08)
+    start=1073+max(0,(505-lh*len(lines))//2)
     paint(d,start-50,start+len(lines)*lh+65,NAVY,18+index)
     if len(lines)>=3:paint(d,start+2*lh-26,start+len(lines)*lh+57,RED,73+index)
     for i,line in enumerate(lines):
@@ -174,11 +192,17 @@ def poster(episode,headline=None,index=0,total=1):
     while d.textbbox((0,0),label,font=lf)[2]>900 and lf.size>23:lf=face(lf.size-2,False)
     d.text(((W-d.textbbox((0,0),label,font=lf)[2])//2,1672),label,font=lf,fill=WHITE)
     if not has_photo:
-        d.text((70,1097),"ILUSTRAÇÃO EDITORIAL · SEM FOTO HISTÓRICA",font=face(24,False),fill=GOLD)
+        note="ILUSTRAÇÃO EDITORIAL · SEM FOTO HISTÓRICA"
+        nd=face(23,False)
+        d.rounded_rectangle((65,949,715,996),radius=9,fill=(*INK,205))
+        d.text((84,952),note,font=nd,fill=GOLD)
     base.alpha_composite(art)
     logo=official_logo()
-    logo.thumbnail((400,172),Image.Resampling.LANCZOS)
-    x=(W-logo.width)//2;y=1740
+    # Aumenta com proporção original preservada, sem recriar a marca.
+    scale=min(460/max(1,logo.width),145/max(1,logo.height))
+    if abs(scale-1)>0.01:
+        logo=logo.resize((max(1,round(logo.width*scale)),max(1,round(logo.height*scale))),Image.Resampling.LANCZOS)
+    x=(W-logo.width)//2;y=1742
     shade=Image.new("RGBA",(W,H),(0,0,0,0))
     sd=ImageDraw.Draw(shade,"RGBA")
     sd.rounded_rectangle((x-38,y-18,x+logo.width+38,y+logo.height+26),radius=14,fill=(*INK,205))
