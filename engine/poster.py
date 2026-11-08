@@ -8,6 +8,7 @@ import base64, io, json, random, re, unicodedata
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 from comic_hero import cartoon_player
+from anime_assets import hero_from_approved_asset
 
 ROOT = Path(__file__).resolve().parents[1]
 W, H = 1080, 1920
@@ -108,6 +109,15 @@ def illustrated_player(base):
     base.alpha_composite(layer,(0,130))
 
 def add_hero(base,episode):
+    curated=hero_from_approved_asset(episode)
+    if curated is not None:
+        image,metadata=curated
+        fade=Image.new("L",(1,image.height),255)
+        for y in range(690,image.height):
+            fade.putpixel((0,y),int(255*max(0,(image.height-y)/(image.height-690))))
+        image.putalpha(fade.resize(image.size))
+        base.alpha_composite(image,(0,145))
+        return True
     photo=licensed_photo(episode)
     if photo is None:
         # Cartoon original com rosto/uniforme completos. Não retrato fiel.
