@@ -98,6 +98,35 @@ jobs:
           test -s output/allstars_reel.mp4
           test -s output/legendas.srt
           ffprobe -v error output/allstars_reel.mp4 >/dev/null
+      - name: Testar capa e vídeo de episódio novo com arte contextual inédita
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          ep=json.loads(Path("data/episode.json").read_text(encoding="utf-8"))
+          ep["id"]="teste-art-ep"
+          ep["episode_number"]=987654
+          ep["unique_art_required"]=True
+          ep["subject"]="No-hitter histórico 1993"
+          ep["title"]="A história do no-hitter"
+          ep["hook"]="Como um jogo sem rebatidas entrou para a história?"
+          ep["art_direction"]="Arremessador, zona de strike, cronologia e bola"
+          Path("output/new-art-episode.json").write_text(json.dumps(ep,ensure_ascii=False),encoding="utf-8")
+          PY
+          python engine/cover.py --episode output/new-art-episode.json --output output/new-art-cover.png
+          python engine/visual_quality.py --episode output/new-art-episode.json --output output/new-art-quality.json
+          python engine/render.py --episode output/new-art-episode.json --audio output/test-audio.wav --out-dir output/new-art
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          q=json.loads(Path("output/new-art-quality.json").read_text(encoding="utf-8"))
+          st=json.loads(Path("output/new-art/storyboard.json").read_text(encoding="utf-8"))
+          assert q["new_for_episode"] is True and q["premium"] is False,q
+          assert st["hook_window_seconds"]==3 and st["scenes"],st
+          assert Path("output/new-art-cover.png").stat().st_size>30000
+          assert Path("output/new-art/allstars_reel.mp4").stat().st_size>30000
+          PY
+          ffprobe -v error output/new-art/allstars_reel.mp4 >/dev/null
       - name: Testar Reel com imagem aprovada Jim Abbott sem Gemini e sem API paga
         run: |
           python - <<'PY'
