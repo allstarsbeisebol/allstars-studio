@@ -30,15 +30,27 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg fonts-dejavu-core
           python -m pip install -r requirements.txt
+      - name: Disponibilizar fontes Barlow oficiais para a arte
+        run: |
+          sudo install -d /usr/share/fonts/truetype/barlow
+          sudo curl --retry 2 -fLsS https://raw.githubusercontent.com/google/fonts/main/ofl/barlowcondensed/BarlowCondensed-ExtraBold.ttf -o /usr/share/fonts/truetype/barlow/BarlowCondensed-ExtraBold.ttf || true
+          sudo curl --retry 2 -fLsS https://raw.githubusercontent.com/google/fonts/main/ofl/barlow/Barlow-Bold.ttf -o /usr/share/fonts/truetype/barlow/Barlow-Bold.ttf || true
+          fc-cache -f || true
       - name: Baixar voz pt-BR
         run: python -m piper.download_voices pt_BR-faber-medium --data-dir voice
       - name: Preparar referências para pesquisa
         run: python engine/research.py --episode output/selected.json --output output/pesquisa.json
       - name: Criar capa oficial do episodio
         run: python engine/cover.py --episode output/selected.json --output output/capa.png
-      - name: Gerar MP3 e Reel
+      - name: Gerar narração brasileira pausada
+        run: python engine/speech.py --episode output/selected.json --model pt_BR-faber-medium --data-dir voice --output output/narracao.wav --pace 1.14
+      - name: Preparar alinhamento local das legendas (CPU)
+        run: python -m pip install -q 'faster-whisper>=1.1,<2' || echo 'Whisper nao disponivel; fallback temporal habilitado'
+      - name: Legendar e montar Reel cinematografico
+        env:
+          ALLSTARS_WHISPER: '1'
         run: |
-          python engine/speech.py --episode output/selected.json --model pt_BR-faber-medium --data-dir voice --output output/narracao.wav
+          python engine/subtitles.py --episode output/selected.json --audio output/narracao.wav --out-dir output
           python engine/render.py --episode output/selected.json --audio output/narracao.wav
           ffmpeg -y -loglevel error -i output/narracao.wav -codec:a libmp3lame -qscale:a 3 output/narracao.mp3
       - name: Copia de seguranca
@@ -53,6 +65,8 @@ jobs:
             output/roteiro.txt
             output/fontes.txt
             output/pesquisa.json
+            output/legendas.srt
+            output/legendas_metadata.json
           retention-days: 30
       - name: Publicar links para download
         env:
@@ -67,6 +81,8 @@ jobs:
             output/roteiro.txt#roteiro.txt \
             output/fontes.txt#fontes.txt \
             output/pesquisa.json#pesquisa.json \
+            output/legendas.srt#legendas.srt \
+            output/legendas_metadata.json#legendas_metadata.json \
             --repo "${{ github.repository }}" \
             --title "ALLSTARS - episodio ${{ github.run_number }}" \
             --notes "PREVIA EDITORIAL: confira fontes, narracao e direitos de uso antes de postar." \
