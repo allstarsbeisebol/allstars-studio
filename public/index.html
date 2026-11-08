@@ -619,7 +619,7 @@ $('external-image-send').addEventListener('click',async()=>{
   $('progress-stage').textContent='PREPARANDO IMAGEM EXTERNA';
   $('progress-title').textContent='Ajustando a imagem enviada';
   $('progress-message').textContent='A imagem está sendo adaptada ao formato vertical. Nenhum vídeo foi iniciado ainda. '+(result.library_message||'');
-  $('progress').scrollIntoView({behavior:'smooth',block:'start'});
+  showWizardScreen('progress');
   clearTimeout(timer);timer=setTimeout(poll,6000);
  }catch(e){
   $('external-image-status').textContent=e.message;
@@ -665,7 +665,7 @@ async function submitArtAction(action){
   $('progress-title').textContent=action==='approve'?'Produzindo o seu vídeo...':'Preparando uma nova imagem...';
   $('progress-message').textContent=data.message;
   $('art-feedback').value='';
-  $('progress').scrollIntoView({behavior:'smooth',block:'start'});
+  showWizardScreen('progress');
   clearTimeout(timer);timer=setTimeout(poll,6000);
  }catch(e){$('art-action-message').textContent=e.message;}
  finally{for(const btn of buttons)btn.disabled=false;}
@@ -713,7 +713,8 @@ function showToast(kind,title,message,target='downloads'){
 $('toast-close').addEventListener('click',()=>$('completion-toast').classList.add('hidden'));
 $('toast-action').addEventListener('click',()=>{
  $('completion-toast').classList.add('hidden');
- $(toastTarget).scrollIntoView({behavior:'smooth',block:'start'});
+ showWizardScreen(toastTarget==='downloads'?'result':toastTarget==='alert-settings'?'alerts':'progress',
+  {force:toastTarget==='progress'&&!pending});
 });
 function syncNotifyButton(){
  const btn=$('notify-enable'),note=$('notify-explanation');
@@ -755,7 +756,7 @@ function announceEnd(issueId,kind,details){
   issueId,kind,title:'ALLSTARS Studio — '+(ready?'vídeo pronto':'atenção à produção'),body,
   onClick:()=>{
    window.focus();
-   (ready?$('downloads'):$('progress')).scrollIntoView({behavior:'smooth',block:'start'});
+   showWizardScreen(ready?'result':'progress',{force:!ready&&!pending});
   }
  });
 }
@@ -809,7 +810,8 @@ function explainType(){
 }
 function showFormProblem(message){
  $('form-hint').textContent=message;
- $('options').scrollIntoView({behavior:'smooth',block:'start'});
+ showWizardScreen('references');
+ $('form-hint').setAttribute('role','alert');
 }
 function validateDraft(){
  const rawLinks=$('reference-links-text').value;
@@ -838,10 +840,10 @@ function openReview(){
   ['Depois de confirmar','O Studio prepara o prompt e a primeira capa. Você também poderá criar a imagem em outra IA e colá-la antes de aprovar o MP4.']
  ];
  for(const [label,value] of lines){const p=document.createElement('p');const strong=document.createElement('strong');strong.textContent=label+': ';p.append(strong,document.createTextNode(value));summary.append(p);}
- $('confirm-panel').classList.remove('hidden');$('confirm-panel').scrollIntoView({behavior:'smooth',block:'start'});$('confirm-panel').focus();
+ $('confirm-panel').classList.remove('hidden');showWizardScreen('confirm');
 }
 $('review').addEventListener('click',openReview);
-$('review-back').addEventListener('click',()=>{$('confirm-panel').classList.add('hidden');$('options').scrollIntoView({behavior:'smooth',block:'start'});});
+$('review-back').addEventListener('click',()=>{$('confirm-panel').classList.add('hidden');showWizardScreen('references');});
 
 function updateFormHint(){
  const urls=getReferences(),text=$('reference-text').value.trim(),subject=$('subject').value.trim();
