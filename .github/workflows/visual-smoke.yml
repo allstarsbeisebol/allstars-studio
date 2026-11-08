@@ -1,0 +1,32 @@
+name: "ALLSTARS | Verificar conexão Supabase"
+on:
+  push:
+    branches: [main]
+    paths:
+      - "engine/visual_sync.py"
+      - "engine/visual_smoke.py"
+      - ".github/workflows/visual-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  read-only-smoke:
+    if: github.repository == 'allstarsbeisebol/allstars-studio'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Testar bucket privado e memória sem alterar dados
+        env:
+          SUPABASE_URL: https://alrgqmwnynybawenyugb.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python -m py_compile engine/visual_smoke.py engine/visual_sync.py
+          python engine/visual_smoke.py
