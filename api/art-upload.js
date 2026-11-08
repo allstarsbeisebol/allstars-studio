@@ -1,5 +1,6 @@
 import {randomBytes} from "node:crypto";
 import {authorized,configured,sameOrigin,json} from "../lib/security.js";
+import {visualConfigured,jpegSize,storeImage} from "../lib/visual-storage.js";
 
 const REPO="allstarsbeisebol/allstars-studio";
 const GH="https://api.github.com/repos/"+REPO;
@@ -24,9 +25,14 @@ export default async function handler(req,res){
   const id=String(req.body?.id||"");
   const revision=Number(req.body?.revision);
   const fit=String(req.body?.fit||"contain");
+  const sourceKind=String(req.body?.source_kind||"uploaded_original");
+  const promptText=typeof req.body?.prompt==="string"?req.body.prompt.trim():"";
   if(!/^[1-9][0-9]{0,8}$/.test(id)||!Number.isSafeInteger(revision)||revision<1||revision>99999)
     return json(res,400,{error:"Pedido ou versão inválidos."});
   if(!["contain","cover","blur"].includes(fit))return json(res,400,{error:"Escolha um enquadramento válido."});
+  if(!["uploaded_original","generated_external"].includes(sourceKind))
+    return json(res,400,{error:"Selecione se a imagem foi enviada ou gerada em outra IA."});
+  if(promptText.length>12000)return json(res,400,{error:"O prompt excede 12 mil caracteres."});
   if(req.body?.rightsConfirmed!==true)
     return json(res,400,{error:"Confirme que você tem permissão para utilizar esta imagem."});
   const raw=String(req.body?.image||"");
@@ -86,7 +92,24 @@ export default async function handler(req,res){
       body:JSON.stringify({body:comment})
     });
     if(!created.ok)return json(res,502,{error:"Imagem enviada, mas a solicitação de revisão não foi registrada. Não aprove outra capa até conferir o pedido."});
-    return json(res,202,{accepted:true,state:"art_generating",
+    let archived=false;
+    let library_message="A imagem segue no GitHub; o Supabase ainda precisa ser configurado na Vercel para arquivar novas criações.";
+    if(visualConfigured()){
+      try{
+        const dimensions=jpegSize(image);
+        await storeImage({
+          issue:Number(id),title:issue.title,
+          subject:String(issue.body||"").match(/^ASSUNTO:\\s*(.*)$/m)?.[1]||"",
+          assetName:asset,image,width:dimensions.width,height:dimensions.height,
+          sourceKind,revision,fit,promptText:sourceKind==="generated_external"?promptText:""
+        });
+        archived=true;library_message="Imagem salva também no banco visual privado do Supabase.";
+      }catch(e){
+        console.error("[ALLSTARS Visual] Não foi possível arquivar o upload:",e.message);
+        library_message="A capa foi enviada para a produção no GitHub, mas não foi arquivada no Supabase. Confira as configurações da biblioteca.";
+      }
+    }
+    return json(res,202,{accepted:true,state:"art_generating",archived,library_message,
       message:"Imagem recebida. Preparando a capa e a versão para Instagram, antes de produzir o MP4."});
   }catch{return json(res,502,{error:"Não foi possível enviar a imagem agora. Confira a conexão e tente novamente."});}
 }
