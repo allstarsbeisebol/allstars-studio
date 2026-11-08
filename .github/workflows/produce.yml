@@ -142,7 +142,7 @@ jobs:
             --latest
       - name: Confirmar capa usada no vídeo na biblioteca Supabase
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_URL: https://alrgqmwnynybawenyugb.supabase.co
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           python engine/visual_sync.py --stage published || echo "Reel disponível; sincronização visual pendente."
