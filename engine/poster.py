@@ -7,6 +7,7 @@ from __future__ import annotations
 import base64, io, json, random, re, unicodedata
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
+from comic_hero import cartoon_player
 
 ROOT = Path(__file__).resolve().parents[1]
 W, H = 1080, 1920
@@ -105,10 +106,9 @@ def illustrated_player(base):
 def add_hero(base,episode):
     photo=licensed_photo(episode)
     if photo is None:
-        raise FileNotFoundError(
-            "FOTOGRAFIA OBRIGATÓRIA: não foi encontrada foto histórica autorizada do atleta. "
-            "Nenhum vídeo será criado com silhueta ou ilustração substituta."
-        )
+        # Cartoon original com rosto/uniforme completos. Não retrato fiel.
+        base.alpha_composite(cartoon_player(episode.get("athlete","Atleta"),episode.get("episode_number",0)),(0,125))
+        return False
     overlay=photo.convert("RGBA")
     film=Image.new("RGBA",overlay.size,(*NAVY,36))
     overlay=Image.alpha_composite(overlay,film)
