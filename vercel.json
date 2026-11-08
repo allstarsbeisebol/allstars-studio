@@ -24,5 +24,8 @@
       ]
     }
   ],
-  "outputDirectory": "public"
+  "outputDirectory": "public",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "npm run build"
 }
