@@ -5,6 +5,7 @@ Não afirma ter criado ilustração nova.
 """
 import argparse,json
 from pathlib import Path
+from scene_direction import story_scene
 
 ROOT=Path(__file__).resolve().parents[1]
 p=argparse.ArgumentParser()
@@ -19,6 +20,7 @@ headline=str(ep.get("title","ALÉM DO JOGO")).strip()
 hook=str(ep.get("hook") or headline).strip()
 research_direction=str(ep.get("art_direction") or "A cena deve representar apenas os fatos explícitos no roteiro e nas fontes.")[:600]
 sources=ep.get("sources",[])
+scene=story_scene(ep)
 is_individual=ep.get("content_type","atleta")=="atleta"
 scene_direction=("Criar personagem de anime original adulto em ação coerente com a história; nunca inventar traços reais de uma pessoa sem referência."
                  if is_individual else
@@ -31,17 +33,21 @@ Gancho narrado nos três segundos iniciais: {hook}
 Direção específica DESTA PESQUISA: {research_direction}
 
 FORMATO
-Capa vertical 1080x1920 (9:16), compatível com recorte do perfil 3:4.
-Logo original ALLSTARS, sem redesenhar; paleta azul royal #315FAC,
-navy #1A3566, vermelho #CE233E, dourado #F0C040, branco #FFFFFF.
-O título, a logo e o sujeito precisam ser equilibrados no recorte.
+ILUSTRAÇÃO-BASE vertical 1080x1920 (9:16), compatível com recorte 3:4.
+SEM logotipo, SEM título, SEM caixas de legendas, SEM molduras ou cartões.
+O ALLSTARS Studio aplica DEPOIS a logo original e a tipografia sobre a arte,
+de acordo com a Bíblia Visual 2026. Apenas orientar respiro natural.
+
+CENA NARRATIVA ESPECÍFICA (ACIMA DE QUALQUER ESTILO GENÉRICO)
+{scene}
 
 DIREÇÃO VISUAL
 {style["visual_direction"]}
-Personagem de anime original adulto, ação de beisebol anatomicamente correta,
-expressão determinada, sombras cel-shading refinadas, estádio noturno
-com refletores, profundidade, pinceladas esportivas azul/vermelho,
-tipografia grande e legível. Não imitar personagens de séries existentes.
+Personagens originais em ações historicamente coerentes, anatomia correta,
+expressões legíveis, cel-shading refinado, profundidade e ambiente próprio
+da história. Não forçar estádio noturno moderno em narrativa de época.
+Nenhuma tipografia, símbolo de interface ou placa decorativa na arte-base.
+Não imitar personagens de séries existentes.
 Adotar a linguagem de direção, luz, texturas e enquadramento da prévia Jim Abbott aprovada,\nsem copiar sua composição ou imagem em outras histórias.\nEvitar o visual de desenho infantil, boneco geométrico, silhueta e
 posições impossíveis. NÃO inventar características físicas específicas.
 
@@ -52,8 +58,10 @@ exigir informação explícita na fonte antes de representar visualmente.
 Nenhum retrato ilustrado é fotografia histórica.
 
 ÁREA DA NARRAÇÃO
-Subtítulos somente entre x=162..918, y=930..1150, até duas linhas.
-A arte deve reservar contraste sem competir com rosto, logo ou headline.
+O compositor do Studio controla a região das legendas
+(x=162..918, y=930..1150, no máximo 2 linhas).
+A IA externa NÃO deve desenhar essas caixas ou deixar um retângulo vazio;
+apenas mantenha pessoas e detalhes essenciais fora das bordas e com respiro.
 
 FONTES INFORMADAS NO ROTEIRO
 {chr(10).join(str(x) for x in sources) or "Não informadas"}
