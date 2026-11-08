@@ -14,7 +14,7 @@ export default async function handler(req,res){
     const commentsRes=await fetch("https://api.github.com/repos/"+REPO+"/issues/"+id+"/comments?per_page=100",{headers});
     if(!commentsRes.ok)return json(res,502,{error:"Não foi possível consultar a produção."});
     const comments=await commentsRes.json();
-    const completed=comments.findLast(c=>String(c.body||"").includes("Episódio gerado."));
+    const completed=comments.findLast(c=>/^(Episódio|Vídeo) gerado\./.test(String(c.body||"")));
     if(issue.state==="closed"&&completed){
       const match=String(completed.body||"").match(/episodio-(\d+)/);
       if(!match)return json(res,200,{state:"running",message:"Finalizando arquivos..."});
