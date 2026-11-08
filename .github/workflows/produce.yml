@@ -43,6 +43,11 @@ jobs:
             --pattern selected.json --pattern capa.png --pattern capa_perfil_3x4.png \
             --dir output --clobber
           python engine/art_gate.py approve
+          asset="$(python -c 'import json; print(json.load(open("output/selected.json")).get("art_image_asset",""))')"
+          if [ -n "$asset" ]; then
+            gh release download "preview-issue-${ISSUE_ID}" --repo "${{ github.repository }}" \
+              --pattern "$asset" --dir output --clobber
+          fi
       - name: Instalar programas
         run: |
           sudo apt-get update -qq
