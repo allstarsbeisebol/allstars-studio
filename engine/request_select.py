@@ -22,4 +22,11 @@ selection=root/"output/selected.json"
 if selection.is_file():
     episode=json.loads(selection.read_text(encoding="utf-8"))
     episode["unique_art_required"]=True
+    if not str(episode.get("hook") or "").strip():
+        # Episódios antigos da biblioteca não têm campo de hook: reutilizar
+        # primeira frase existente, sem inventar novos fatos.
+        import re
+        narration=str(episode.get("narration") or "").strip()
+        first=re.split(r"(?<=[.!?])\\s+",narration,maxsplit=1)[0].strip()
+        episode["hook"]=" ".join(first.split()[:16]) or str(episode.get("title") or "")
     selection.write_text(json.dumps(episode,ensure_ascii=False,indent=2),encoding="utf-8")
