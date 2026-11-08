@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
-"""Escolhe modo do pedido com base no evento GitHub sem avaliar entrada como shell."""
-import json, os, subprocess, sys
+"""Despacha pedidos do ALLSTARS por assunto/link sem trocar histórias."""
+import json,os,subprocess,sys
 from pathlib import Path
+from content_request import parse
 root=Path(__file__).resolve().parents[1]
-mode="auto"
+req={"mode":"auto","content_type":"auto","subject":"","url":""}
 if os.environ.get("GITHUB_EVENT_NAME")=="issues":
     event=json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text(encoding="utf-8"))
-    body=str(event.get("issue",{}).get("body") or "")
-    if any(line.lstrip().upper().startswith("LINK:") for line in body.splitlines()):
-        mode="link"
-print("Modo do pedido:",mode,flush=True)
-script="engine/from_link.py" if mode=="link" else "engine/produce_select.py"
+    req=parse(event.get("issue",{}).get("body",""))
+if req["url"]:
+    script="engine/from_link.py"
+elif req["subject"]:
+    script="engine/topic_generate.py"
+else:
+    script="engine/produce_select.py"
+print("Modo:",req["mode"],"| tipo:",req["content_type"],"| assunto:",req["subject"][:100],flush=True)
 subprocess.run([sys.executable,str(root/script)],check=True,cwd=root)
