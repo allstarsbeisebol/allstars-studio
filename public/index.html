@@ -200,6 +200,9 @@ async function loadLatest(){
   files['capa.png']=data.cover;files['capa_perfil_3x4.png']=data.profile_cover;files['narracao.mp3']=data.audio;files['legenda_instagram.txt']=data.caption;
   files['roteiro.txt']=data.script;files['fontes.txt']=data.sources;files['pesquisa.json']=data.research;files['midia.json']=data.media;files['briefing_arte_anime.txt']=data.anime_briefing;files['qualidade_visual.json']=data.visual_quality;files['legendas.srt']=data.subtitles;
   renderFiles(files,data.athlete+' — '+data.title);
+  if(data.visual_premium===false){
+   $('result-message').textContent='Prévia com arte de contingência: ainda não atende ao estilo anime premium aprovado. Revise antes de publicar.';
+  }
  }catch{$('result-message').textContent='Quando uma produção terminar, seus arquivos aparecerão aqui.';}
 }
 init();
