@@ -1,5 +1,25 @@
 import {authorized,configured,sameOrigin,allowedUrl,json} from "../lib/security.js";
 const REPO="allstarsbeisebol/allstars-studio";
+async function githubAccessError(response,action){
+  const status=response.status;
+  if(status===401)return "A conexão com o GitHub precisa ser renovada. Verifique se ALLSTARS_GITHUB_TOKEN está ativa na Vercel.";
+  if(status===404)return "O GitHub não encontrou o repositório para este acesso. Confira se o token permite acessar allstarsbeisebol/allstars-studio.";
+  if(status!==403&&status!==429)return null;
+  const remaining=response.headers?.get?.("x-ratelimit-remaining");
+  const retry=response.headers?.get?.("retry-after");
+  let message="";
+  try{
+    const data=await response.json();
+    if(typeof data?.message==="string")message=data.message.slice(0,400).toLowerCase();
+  }catch{}
+  const limited=status===429||remaining==="0"||retry!==null&&retry!==undefined||
+    /secondary rate limit|rate limit exceeded|abuse detection|too many requests/.test(message);
+  if(limited)return "O GitHub limitou temporariamente as solicitações. Seu pedido não foi iniciado. Aguarde a liberação antes de tentar novamente. Não é necessário criar um token novo.";
+  if(/resource not accessible by personal access token|insufficient permission|must have write access|permission to .*denied|integration does not have/.test(message))
+    return "O GitHub permitiu consultar, mas não autorizou "+action+". No token ALLSTARS_GITHUB_TOKEN, confira se o proprietário é allstarsbeisebol, o repositório allstars-studio está selecionado e a permissão Issues está em Read and write. Depois salve na Vercel e publique novamente.";
+  return "O GitHub recusou "+action+" (403), mas não informou claramente se foi permissão ou limite temporário. Confira se a permissão Issues está em Read and write e, se já estiver, evite criar outro token imediatamente: consulte o status do GitHub ou tente novamente mais tarde.";
+}
+
 export default async function handler(req,res){
   if(req.method!=="POST")return json(res,405,{error:"Método não permitido."});
   if(!sameOrigin(req))return json(res,403,{error:"Origem não autorizada."});
@@ -28,9 +48,8 @@ export default async function handler(req,res){
     // Evitar novos pedidos se já houver produção sob demanda aguardando conclusão.
     const open=await fetch("https://api.github.com/repos/"+REPO+"/issues?state=open&per_page=100",{headers});
     if(!open.ok){
-      if(open.status===401||open.status===403)return json(res,503,{error:"A credencial GitHub configurada na Vercel não consegue consultar o novo repositório allstarsbeisebol/allstars-studio ("+open.status+"). Atualize ALLSTARS_GITHUB_TOKEN no projeto ALLSTARS Beisebol e autorize este repositório."});
-      if(open.status===404)return json(res,503,{error:"O token da Vercel não tem acesso ao repositório allstarsbeisebol/allstars-studio. Autorize o novo repositório no GitHub."});
-      throw Error("Não foi possível consultar pedidos.");
+      const explanation=await githubAccessError(open,"consultar os pedidos");
+      return json(res,503,{error:explanation||"Não foi possível consultar os pedidos no GitHub ("+open.status+")."});
     }
     const items=await open.json();
     if(items.some(item=>!item.pull_request&&typeof item.title==="string"&&item.title.startsWith("[ALLSTARS] Criar novo episódio"))){
@@ -45,11 +64,9 @@ export default async function handler(req,res){
     const issue=await fetch("https://api.github.com/repos/"+REPO+"/issues",{method:"POST",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({title:mode==="link"?"[ALLSTARS] Criar novo episódio por link":"[ALLSTARS] Criar novo episódio",body})});
     if(!issue.ok){
       const status=issue.status;
-      if(status===401)return json(res,503,{error:"O token GitHub configurado na Vercel é inválido ou expirou (401). Atualize ALLSTARS_GITHUB_TOKEN."});
-      if(status===403)return json(res,503,{error:"O GitHub recusou criar o episódio (403). Autorize ALLSTARS_GITHUB_TOKEN a escrever Issues no repositório allstarsbeisebol/allstars-studio. No token Fine-grained: Repository access = allstarsbeisebol/allstars-studio; Issues = Read and write."});
-      if(status===404)return json(res,503,{error:"O token GitHub não enxerga o novo repositório allstarsbeisebol/allstars-studio (404). Conceda acesso ao repositório no token."});
-      if(status===422)return json(res,502,{error:"O GitHub rejeitou o conteúdo do pedido (422). Verifique se Issues está habilitado e tente novamente."});
-      if(status===429)return json(res,503,{error:"O GitHub limitou temporariamente as solicitações (429). Tente novamente após a liberação."});
+      const explanation=await githubAccessError(issue,"criar o pedido de vídeo");
+      if(explanation)return json(res,503,{error:explanation});
+      if(status===422)return json(res,502,{error:"O GitHub rejeitou os dados deste pedido. Revise o assunto, os links e o texto fornecido."});
       return json(res,502,{error:"Não foi possível iniciar o gerador no GitHub ("+status+")."});
     }
     const data=await issue.json();
