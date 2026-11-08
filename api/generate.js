@@ -11,7 +11,7 @@ export default async function handler(req,res){
   const contentType=typeof req.body?.content_type==="string"?req.body.content_type.trim().toLowerCase():"auto";
   if(!types.has(contentType))return json(res,400,{error:"Escolha um tipo de conteúdo válido."});
   const subject=typeof req.body?.subject==="string"?req.body.subject.trim():"";
-  if(subject.length>160||/[\\r\\n\\x00-\\x1F]/.test(subject))return json(res,400,{error:"O assunto deve ter até 160 caracteres em uma única linha."});
+  if(subject.length>160||/[\r\n\x00-\x1F]/.test(subject))return json(res,400,{error:"O assunto deve ter até 160 caracteres em uma única linha."});
   const rawUrl=typeof req.body?.url==="string"?req.body.url.trim():"";
   const source=rawUrl?allowedUrl(rawUrl):null;
   if(rawUrl&&!source)return json(res,400,{error:"Informe um link HTTPS público válido."});
