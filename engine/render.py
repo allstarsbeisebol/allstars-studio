@@ -21,7 +21,7 @@ proc=subprocess.run(["ffprobe","-v","error","-show_entries","format=duration","-
 duration=float(proc.stdout.strip())
 if duration<=1:raise SystemExit("Áudio inválido ou muito curto")
 screens=[str(x).strip() for x in ep.get("screens",[]) if str(x).strip()]
-scenes=[ep.get("title","ALÉM DO JOGO")]+screens[:5]
+scenes=[ep.get("hook") or ep.get("title","ALÉM DO JOGO")]+screens[:5]
 if len(scenes)==1:scenes.append(ep.get("athlete","HISTÓRIAS REAIS"))
 photos=[]
 for i,message in enumerate(scenes):
