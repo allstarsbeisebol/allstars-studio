@@ -88,3 +88,21 @@ test("status: libera downloads após conclusão registrada",async()=>{
     assert.equal(res.body.assets["allstars_reel.mp4"],"https://github.com/example.mp4");
   }finally{globalThis.fetch=original;}
 });
+
+test("status: mostra motivo seguro específico informado pelo workflow",async()=>{
+  const cookie=await loginCookie();
+  const original=globalThis.fetch;
+  globalThis.fetch=async(url)=>{
+    const issue={title:"[ALLSTARS] Criar novo episódio por link",user:{login:"liuhelpme"},state:"closed"};
+    const comments=[{body:"Não foi possível gerar este episódio. Motivo: Gemini HTTP 404 (gemini-3.5-flash-lite): modelo não disponível para esta chave/projeto. O pedido não foi substituído por outra história. Registro: https://github.com/liuhelpme/allstars-studio/actions/runs/999"}];
+    return {ok:true,json:async()=>url.endsWith("/issues/151")?issue:comments};
+  };
+  try{
+    const res=response();
+    await status({method:"GET",headers:headers(cookie),query:{id:"151"}},res);
+    assert.equal(res.code,200);
+    assert.equal(res.body.state,"error");
+    assert.match(res.body.message,/Gemini HTTP 404/);
+    assert.match(res.body.message,/modelo não disponível/);
+  }finally{globalThis.fetch=original;}
+});
