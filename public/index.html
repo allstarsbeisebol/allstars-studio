@@ -13,6 +13,11 @@
 .section-nav a:hover,.section-nav a:focus-visible{border-color:#F0C040;color:#F0C040}
 .library-tools{display:grid;grid-template-columns:1fr minmax(160px,220px) auto;align-items:end;gap:12px;margin:18px 0}
 .library-view{display:flex;gap:8px;margin-bottom:4px}
+#extra-reference{border:1px solid #49648e;border-radius:12px;padding:16px;margin:12px 0;background:#0c2243}
+#extra-reference summary{cursor:pointer;font-weight:700;color:#F0C040}
+.library-more{margin-top:12px;padding:8px;border:1px solid #49648e;border-radius:10px}
+.library-more summary{cursor:pointer;font-size:14px;font-weight:700}
+.library-more .links{padding:8px 2px;gap:10px}
 .library-pagination{display:flex;justify-content:center;align-items:center;gap:12px;padding:18px 0}
 .library-grid.is-list{display:block}
 .library-grid.is-list .library-entry{display:grid;grid-template-columns:95px 1fr;gap:15px;margin-bottom:12px}
@@ -92,11 +97,12 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
       <p class="field-help" id="reference-count" role="status">0 links identificados. Cole tudo de uma vez.</p>
       <p class="note">Pode incluir notícias e publicações públicas do Instagram ou Facebook. Se a rede social impedir a leitura automática, cole a legenda abaixo. Conteúdo público não autoriza reutilizar fotos e vídeos de terceiros.</p>
     </div>
-    <div class="wide">
-      <label for="reference-text">Quer colar uma legenda ou um texto? <span class="note">(opcional)</span></label>
+    <details class="wide" id="extra-reference">
+      <summary>+ Incluir legenda ou texto de referência (opcional)</summary>
+      <label for="reference-text">Texto adicional para a pesquisa</label>
       <textarea id="reference-text" maxlength="8000" placeholder="Cole uma legenda, trecho de artigo ou informação para orientar o vídeo. Indique a origem sempre que possível."></textarea>
       <p class="note">Atenção: as referências enviadas entram em pedidos públicos no GitHub. Cole somente conteúdo público; não inclua dados pessoais, senhas ou informações confidenciais. Textos de terceiros devem ser usados como referência, não copiados na íntegra para publicação.</p>
-    </div>
+    </details>
     <p id="form-hint" class="notice" aria-live="polite">Sem assunto nem referência, o Studio escolhe uma história da biblioteca.</p>
     <p id="draft-status" class="field-help" role="status">Seu rascunho será salvo automaticamente neste navegador.</p>
     <button id="clear-form" type="button" class="outline">Limpar formulário</button>
@@ -181,7 +187,7 @@ function restoreDraft(){
   const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');if(!d||typeof d!=='object')return;
   for(const [key,id] of [['subject','subject'],['urls','reference-links-text'],['reference_text','reference-text']])if(typeof d[key]==='string')$(id).value=d[key];
   if(['auto','atleta','tema','noticia','lista','explicativo'].includes(d.content_type))$('content-type').value=d.content_type;
-  $('draft-status').textContent='Rascunho recuperado.';updateFormHint();explainType();
+  $('draft-status').textContent='Rascunho recuperado.';if(d.reference_text)$('extra-reference').open=true;updateFormHint();explainType();
  }catch{}
 }
 function clearDraft(){localStorage.removeItem(DRAFT_KEY);$('draft-status').textContent='Pedido enviado. Rascunho local limpo.';}
@@ -345,7 +351,7 @@ restoreDraft();
 $('clear-form').addEventListener('click',()=>{
  if(!confirm('Limpar o formulário? O rascunho salvo neste navegador será apagado.'))return;
  for(const id of ['subject','reference-links-text','reference-text'])$(id).value='';
- $('content-type').value='auto';localStorage.removeItem(DRAFT_KEY);$('confirm-panel').classList.add('hidden');$('draft-status').textContent='Formulário limpo.';updateFormHint();explainType();
+ $('content-type').value='auto';localStorage.removeItem(DRAFT_KEY);$('confirm-panel').classList.add('hidden');$('extra-reference').open=false;$('draft-status').textContent='Formulário limpo.';updateFormHint();explainType();
 });
 async function create(){
  $('completion-toast').classList.add('hidden');
@@ -458,7 +464,17 @@ function paintLibrary(){
    if(item.assets?.['allstars_reel.mp4']){
      const video=document.createElement('a');video.href=item.assets['allstars_reel.mp4'];video.target='_blank';video.rel='noopener';video.className='btn secondary';video.textContent='Baixar MP4';actions.append(video);
    }
-   body.append(title,date,actions);card.append(image,body);list.append(card);
+   const more=document.createElement('details');more.className='library-more';
+   const moreTitle=document.createElement('summary');moreTitle.textContent='Mais opções';more.append(moreTitle);
+   const extra=document.createElement('div');extra.className='links';
+   for(const [asset,label] of [['roteiro.txt','Ler roteiro'],['fontes.txt','Conferir fontes'],['storyboard.json','Ver storyboard'],['qualidade_visual.json','Ver qualidade da arte']]){
+     const url=item.assets?.[asset];
+     if(typeof url!=='string'||!url.startsWith('https://github.com/allstarsbeisebol/allstars-studio/releases/download/'))continue;
+     const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener';link.textContent=label;extra.append(link);
+   }
+   if(item.release){const link=document.createElement('a');link.href=item.release;link.target='_blank';link.rel='noopener';link.textContent='Abrir publicação';extra.append(link);}
+   more.append(extra);
+   body.append(title,date,actions,more);card.append(image,body);list.append(card);
  }
  $('library-page').textContent=results.length?'Página '+(libraryPage+1)+' de '+pages+' · '+results.length+' vídeo(s)':'Nenhum vídeo encontrado.';
  $('library-prev').disabled=libraryPage===0;$('library-next').disabled=libraryPage+1>=pages;
