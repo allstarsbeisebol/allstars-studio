@@ -50,14 +50,14 @@ inputs+=["-i",str(audio)]
 filters=[]
 for i in range(len(photos)):
     # Ken Burns em intensidade suave, sem deformar o logo.
-    filters.append(f"[{i}:v]fps=24,scale=1140:2027:flags=lanczos,"
-                   f"crop=1080:1920:x='30+14*sin(t/3+{i})':y='53+14*cos(t/3+{i})',"
+    filters.append(f"[{i}:v]fps=24,scale=1100:1956:flags=lanczos,"
+                   f"crop=1080:1920:x='10+8*sin(t/3+{i})':y='18+8*cos(t/3+{i})',"
                    f"setsar=1,format=yuv420p,settb=AVTB,setpts=PTS-STARTPTS[v{i}]")
 label="v0";elapsed=0.0
 for i in range(1,len(photos)):
     elapsed+=timings[i-1]
     target=f"mix{i}"
-    filters.append(f"[{label}][v{i}]xfade=transition=fade:duration={fade}:offset={elapsed:.3f}[{target}]")
+    filters.append(f"[{label}][v{i}]xfade=transition=fadeblack:duration={fade}:offset={elapsed:.3f}[{target}]")
     label=target
 filters.append(f"[{label}]subtitles=filename='{ass.as_posix()}',format=yuv420p[final]")
 output=out/"allstars_reel.mp4"
