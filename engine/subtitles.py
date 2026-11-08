@@ -75,7 +75,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: ALLSTARS,DejaVu Sans,52,&H00FFFFFF,&H00C0F0F0,&H001A3566,&HAA000010,-1,0,0,0,100,100,0,0,1,3,0,5,162,162,0,1
+Style: ALLSTARS,DejaVu Sans,52,&H00FFFFFF,&H00C0F0F0,&H0066351A,&HAA000010,-1,0,0,0,100,100,0,0,1,3,0,5,162,162,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
