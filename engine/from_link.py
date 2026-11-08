@@ -41,23 +41,38 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 def read_page(url):
-    url=validate(url)
-    req=urllib.request.Request(url,headers={"User-Agent":"ALLSTARS-Editorial/1.0 (research, single-page fetch)","Accept":"text/html"})
+    original=validate(url)
+    current=original
     opener=urllib.request.build_opener(NoRedirect)
-    try:
-        with opener.open(req,timeout=15) as response:
-            mime=response.headers.get_content_type()
-            if mime not in ("text/html","application/xhtml+xml"):
-                raise ValueError("O link não contém um artigo HTML acessível.")
-            if int(response.headers.get("Content-Length","0"))>900000:
-                raise ValueError("Página maior que o limite permitido.")
-            body=response.read(900001)
-            if len(body)>900000:raise ValueError("Página maior que o limite permitido.")
-            encoding=response.headers.get_content_charset() or "utf-8"
-            page=body.decode(encoding,errors="replace")
-    except urllib.error.HTTPError as ex:
-        raise ValueError("Site não liberou a leitura HTTP: "+str(ex.code)) from ex
-    return extract_article(page,url)
+    for hop in range(4):
+        current=validate(current)
+        req=urllib.request.Request(current,headers={
+            "User-Agent":"ALLSTARS-Editorial/1.0 (research, single-page fetch)",
+            "Accept":"text/html"})
+        try:
+            with opener.open(req,timeout=15) as response:
+                mime=response.headers.get_content_type()
+                if mime not in ("text/html","application/xhtml+xml"):
+                    raise ValueError("O link não contém um artigo HTML acessível.")
+                if int(response.headers.get("Content-Length","0"))>900000:
+                    raise ValueError("Página maior que o limite permitido.")
+                body=response.read(900001)
+                if len(body)>900000:
+                    raise ValueError("Página maior que o limite permitido.")
+                encoding=response.headers.get_content_charset() or "utf-8"
+                page=body.decode(encoding,errors="replace")
+            extracted=extract_article(page,current)
+            extracted["submitted_url"]=original
+            extracted["redirect_count"]=hop
+            return extracted
+        except urllib.error.HTTPError as ex:
+            if ex.code in (301,302,303,307,308) and hop<3:
+                location=ex.headers.get("Location")
+                if not location:raise ValueError("Redirecionamento sem destino público.") from ex
+                current=validate(urllib.parse.urljoin(current,location))
+                continue
+            raise ValueError("Site não liberou a leitura HTTP: "+str(ex.code)) from ex
+    raise ValueError("A matéria redirecionou muitas vezes sem disponibilizar o conteúdo.")
 
 def gemini(text,title,url):
     paragraphs=[p.strip() for p in text.split("\n\n") if p.strip()]
@@ -112,7 +127,7 @@ def run():
       "sources":[url],"approved":False,"media_approved":False,
       "editorial_status":"RASCUNHO DE IA BASEADO EM LINK — fatos e direitos ainda não validados",
       "source_mode":"link","source_title":title,
-      "source_metadata":{key:article[key] for key in ("url","title","extraction_method","paragraph_count","word_count","content_sha256","published_at","author","verification_status")},
+      "source_metadata":{key:article[key] for key in ("submitted_url","url","redirect_count","title","extraction_method","paragraph_count","word_count","content_sha256","published_at","author","verification_status")},
       "evidence_paragraphs":ep.get("evidence_paragraphs",[])})
     output=ROOT/"output";output.mkdir(exist_ok=True)
     (output/"selected.json").write_text(json.dumps(ep,ensure_ascii=False,indent=2),encoding="utf-8")
