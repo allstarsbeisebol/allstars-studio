@@ -87,6 +87,7 @@ jobs:
             output/midia.json
             output/briefing_arte_anime.txt
             output/qualidade_visual.json
+            output/storyboard.json
             output/legendas.srt
             output/legendas_metadata.json
           retention-days: 30
@@ -107,6 +108,7 @@ jobs:
             output/midia.json#midia.json \
             output/briefing_arte_anime.txt#briefing_arte_anime.txt \
             output/qualidade_visual.json#qualidade_visual.json \
+            output/storyboard.json#storyboard.json \
             output/legendas.srt#legendas.srt \
             output/legendas_metadata.json#legendas_metadata.json \
             --repo "${{ github.repository }}" \
