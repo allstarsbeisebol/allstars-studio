@@ -99,7 +99,7 @@ export default async function handler(req,res){
         const dimensions=jpegSize(image);
         await storeImage({
           issue:Number(id),title:issue.title,
-          subject:String(issue.body||"").match(/^ASSUNTO:\\s*(.*)$/m)?.[1]||"",
+          subject:String(issue.body||"").match(/^ASSUNTO:\s*(.*)$/m)?.[1]||"",
           assetName:asset,image,width:dimensions.width,height:dimensions.height,
           sourceKind,revision,fit,promptText:sourceKind==="generated_external"?promptText:""
         });
