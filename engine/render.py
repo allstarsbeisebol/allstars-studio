@@ -103,6 +103,10 @@ if media.is_file():
                 "Licença (detalhes): "+str(info.get("license_url","")),
                 "Conferir licença e direitos antes de publicar."
             ])
+        elif status.get("visual_mode")=="original_cartoon" or status.get("status") not in ("downloaded","existing"):
+            warning="Arte ilustrativa original em estilo cartoon; personagem fictício, não é retrato histórico fiel do atleta."
+            caption=(caption+"\n\n"+warning).strip()
+            sources.extend(["", "CRÉDITOS DA IMAGEM", warning, "Criação: ALLSTARS Studio. Nenhuma foto histórica utilizada."])
     except (ValueError,OSError):pass
 (out/"fontes.txt").write_text("\n".join(sources),encoding="utf-8")
 (out/"legenda_instagram.txt").write_text(caption,encoding="utf-8")
