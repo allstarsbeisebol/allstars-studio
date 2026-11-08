@@ -68,8 +68,10 @@ class ExternalImageTests(unittest.TestCase):
         Image.new("RGB",(1080,1920),(25,110,200)).save(source,"JPEG",quality=84)
         try:
             ep=self.episode()
-            ep=advance(ep,"ALLSTARS_ART_CHANGE\\nREVISION: 1\\nACTION: external\\n"
-                          "IMAGE_ASSET: external-r2-abcdef123456.jpg\\nFIT: contain".replace("\\n","\n"))
+            ep=advance(ep,"\n".join([
+                "ALLSTARS_ART_CHANGE","REVISION: 1","ACTION: external",
+                "IMAGE_ASSET: external-r2-abcdef123456.jpg","FIT: contain"
+            ]))
             frame=poster(ep,headline="Uma cena desta história",index=1,total=4)
             self.assertEqual(frame.size,(1080,1920))
         finally:source.unlink(missing_ok=True)
