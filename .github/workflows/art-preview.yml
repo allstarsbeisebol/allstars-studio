@@ -61,6 +61,8 @@ jobs:
           sudo curl --retry 2 -fLsS https://raw.githubusercontent.com/google/fonts/main/ofl/barlowcondensed/BarlowCondensed-ExtraBold.ttf -o /usr/share/fonts/truetype/barlow/BarlowCondensed-ExtraBold.ttf || true
           sudo curl --retry 2 -fLsS https://raw.githubusercontent.com/google/fonts/main/ofl/barlow/Barlow-Bold.ttf -o /usr/share/fonts/truetype/barlow/Barlow-Bold.ttf || true
           fc-cache -f || true
+      - name: Preparar logo oficial nítida do site ALLSTARS
+        run: python engine/brand_assets.py
       - name: Criar imagem para aprovação antes do vídeo
         run: |
           python engine/visual_quality.py --episode output/selected.json --output output/qualidade_visual.json
@@ -90,6 +92,7 @@ jobs:
               output/selected.json#selected.json \
               output/capa.png#capa.png \
               output/capa_perfil_3x4.png#capa_perfil_3x4.png \
+              output/logo-oficial.png#logo-oficial.png \
               output/briefing_arte_anime.txt#briefing_arte_anime.txt \
               output/prompt_imagem_ia.txt#prompt_imagem_ia.txt \
               output/qualidade_visual.json#qualidade_visual.json \
