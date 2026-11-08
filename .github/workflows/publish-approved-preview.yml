@@ -1,0 +1,88 @@
+name: "ALLSTARS | Publicar prévia aprovada Jim Abbott"
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/preview-trigger.txt'
+permissions:
+  contents: write
+concurrency:
+  group: allstars-jim-approved-preview
+  cancel-in-progress: false
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar ferramentas gratuitas
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          python -m pip install 'Pillow>=10.4,<12'
+      - name: Preparar episódio e baixar narração original da release
+        run: |
+          mkdir -p output
+          curl --fail --location --retry 3 --silent --show-error \
+            https://github.com/liuhelpme/allstars-studio/releases/download/episodio-9/narracao.mp3 \
+            --output output/narracao-jim-original.mp3
+          curl --fail --location --retry 3 --silent --show-error \
+            https://github.com/liuhelpme/allstars-studio/releases/download/episodio-9/roteiro.txt \
+            --output output/roteiro-jim-original.txt
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          ep={
+            "athlete":"Jim Abbott",
+            "episode_number":9,
+            "title":"1993: O NO-HITTER DE JIM ABBOTT",
+            "cover_headline":"NASCIDO SEM A MÃO DIREITA. LANÇOU UM NO-HITTER.",
+            "narration":Path("output/roteiro-jim-original.txt").read_text(encoding="utf-8"),
+            "screens":["UMA NOITE HISTÓRICA","UM NO-HITTER INESQUECÍVEL"],
+            "caption":"Jim Abbott · uma trajetória extraordinária no beisebol. Prévia editorial: revise fatos e direitos antes de postar.",
+            "sources":["https://jokermag.com/jim-abbott-mlb-story/"]
+          }
+          Path("output/jim-abbott-approved.json").write_text(
+              json.dumps(ep,ensure_ascii=False,indent=2),encoding="utf-8")
+          PY
+      - name: Validar arquivo e qualidade da arte aprovada
+        run: |
+          python -m unittest discover -s tests -p 'test_approved_jim.py' -v
+          python engine/commons_media.py --episode output/jim-abbott-approved.json --output output/midia.json
+          python engine/visual_quality.py --episode output/jim-abbott-approved.json --output output/qualidade_visual.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          quality=json.loads(Path("output/qualidade_visual.json").read_text(encoding="utf-8"))
+          if not quality.get("premium") or quality.get("mode")!="anime_aprovado":
+              raise SystemExit("Arte anime não reconhecida como aprovada; não publicar prévia.")
+          PY
+      - name: Produzir capa, perfil, legenda e Reel com áudio original
+        run: |
+          python engine/cover.py --episode output/jim-abbott-approved.json --output output/capa.png
+          python engine/subtitles.py --episode output/jim-abbott-approved.json --audio output/narracao-jim-original.mp3 --out-dir output
+          python engine/render.py --episode output/jim-abbott-approved.json --audio output/narracao-jim-original.mp3 --out-dir output
+          ffprobe -v error output/allstars_reel.mp4
+          test -s output/allstars_reel.mp4
+          test -s output/capa.png
+          test -s output/capa_perfil_3x4.png
+      - name: Publicar link permanente da prévia sem substituir último episódio
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=previa-jim-abbott-anime
+          gh release delete "$tag" --repo "${{ github.repository }}" --yes --cleanup-tag || true
+          gh release create "$tag" \
+            output/allstars_reel.mp4#jim_abbott_anime_preview.mp4 \
+            output/capa.png#jim_abbott_anime_capa.png \
+            output/capa_perfil_3x4.png#jim_abbott_anime_perfil_3x4.png \
+            output/legendas.srt#legendas.srt \
+            output/qualidade_visual.json#qualidade_visual.json \
+            --repo "${{ github.repository }}" \
+            --title "ALLSTARS — prévia anime aprovada Jim Abbott" \
+            --notes "Prévia editorial aprovada quanto ao formato visual; narração reaproveitada do episódio 9. Confirmar dados históricos e direitos antes de publicar. Não é a geração de um novo episódio." \
+            --latest=false
