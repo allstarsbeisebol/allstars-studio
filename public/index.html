@@ -96,6 +96,20 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 #image-preview-dialog .modal-actions{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:12px}
 #image-preview-dialog a{color:#F0C040}
 @media(max-width:680px){.art-review-gallery{grid-template-columns:1fr}.art-review-gallery img{max-height:420px;max-width:300px;margin:auto}.art-actions{flex-direction:column}.art-actions button{width:100%}.file-actions{flex-direction:column}.file-actions button{width:100%}}
+.visual-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:15px}
+.visual-card{border:1px solid #47688f;border-radius:13px;padding:13px;background:#0b2143;min-width:0}
+.visual-card img{width:100%;aspect-ratio:9/12;object-fit:contain;border-radius:9px;background:#071630;max-height:310px}
+.visual-card strong{display:block;margin:9px 0 4px;overflow-wrap:anywhere}
+.visual-card .source{display:inline-block;color:#f3d47f;font-size:12px;font-weight:700;margin-bottom:5px}
+.visual-card .review-box{margin-top:12px;padding-top:12px;border-top:1px solid #47688f}
+.visual-card textarea{width:100%;min-height:76px}
+.visual-card select{width:100%}
+.visual-card button{width:100%;margin-top:8px}
+.visual-archive{border-top:1px solid #486a96;margin-top:26px;padding-top:24px}
+.visual-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin-top:14px}
+.visual-toolbar label{flex:1;min-width:180px}
+.visual-toolbar button{min-height:44px}
+@media(max-width:680px){.visual-gallery{grid-template-columns:1fr}.visual-toolbar{flex-direction:column;align-items:stretch}.visual-toolbar label{width:100%}}
 </style></head><body>
 <header><div class="wrap"><div class="brand">⚾ ALLSTARS <span>STUDIO</span></div><div class="sub">ALÉM DO JOGO · HISTÓRIAS REAIS DO BEISEBOL</div></div></header>
 <nav class="section-nav" aria-label="Navegação no Studio">
@@ -207,6 +221,11 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
    <a class="btn outline" href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer">Abrir Gemini</a>
   </div>
   <p class="note" id="external-prompt-status" role="status">O prompt é copiado por você. Nenhum texto é enviado automaticamente para outros serviços.</p>
+  <label for="external-image-source">Origem da imagem</label>
+  <select id="external-image-source">
+   <option value="generated_external">Imagem criada em outra IA</option>
+   <option value="uploaded_original">Imagem pronta enviada por mim</option>
+  </select>
   <label for="external-image-file">Sua imagem final (JPG, PNG ou WEBP)</label>
   <div id="external-image-drop" class="external-drop" tabindex="0" role="region" aria-label="Área para colar ou arrastar uma imagem">Clique aqui e cole com Ctrl+V, ou arraste uma imagem para esta caixa</div>
   <input id="external-image-file" type="file" accept="image/png,image/jpeg,image/webp">
@@ -276,6 +295,24 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
   <p id="library-message" class="note">Entre com sua senha e clique em Carregar biblioteca para ver os vídeos anteriores.</p>
   <div id="library-items" class="library-grid"></div>
 <div class="library-pagination"><button type="button" id="library-prev" class="secondary" disabled>Anterior</button><span id="library-page" class="note" role="status"></span><button type="button" id="library-next" class="secondary" disabled>Próxima</button></div>
+<div id="visual-archive" class="visual-archive" aria-labelledby="visual-title">
+  <div class="eyebrow">BIBLIOTECA VISUAL INTELIGENTE · SUPABASE</div>
+  <h3 id="visual-title">Artes e memória editorial</h3>
+  <p class="field-help">Cópias das imagens enviadas e criadas, separadas pela origem. Só imagens criadas, aprovadas e com direitos confirmados podem virar referências para melhorar os próximos prompts. Isso não treina um modelo de IA.</p>
+  <div class="visual-toolbar">
+    <label for="visual-origin">Mostrar imagens
+      <select id="visual-origin">
+        <option value="all">Todas</option>
+        <option value="uploaded">Enviadas por mim</option>
+        <option value="created">Criadas (Studio ou outra IA)</option>
+        <option value="reference">Referências aprovadas</option>
+      </select>
+    </label>
+    <button id="visual-refresh" type="button" class="secondary">↻ Atualizar imagens</button>
+  </div>
+  <p id="visual-message" class="note" role="status">Entre no Studio para consultar as imagens.</p>
+  <div id="visual-items" class="visual-gallery"></div>
+</div>
 </section>
 <section class="extras"><span>Identidade: <strong>ALLSTARS · Bíblia Visual 2026</strong></span><a href="https://baseballhall.org/" target="_blank" rel="noopener">Hall of Fame</a><a href="https://www.mlb.com/players" target="_blank" rel="noopener">MLB Players</a><a href="https://www.baseball-reference.com/" target="_blank" rel="noopener">Baseball-Reference</a><a href="https://www.statmuse.com/mlb/players" target="_blank" rel="noopener">StatMuse</a></section>
 <aside id="completion-toast" class="toast hidden" role="status" aria-live="polite" aria-atomic="true" data-kind="ready"><button type="button" class="toast-close" id="toast-close" aria-label="Fechar aviso">×</button><strong id="toast-title">Seu vídeo está pronto!</strong><p id="toast-message">Os arquivos já podem ser baixados.</p><button type="button" class="toast-action" id="toast-action">Ver downloads</button></aside>
@@ -325,8 +362,9 @@ function clearDraft(){localStorage.removeItem(DRAFT_KEY);$('draft-status').textC
 const ordinaryTitle=document.title;
 let artRevision=0,artAssets={};
 function openImagePreview(url,title){
- const allowed='https://github.com/allstarsbeisebol/allstars-studio/releases/download/';
- if(typeof url!=='string'||!url.startsWith(allowed))return;
+ const github='https://github.com/allstarsbeisebol/allstars-studio/releases/download/';
+ const privateVisual='https://alrgqmwnynybawenyugb.supabase.co/storage/v1/object/sign/allstars-visual/';
+ if(typeof url!=='string'||!(url.startsWith(github)||url.startsWith(privateVisual)))return;
  const dialog=$('image-preview-dialog');
  $('image-preview-title').textContent=title||'Prévia da imagem';
  $('image-preview-full').src=url;
@@ -453,6 +491,8 @@ $('external-image-send').addEventListener('click',async()=>{
   });
   const result=await request('/api/art-upload',{method:'POST',body:JSON.stringify({
    id:pending,revision:artRevision,image:base64,
+   source_kind:$('external-image-source').value,
+   prompt:$('external-image-source').value==='generated_external'?$ ('external-image-prompt').value:'',
    fit:$('external-image-fit').value,rightsConfirmed:true
   })});
   clearExternalImage();
@@ -462,7 +502,7 @@ $('external-image-send').addEventListener('click',async()=>{
   $('progress').classList.remove('hidden');
   $('progress-stage').textContent='PREPARANDO IMAGEM EXTERNA';
   $('progress-title').textContent='Ajustando a imagem enviada';
-  $('progress-message').textContent='A imagem está sendo adaptada ao formato vertical. Nenhum vídeo foi iniciado ainda.';
+  $('progress-message').textContent='A imagem está sendo adaptada ao formato vertical. Nenhum vídeo foi iniciado ainda. '+(result.library_message||'');
   $('progress').scrollIntoView({behavior:'smooth',block:'start'});
   clearTimeout(timer);timer=setTimeout(poll,6000);
  }catch(e){
