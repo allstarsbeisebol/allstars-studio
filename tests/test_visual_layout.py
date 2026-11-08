@@ -37,6 +37,14 @@ class SubtitleGeometryTests(unittest.TestCase):
         self.assertEqual(cartoon.mode,"RGBA")
         # Illustration has face, cap, shirt and contrast, not a blank background.
         # Sample the palette after quantization so anti-aliased art cannot exceed maxcolors.\n        colors=cartoon.convert("RGB").quantize(colors=32).getcolors(maxcolors=32) or []\n        self.assertGreater(len(colors),10)
+    def test_thematic_poster_does_not_use_fictitious_athlete(self):
+        ep={"athlete":"Hall da Fama do beisebol","subject":"Hall da Fama do beisebol","content_type":"explicativo",
+            "title":"COMO FUNCIONA O HALL DA FAMA","episode_number":14}
+        image=poster(ep)
+        self.assertEqual(image.size,(1080,1920))
+        self.assertEqual(image.mode,"RGB")
+        # No centro, o tema desenha a bola e não o personagem humano.
+        self.assertNotEqual(image.getpixel((540,620)),(4,14,33))
     def test_poster_without_photo_uses_original_cartoon(self):
         ep={"athlete":"Jim Abbott","title":"UMA HISTÓRIA DE SUPERAÇÃO","episode_number":11}
         im=poster(ep)
