@@ -38,7 +38,16 @@ media_file=root/"output/midia.json"
 if media_file.is_file():
     try:
         media=json.loads(media_file.read_text(encoding="utf-8"))
-        if media.get("status") in ("existing","downloaded"):
+        if media.get("status")=="approved_anime":
+            report["media"]={
+                "status":"Arte anime original aprovada pelo responsável do projeto",
+                "visual_mode":"approved_anime",
+                "source_note":media.get("source_note"),
+                "rights_basis":media.get("rights_basis"),
+                "source_repo_file":media.get("source_repo_file"),
+                "note":"A representação é ilustrativa; não é fotografia nem documento histórico."
+            }
+        elif media.get("status") in ("existing","downloaded"):
             record=media.get("record",{})
             report["media"]={
                 "source":"Wikimedia Commons","url":record.get("source_url"),
