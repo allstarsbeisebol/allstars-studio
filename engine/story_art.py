@@ -31,15 +31,22 @@ def lines_for(draw,text,max_width,size=48,limit=2):
     return lines[:limit],f
 
 def classify(ep):
-    data=" ".join(str(ep.get(x,"")) for x in ("subject","athlete","title","hook","narration","art_direction"))
-    text=data.casefold()
-    if any(x in text for x in ("no-hitter","sem rebatida","perfect game","jogo perfeito","strikeout","arremess")):return "arremesso"
-    if any(x in text for x in ("home run","homerun","rebatida","rebatedor","hit","batedor")):return "rebatida"
-    if any(x in text for x in ("latino","latina","porto rico","puerto rico","caribe","japones","afro")):return "legado"
-    if any(x in text for x in ("lesão","lesao","acidente","supera","volta","recupera","lesion")):return "retorno"
-    if any(x in text for x in ("contrato","troca","free agent","salário","salario","justiça","justica","direitos")):return "contrato"
-    if any(x in text for x in ("regra","arbitr","física","fisica","curva","velocidade")):return "explicacao"
-    if any(x in text for x in ("lista","maiores","top ","cinco","5 jogadores","ranking")):return "ranking"
+    if ep.get("content_type")=="lista":return "ranking"
+    priority=" ".join(str(ep.get(k,"")) for k in ("subject","title")).casefold()
+    extra=" ".join(str(ep.get(k,"")) for k in ("hook","narration","art_direction")).casefold()
+    rules=(
+       ("contrato",("contrato","troca","free agent","salário","salario","justiça","justica","direitos")),
+       ("ranking",("lista","maiores","top ","cinco","5 jogadores","ranking")),
+       ("legado",("latino","latina","porto rico","puerto rico","caribe","japones","afro")),
+       ("arremesso",("no-hitter","sem rebatida","perfect game","jogo perfeito","strikeout","arremess")),
+       ("rebatida",("home run","homerun","rebatida","rebatedor","hit","batedor")),
+       ("retorno",("lesão","lesao","acidente","supera","volta","recupera","lesion")),
+       ("explicacao",("regra","arbitr","física","fisica","curva","velocidade"))
+    )
+    # Primeiro classificar o ASSUNTO explícito, depois detalhes secundários.
+    for text in (priority,extra):
+        for label,words in rules:
+            if any(word in text for word in words):return label
     return "cronica"
 
 def year_or_number(text):
