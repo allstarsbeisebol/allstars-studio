@@ -48,7 +48,7 @@ if media_file.is_file():
                 "note":"Foto não prova a narrativa histórica do roteiro."
             }
         else:
-            report["media"]={"status":"Nenhuma foto com licença qualificada encontrada; ilustração editorial utilizada"}
+            report["media"]={"status":"Nenhuma foto licenciada encontrada; cartoon original utilizado","visual_mode":"original_cartoon","attribution":"ALLSTARS Studio","representation":"Personagem fictício ilustrativo; não retrato histórico fiel do atleta"}
     except (ValueError,OSError):
         report["media"]={"status":"Dados da imagem indisponíveis"}
 out=Path(args.output);out.parent.mkdir(parents=True,exist_ok=True)
