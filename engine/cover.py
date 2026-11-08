@@ -13,6 +13,19 @@ episode=json.loads(Path(args.episode).read_text(encoding="utf-8"))
 dest=Path(args.output);dest.parent.mkdir(parents=True,exist_ok=True)
 curated=cover_from_approved_asset(episode)
 image=curated[0] if curated is not None else poster(episode)
+if curated is not None:
+    # A arte aprovada é uma composição completa. Preserve a ilustração
+    # e a manchete; substitua somente a região de marca pela logo OFICIAL.
+    image=image.convert("RGBA")
+    stamp=Image.new("RGBA",image.size,(0,0,0,0))
+    draw=ImageDraw.Draw(stamp,"RGBA")
+    draw.rectangle((0,1655,1080,1920),fill=(4,14,33,244))
+    image.alpha_composite(stamp)
+    mark=official_logo()
+    scale=min(510/max(1,mark.width),190/max(1,mark.height))
+    mark=mark.resize((max(1,round(mark.width*scale)),max(1,round(mark.height*scale))),Image.Resampling.LANCZOS)
+    image.alpha_composite(mark,((1080-mark.width)//2,1700+(190-mark.height)//2))
+    image=image.convert("RGB")
 image.save(dest,optimize=True)
 print('Visual:', 'anime aprovado para este atleta' if curated is not None else 'arte gerada pelo compositor atual')
 # Prévia exata da grade de perfil 3:4, centralizada no Reel 9:16.
