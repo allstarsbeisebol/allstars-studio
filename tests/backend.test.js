@@ -180,3 +180,34 @@ test("transferência: distingue token sem leitura e token sem escrita",async()=>
     assert.match(res.body.error,/não consegue consultar/);
   }finally{globalThis.fetch=original;}
 });
+
+test("fontes: aceita três links e texto colado sem divulgar texto plano na issue",async()=>{
+ const cookie=await loginCookie(),original=globalThis.fetch;let payload;
+ globalThis.fetch=async(url,options={})=>{
+  if(options.method==="POST"){payload=JSON.parse(options.body);return {ok:true,json:async()=>({number:303})};}
+  return {ok:true,json:async()=>[]};
+ };
+ try{
+  const res=response(),links=["https://www.mlb.com/news/example","https://www.instagram.com/p/example/","https://www.facebook.com/example/posts/123"];
+  const text="Legenda publicada sobre uma jogada importante, para referência editorial e checagem posterior.";
+  await generate({method:"POST",headers:headers(cookie),body:{mode:"link",content_type:"tema",subject:"Histórias do jogo",urls:links,reference_text:text}},res);
+  assert.equal(res.code,202);
+  assert.equal((payload.body.match(/LINK: /g)||[]).length,3);
+  assert.match(payload.body,/TEXTO_BASE64: /);
+  assert.ok(!payload.body.includes(text));
+  assert.deepEqual(payload.body.match(/LINK: (.+)/g).map(x=>x.slice(6)),links);
+ }finally{globalThis.fetch=original;}
+});
+test("fontes: rejeita link duplicado, lista longa e texto excessivo",async()=>{
+ const cookie=await loginCookie();
+ for(const body of [
+  {mode:"link",urls:Array(6).fill("https://example.com/a")},
+  {mode:"link",urls:["https://example.com/a","https://example.com/a"]},
+  {mode:"link",urls:["http://example.com/a"]},
+  {mode:"link",reference_text:"x".repeat(8001)}
+ ]){
+  const res=response();
+  await generate({method:"POST",headers:headers(cookie),body},res);
+  assert.equal(res.code,400);
+ }
+});
