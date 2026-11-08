@@ -51,6 +51,10 @@ jobs:
         run: |
           python engine/cover.py --episode data/episode.json --output output/capa.png
           test -s output/capa.png
+      - name: Instalar FFmpeg para teste de vídeo
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
       - name: Conferir legendas e Reel com audio de teste (sem chamadas de API)
         run: |
           ffmpeg -y -hide_banner -loglevel error -f lavfi -i anullsrc=r=22050:cl=mono -t 8 -c:a pcm_s16le output/test-audio.wav
