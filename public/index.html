@@ -264,6 +264,7 @@ function openReview(){
 $('review').addEventListener('click',openReview);
 $('review-back').addEventListener('click',()=>{$('confirm-panel').classList.add('hidden');$('options').scrollIntoView({behavior:'smooth',block:'start'});});
 
+function updateFormHint(){
  const urls=getReferences(),text=$('reference-text').value.trim(),subject=$('subject').value.trim();
  $('form-hint').textContent=urls.length||text?
   'O Studio cruzará suas referências. Caso a rede social bloqueie a leitura, cole a legenda ou o texto da postagem neste campo. Confira os fatos antes de publicar.':
