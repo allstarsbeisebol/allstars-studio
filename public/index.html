@@ -14,6 +14,7 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 .alert-settings .note{flex:1;min-width:240px}
 .toast{position:fixed;top:18px;right:18px;width:min(440px,calc(100vw - 36px));z-index:1000;background:#10284e;border:2px solid var(--gold);border-left:7px solid var(--gold);border-radius:14px;padding:17px 17px 16px;box-shadow:0 16px 45px #020916be}
 .toast[data-kind="error"]{border-color:var(--red)}.toast strong{font-family:'Barlow Condensed',Impact,sans-serif;font-size:27px;line-height:1.12;display:block;padding-right:30px}.toast p{margin:7px 0 13px;color:#e1edfd;font-size:14px}.toast .toast-close{position:absolute;right:7px;top:7px;border:0;background:none;color:#fff;min-height:36px;padding:6px 12px;font-size:23px}.toast .toast-action{padding:11px 16px;min-height:42px}
+.reference-example{margin-top:22px;border-top:1px solid #49648e;padding-top:17px}.reference-example summary{cursor:pointer;color:var(--gold);font-weight:800;font-size:16px;list-style:revert}.reference-example .sample-layout{display:grid;grid-template-columns:minmax(150px,215px) 1fr;gap:18px;align-items:start;margin-top:15px}.reference-example video{width:100%;max-height:410px;aspect-ratio:9/16;object-fit:contain;background:#08162e;border:1px solid #5275a1;border-radius:12px}.reference-example p{margin-top:0}@media(max-width:680px){.reference-example .sample-layout{grid-template-columns:1fr}.reference-example video{max-width:220px}}
 @media(max-width:680px){.cards,.result{grid-template-columns:1fr}.panel{padding:19px}.option{min-height:225px}h1{font-size:46px}.links a{width:100%}.result img{max-width:230px;margin:auto}.cards button{width:100%}}
 </style></head><body>
 <header><div class="wrap"><div class="brand">⚾ ALLSTARS <span>STUDIO</span></div><div class="sub">ALÉM DO JOGO · HISTÓRIAS REAIS DO BEISEBOL</div></div></header>
@@ -30,6 +31,24 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 <section class="panel hidden" id="progress" aria-live="polite"><div class="eyebrow">EM PRODUÇÃO</div><h2 id="progress-title">Criando o episódio...</h2><p id="progress-message" class="muted">Preparando o pedido...</p><p class="note">Você pode deixar esta página aberta. O histórico de produção será mantido neste navegador.</p><button class="secondary" id="refresh" type="button">↻ Verificar andamento</button></section>
 <section class="panel" id="downloads"><div class="eyebrow">ARQUIVOS PRODUZIDOS</div><h2 id="result-title">Último episódio disponível</h2><p class="muted" id="result-message">Consultando os downloads...</p>
 <div id="result" class="result hidden"><div><img id="cover" alt="Capa do episódio ALLSTARS" loading="lazy"></div><div><video id="video" controls preload="none" playsinline aria-label="Assista ao Reel"></video><p class="note">Prévia editorial. Confira fatos históricos, voz e direitos das imagens antes de publicar.</p><div class="links" id="files"></div></div></div>
+<details class="reference-example" id="approved-anime-preview">
+  <summary>Ver prévia anime aprovada · Jim Abbott</summary>
+  <div class="sample-layout">
+    <video controls playsinline preload="none" poster="https://github.com/liuhelpme/allstars-studio/releases/download/previa-jim-abbott-anime/capa.png" aria-label="Prévia anime aprovada do episódio Jim Abbott">
+      <source src="https://github.com/liuhelpme/allstars-studio/releases/download/previa-jim-abbott-anime/allstars_reel.mp4" type="video/mp4">
+      Seu navegador não suporta reprodução de vídeo. Utilize o link para baixar.
+    </video>
+    <div>
+      <p>Esta é a referência de acabamento visual aprovada para a série <strong>ALÉM DO JOGO</strong>. É uma prévia editorial, não um novo episódio gerado agora.</p>
+      <div class="links">
+        <a class="btn" href="https://github.com/liuhelpme/allstars-studio/releases/download/previa-jim-abbott-anime/allstars_reel.mp4" target="_blank" rel="noopener">↓ Baixar prévia MP4</a>
+        <a class="btn secondary" href="https://github.com/liuhelpme/allstars-studio/releases/download/previa-jim-abbott-anime/capa.png" target="_blank" rel="noopener">↓ Capa 9:16</a>
+        <a class="btn secondary" href="https://github.com/liuhelpme/allstars-studio/releases/download/previa-jim-abbott-anime/capa_perfil_3x4.png" target="_blank" rel="noopener">↓ Capa 3:4</a>
+      </div>
+      <p class="note" style="margin-top:12px">A imagem pertence especificamente ao episódio do no-hitter de Jim Abbott. Episódios futuros utilizarão outras imagens, sem reciclar o jogador.</p>
+    </div>
+  </div>
+</details>
 </section>
 <section class="extras"><span>Identidade: <strong>ALLSTARS · Bíblia Visual 2026</strong></span><a href="https://baseballhall.org/" target="_blank" rel="noopener">Hall of Fame</a><a href="https://www.mlb.com/players" target="_blank" rel="noopener">MLB Players</a><a href="https://www.baseball-reference.com/" target="_blank" rel="noopener">Baseball-Reference</a><a href="https://www.statmuse.com/mlb/players" target="_blank" rel="noopener">StatMuse</a></section>
 <aside id="completion-toast" class="toast hidden" role="status" aria-live="polite" aria-atomic="true" data-kind="ready"><button type="button" class="toast-close" id="toast-close" aria-label="Fechar aviso">×</button><strong id="toast-title">Seu episódio está pronto!</strong><p id="toast-message">Os arquivos já podem ser baixados.</p><button type="button" class="toast-action" id="toast-action">Ver downloads</button></aside>
