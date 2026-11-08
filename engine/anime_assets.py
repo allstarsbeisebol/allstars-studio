@@ -34,7 +34,7 @@ def find_approved_anime(episode):
         expected_sha=info.get("source_git_blob_sha")
         if expected_sha:
             content=path.read_bytes()
-            actual=hashlib.sha1(("blob "+str(len(content))+"\\0").encode("ascii")+content).hexdigest()
+            actual=hashlib.sha1(("blob "+str(len(content))+"\0").encode("ascii")+content).hexdigest()
             if actual!=expected_sha:return None
         keywords=info.get("story_keywords")
         if keywords:
