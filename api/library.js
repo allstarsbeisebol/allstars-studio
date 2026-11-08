@@ -1,7 +1,7 @@
 import {authorized,configured,json} from "../lib/security.js";
 const REPO="allstarsbeisebol/allstars-studio";
 const PREFIX="https://github.com/"+REPO+"/releases/download/";
-const allowed=new Set(["allstars_reel.mp4","capa.png","capa_perfil_3x4.png","narracao.mp3","legenda_instagram.txt","roteiro.txt","fontes.txt","pesquisa.json","midia.json","briefing_arte_anime.txt","qualidade_visual.json","legendas.srt","legendas_metadata.json"]);
+const allowed=new Set(["allstars_reel.mp4","capa.png","capa_perfil_3x4.png","narracao.mp3","legenda_instagram.txt","roteiro.txt","fontes.txt","pesquisa.json","midia.json","briefing_arte_anime.txt","qualidade_visual.json","legendas.srt","storyboard.json","legendas_metadata.json"]);
 export default async function handler(req,res){
   if(req.method!=="GET")return json(res,405,{error:"Método não permitido."});
   if(!configured()||!authorized(req))return json(res,401,{error:"Entre no Studio para consultar os vídeos anteriores."});
