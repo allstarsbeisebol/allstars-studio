@@ -11,8 +11,17 @@ p.add_argument("--output",default="output/qualidade_visual.json")
 args=p.parse_args()
 
 ep=json.loads(Path(args.episode).read_text(encoding="utf-8"))
-approved=find_approved_anime(ep) if ep.get("content_type","atleta")=="atleta" else None
-if approved is not None:
+approved=find_approved_anime(ep) if ep.get("content_type","atleta")=="atleta" and not ep.get("unique_art_required") else None
+if ep.get("unique_art_required"):
+    from story_art import art_metadata
+    data={
+      "mode":"original_context_art",
+      "premium":False,
+      "new_for_episode":True,
+      "message":"Ilustração editorial inédita ligada ao roteiro e à pesquisa. Ainda não é anime premium gerado por modelo de imagem.",
+      **art_metadata(ep)
+    }
+elif approved is not None:
     info=approved[1]
     data={
       "mode":"anime_aprovado",
