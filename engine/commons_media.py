@@ -129,8 +129,10 @@ def main():
     episode=json.loads(path.read_text(encoding="utf-8"))
     root=Path(__file__).resolve().parents[1]
     from anime_assets import find_approved_anime
-    anime=find_approved_anime(episode) if episode.get("content_type","atleta")=="atleta" else None
-    if anime is not None:
+    anime=find_approved_anime(episode) if episode.get("content_type","atleta")=="atleta" and not episode.get("unique_art_required") else None
+    if episode.get("unique_art_required"):
+        result={"status":"original_context_art","visual_mode":"original_context_art","source":"Arte contextual inédita montada localmente","illustration_note":"Composição original específica para o roteiro; não é anime premium e não representa fotografia histórica.","image_author":"ALLSTARS Studio","image_rights":"Ilustração gráfica do próprio projeto."}
+    elif anime is not None:
         info=anime[1]
         result={
             "status":"approved_anime",
@@ -148,7 +150,7 @@ def main():
             # Uma falha de pesquisa não deve impedir a produção do Reel.
             result={"status":"unavailable","reason":str(error)[:160]}
     dest=Path(opts.output);dest.parent.mkdir(parents=True,exist_ok=True)
-    if result.get("status") not in ("existing","downloaded","approved_anime"):
+    if result.get("status") not in ("existing","downloaded","approved_anime","original_context_art"):
         result={
             **result,
             "visual_mode":"original_cartoon",
@@ -156,7 +158,7 @@ def main():
             "image_author":"ALLSTARS Studio — composição vetorial original",
             "image_rights":"Arte produzida pelo próprio sistema, sem uso de fotografia externa."
         }
-    elif result.get("status")!="approved_anime":
+    elif result.get("status") not in ("approved_anime","original_context_art"):
         result["visual_mode"]="licensed_photo"
     dest.write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
     print("Busca de foto:",result["status"])
