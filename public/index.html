@@ -338,8 +338,146 @@ $('image-preview-close').addEventListener('click',()=>$('image-preview-dialog').
 $('image-preview-dialog').addEventListener('click',event=>{if(event.target===$('image-preview-dialog'))$('image-preview-dialog').close();});
 $('cover-preview-btn').addEventListener('click',()=>openImagePreview($('cover').src,'Capa editorial ALLSTARS'));
 $('art-enlarge').addEventListener('click',()=>openImagePreview($('art-preview-cover').src,'Capa para sua aprovação'));
+let selectedExternalImage=null,selectedExternalImageUrl=null;
+function clearExternalImage(){
+ selectedExternalImage=null;
+ if(selectedExternalImageUrl)URL.revokeObjectURL(selectedExternalImageUrl);
+ selectedExternalImageUrl=null;
+ $('external-image-preview').removeAttribute('src');
+ $('external-image-preview').hidden=true;
+ $('external-image-file').value='';
+ $('external-image-send').disabled=true;
+}
+async function normalizeExternalImage(file){
+ if(!file||!['image/png','image/jpeg','image/webp'].includes(file.type))
+  throw Error('Envie uma imagem PNG, JPEG ou WEBP.');
+ if(file.size>12_000_000)throw Error('O arquivo original deve ter até 12 MB.');
+ const sourceUrl=URL.createObjectURL(file);
+ try{
+  const im=new Image();im.src=sourceUrl;await im.decode();
+  const width=im.naturalWidth,height=im.naturalHeight;
+  if(width<256||height<256||width*height>25_000_000)
+   throw Error('A imagem precisa ter pelo menos 256 × 256 pixels e até 25 milhões de pixels.');
+  for(const maxWidth of [1080,960,800,680]){
+   const factor=Math.min(1,maxWidth/width,1920/height);
+   const canvas=document.createElement('canvas');
+   canvas.width=Math.round(width*factor);
+   canvas.height=Math.round(height*factor);
+   const ctx=canvas.getContext('2d');
+   if(!ctx)throw Error('Este navegador não conseguiu preparar a imagem.');
+   ctx.drawImage(im,0,0,canvas.width,canvas.height);
+   for(const quality of [.87,.78,.67]){
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality));
+    if(blob&&blob.size>=5000&&blob.size<=1_900_000)return blob;
+   }
+  }
+  throw Error('Não foi possível reduzir esta imagem ao tamanho permitido. Experimente outra imagem ou resolução.');
+ }finally{URL.revokeObjectURL(sourceUrl);}
+}
+async function acceptExternalImage(file){
+ $('external-image-send').disabled=true;
+ $('external-image-status').textContent='Preparando a imagem no navegador...';
+ try{
+  const blob=await normalizeExternalImage(file);
+  clearExternalImage();
+  selectedExternalImage=blob;
+  selectedExternalImageUrl=URL.createObjectURL(blob);
+  $('external-image-preview').src=selectedExternalImageUrl;
+  $('external-image-preview').hidden=false;
+  $('external-image-status').textContent='Imagem pronta para conferência · '+Math.round(blob.size/1024)+' KB · JPEG otimizado. Clique em Usar esta imagem para enviar.';
+  $('external-image-send').disabled=false;
+ }catch(e){$('external-image-status').textContent=e.message;}
+}
+$('external-image-file').addEventListener('change',event=>{
+ if(event.target.files?.[0])acceptExternalImage(event.target.files[0]);
+});
+const externalDrop=$('external-image-drop');
+externalDrop.addEventListener('paste',event=>{
+ const item=[...(event.clipboardData?.items||[])].find(x=>x.type.startsWith('image/'));
+ if(!item){$('external-image-status').textContent='Não encontrei uma imagem para colar. Copie a imagem da outra IA (não apenas o endereço) e pressione Ctrl+V aqui.';return;}
+ event.preventDefault();
+ acceptExternalImage(item.getAsFile());
+});
+externalDrop.addEventListener('keydown',event=>{
+ if(event.key==='Enter'||event.key===' '){event.preventDefault();$('external-image-file').click();}
+});
+externalDrop.addEventListener('click',()=>{$('external-image-file').click();});
+externalDrop.addEventListener('dragover',event=>{event.preventDefault();externalDrop.classList.add('dragging');});
+externalDrop.addEventListener('dragleave',()=>externalDrop.classList.remove('dragging'));
+externalDrop.addEventListener('drop',event=>{
+ event.preventDefault();externalDrop.classList.remove('dragging');
+ if(event.dataTransfer?.files?.[0])acceptExternalImage(event.dataTransfer.files[0]);
+});
+$('external-prompt-copy').addEventListener('click',async()=>{
+ const text=$('external-image-prompt').value;
+ if(!text){$('external-prompt-status').textContent='O prompt ainda não foi disponibilizado. Atualize o pedido.';return;}
+ try{
+  await navigator.clipboard.writeText(text);
+  $('external-prompt-status').textContent='Prompt copiado! Abra a IA desejada, cole o texto e gere a imagem. Depois volte ao Studio e cole a imagem aqui.';
+ }catch{
+  $('external-image-prompt').focus();$('external-image-prompt').select();
+  $('external-prompt-status').textContent='Copie o texto selecionado com Ctrl+C e cole na outra IA.';
+ }
+});
+async function loadExternalPrompt(issue,revision){
+ const promptField=$('external-image-prompt'),status=$('external-prompt-status');
+ promptField.value='';
+ status.textContent='Buscando o prompt editorial desta história...';
+ try{
+  const data=await request('/api/file-preview?tag=preview-issue-'+encodeURIComponent(issue)+'&file=prompt_imagem_ia.txt');
+  if(pending!==issue||artRevision!==revision)return;
+  promptField.value=String(data.text||'');
+  status.textContent=promptField.value?
+   'Prompt pronto. Copie e cole na IA da sua preferência. Nenhum conteúdo é enviado automaticamente.':
+   'Não foi possível encontrar o prompt desta história.';
+ }catch(e){
+  if(pending!==issue||artRevision!==revision)return;
+  status.textContent='O prompt não pôde ser carregado: '+e.message;
+ }
+}
+$('external-image-send').addEventListener('click',async()=>{
+ if(!pending||!artRevision||!selectedExternalImage)return;
+ if(!$('external-image-rights').checked){
+  $('external-image-status').textContent='Marque a confirmação de direito de uso da imagem.';
+  return;
+ }
+ $('external-image-send').disabled=true;
+ $('external-image-status').textContent='Enviando a imagem para a prévia deste pedido...';
+ try{
+  const base64=await new Promise((resolve,reject)=>{
+   const reader=new FileReader();
+   reader.onerror=()=>reject(Error('Não foi possível ler a imagem selecionada.'));
+   reader.onload=()=>resolve(String(reader.result).split(',')[1]||'');
+   reader.readAsDataURL(selectedExternalImage);
+  });
+  const result=await request('/api/art-upload',{method:'POST',body:JSON.stringify({
+   id:pending,revision:artRevision,image:base64,
+   fit:$('external-image-fit').value,rightsConfirmed:true
+  })});
+  clearExternalImage();
+  $('external-image-rights').checked=false;
+  $('external-image-status').textContent=result.message||'Imagem enviada.';
+  $('art-review').classList.add('hidden');
+  $('progress').classList.remove('hidden');
+  $('progress-stage').textContent='PREPARANDO IMAGEM EXTERNA';
+  $('progress-title').textContent='Ajustando a imagem enviada';
+  $('progress-message').textContent='A imagem está sendo adaptada ao formato vertical. Nenhum vídeo foi iniciado ainda.';
+  $('progress').scrollIntoView({behavior:'smooth',block:'start'});
+  clearTimeout(timer);timer=setTimeout(poll,6000);
+ }catch(e){
+  $('external-image-status').textContent=e.message;
+  $('external-image-send').disabled=false;
+ }
+});
+
 function showArtReview(data){
+ const previousRevision=artRevision;
  artRevision=data.revision;
+ if(previousRevision!==artRevision){
+  clearExternalImage();
+  $('external-image-rights').checked=false;
+ }
+ loadExternalPrompt(pending,artRevision);
  artAssets=data.assets||{};
  const cover=artAssets['capa.png'];
  if(!cover){$('progress-message').textContent='A imagem ainda não foi disponibilizada; atualize o pedido.';return;}
