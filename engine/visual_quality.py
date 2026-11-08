@@ -28,11 +28,12 @@ elif ep.get("content_type","atleta")=="atleta" and licensed_photo(ep) is not Non
       "message":"Fotografia real cadastrada com metadados de licença. Revisar direitos antes da publicação."
     }
 else:
+    thematic=ep.get("content_type","atleta")!="atleta"
     data={
-      "mode":"cartoon_contingencia",
+      "mode":"composicao_tematica" if thematic else "cartoon_contingencia",
       "premium":False,
-      "message":"A capa utiliza o desenho de contingência; ainda NÃO corresponde ao novo padrão de anime premium aprovado. Revise a imagem antes de publicar.",
-      "notice":"Sem foto licenciada e sem arte anime previamente aprovada para este atleta."
+      "message":("Composição temática original com elementos de beisebol; revisar adequação visual e direitos antes da publicação." if thematic else "A capa utiliza o desenho de contingência; ainda NÃO corresponde ao novo padrão de anime premium aprovado. Revise a imagem antes de publicar."),
+      "notice":("Conteúdo coletivo utiliza elementos temáticos, não retrato de atleta." if thematic else "Sem foto licenciada e sem arte anime previamente aprovada para este atleta.")
     }
 
 out=Path(args.output)
