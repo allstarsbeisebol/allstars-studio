@@ -600,7 +600,16 @@ function renderFiles(assets,title){
  for(const [filename,label] of labels){
   const url=assets[filename];
   if(typeof url!=='string'||!url.startsWith('https://github.com/allstarsbeisebol/allstars-studio/releases/download/'))continue;
-  const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';a.className='btn '+(filename==='allstars_reel.mp4'?'':'secondary');a.textContent=label;$('files').append(a);
+  const group=document.createElement('div');group.className='file-actions';
+  const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';a.className='btn '+(filename==='allstars_reel.mp4'?'':'secondary');a.textContent=label;group.append(a);
+  if(/\.(?:png|jpg|jpeg|webp)$/i.test(filename)){
+   const preview=document.createElement('button');preview.type='button';preview.className='secondary';
+   preview.textContent='Ver imagem';preview.addEventListener('click',()=>openImagePreview(url,filename));group.append(preview);
+  }else if(/\.(?:txt|srt|json)$/i.test(filename)){
+   const preview=document.createElement('button');preview.type='button';preview.className='outline';
+   preview.textContent='Visualizar / Copiar';preview.addEventListener('click',()=>openTextPreview(url,filename));group.append(preview);
+  }
+  $('files').append(group);
  }
  $('cover').src=assets['capa.png']||'';$('cover').hidden=!assets['capa.png'];
  $('video').src=assets['allstars_reel.mp4']||'';$('video').hidden=!assets['allstars_reel.mp4'];
