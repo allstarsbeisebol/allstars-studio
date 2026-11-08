@@ -853,16 +853,29 @@ function updateFormHint(){
   'Sem assunto nem referências, o Studio escolhe uma história da biblioteca.';
  $('reference-count').textContent=urls.length+' link(s) identificados automaticamente, sem duplicados.';
 }
-$('reference-links-text').addEventListener('input',()=>{updateFormHint();saveDraft();$('confirm-panel').classList.add('hidden');});
-for(const id of ['content-type','subject','reference-text'])$(id).addEventListener('input',()=>{updateFormHint();if(id==='content-type')explainType();$('confirm-panel').classList.add('hidden');saveDraft();});
+$('reference-links-text').addEventListener('input',()=>{updateFormHint();saveDraft();$('confirm-panel').classList.add('hidden');updateSkipReferences();});
+for(const id of ['content-type','subject','reference-text'])$(id).addEventListener('input',()=>{updateFormHint();if(id==='content-type')explainType();$('confirm-panel').classList.add('hidden');saveDraft();updateSkipReferences();});
+function updateSkipReferences(){
+ const filled=Boolean(getReferences().length||$('reference-links-text').value.trim()||$('reference-text').value.trim());
+ $('wizard-references-skip').classList.toggle('wizard-hidden',filled);
+}
 explainType();
 restoreDraft();
+updateSkipReferences();
+const previouslyOpen=(()=>{try{return localStorage.getItem(WIZARD_VIEW_KEY)||'home';}catch{return 'home';}})();
+const initialScreen=pending?
+  (['art','progress'].includes(previouslyOpen)?'progress':'home'):
+  (['content','references'].includes(previouslyOpen)?previouslyOpen:
+   ['home','result','library','alerts'].includes(previouslyOpen)?previouslyOpen:'home');
+showWizardScreen(initialScreen,{focus:false});
 $('clear-form').addEventListener('click',()=>{
  if(!confirm('Limpar o formulário? O rascunho salvo neste navegador será apagado.'))return;
  for(const id of ['subject','reference-links-text','reference-text'])$(id).value='';
- $('content-type').value='auto';localStorage.removeItem(DRAFT_KEY);$('confirm-panel').classList.add('hidden');$('extra-reference').open=false;$('draft-status').textContent='Formulário limpo.';updateFormHint();explainType();
+ $('content-type').value='auto';localStorage.removeItem(DRAFT_KEY);$('confirm-panel').classList.add('hidden');$('extra-reference').open=false;$('draft-status').textContent='Formulário limpo.';draftStartScreen='content';updateFormHint();explainType();updateSkipReferences();showWizardScreen('content');
 });
 async function create(){
+ // Um pedido existente permanece vinculado ao usuário, inclusive após alternar apps.
+ if(pending){continuePending();return;}
  $('completion-toast').classList.add('hidden');
  document.title=ordinaryTitle;
  if(!authenticated){$('login').classList.remove('hidden');$('login').scrollIntoView({behavior:'smooth'});return;}
@@ -875,16 +888,16 @@ async function create(){
  $('progress-title').textContent='Enviando pedido...';
  $('progress-message').textContent='Seu pedido será pesquisado e a capa será criada primeiro, para sua aprovação.';
  $('art-review').classList.add('hidden');
- $('progress').scrollIntoView({behavior:'smooth'});
+ showWizardScreen('progress',{force:true});
  try{
   const data=await request('/api/generate',{method:'POST',body:JSON.stringify({
    mode:urls.length||reference_text?'link':'auto',content_type,subject,urls,reference_text
   })});
-  pending=data.request_id;localStorage.setItem('allstars-pending-issue',String(pending));$('overview-pending').textContent='Pedido #'+pending;clearDraft();
+  pending=data.request_id;localStorage.setItem('allstars-pending-issue',String(pending));$('overview-pending').textContent='Pedido #'+pending;clearDraft();updateWizardHome();
   $('progress-stage').textContent='PREPARANDO IMAGEM';
   $('progress-title').textContent='Prévia da imagem solicitada';
   await poll();
- }catch(e){errorMessage(e.message);}
+ }catch(e){errorMessage(e.message);showWizardScreen('progress',{force:true});}
  finally{$('generate').disabled=!configured;}
 }
 $('generate').addEventListener('click',create);
