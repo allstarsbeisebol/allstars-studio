@@ -32,6 +32,23 @@ if isinstance(ep.get("source_metadata"),dict):
         "evidence_note":"Identificadores apenas para auditoria do artigo, não constituem prova externa nem verificação histórica.",
         "rights":"A leitura da página não autoriza reutilizar fotos, ilustrações ou conteúdo integral."
     }
+media_file=root/"output/midia.json"
+if media_file.is_file():
+    try:
+        media=json.loads(media_file.read_text(encoding="utf-8"))
+        if media.get("status") in ("existing","downloaded"):
+            record=media.get("record",{})
+            report["media"]={
+                "source":"Wikimedia Commons","url":record.get("source_url"),
+                "author":record.get("author"),"license":record.get("license"),
+                "license_url":record.get("license_url"),
+                "status":"Licença e autoria informadas pelo Commons; confirmar antes da publicação",
+                "note":"Foto não prova a narrativa histórica do roteiro."
+            }
+        else:
+            report["media"]={"status":"Nenhuma foto com licença qualificada encontrada; ilustração editorial utilizada"}
+    except (ValueError,OSError):
+        report["media"]={"status":"Dados da imagem indisponíveis"}
 out=Path(args.output);out.parent.mkdir(parents=True,exist_ok=True)
 out.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
 print("Pesquisa orientada para",name,":",len(references),"sites cadastrados")
