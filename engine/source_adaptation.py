@@ -34,7 +34,9 @@ def describe_reference(req):
         for part in reversed(parts):
             clean=re.sub(r"\.(?:html?|php|aspx|pdf)$","",part,flags=re.I).strip()
             if not clean or OPAQUE.fullmatch(clean):continue
-            terms=[w for w in re.split(r"[-_+.]+",clean) if w and w.casefold() not in GENERIC_PATHS]
+            stop={"a","o","e","de","do","da","dos","das","em","no","na","um","uma","the","of","and"}
+            terms=[w for w in re.split(r"[-_+.]+",clean)
+                   if w and w.casefold() not in GENERIC_PATHS and w.casefold() not in stop]
             if len(terms)<2 or len(" ".join(terms))<13:continue
             if not all(re.fullmatch(r"[^\W\d_][\wÀ-ÿ]{2,}",w,flags=re.U) for w in terms[:8]):continue
             return " ".join(terms[:18])[:160], "url_slug_hint"
