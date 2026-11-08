@@ -22,7 +22,7 @@ jobs:
       - name: Selecionar história ou preparar episódio baseado em link
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: gemini-2.5-flash
+          GEMINI_MODEL: gemini-3.5-flash-lite
         run: |
           python engine/request_select.py
       - name: Instalar programas
@@ -119,7 +119,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue comment "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --body "Não foi possível gerar este episódio. O pedido não foi substituído por outra história. Confira a execução em https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}. Para links, é preciso usar artigo HTTPS acessível e configurar a chave GEMINI_API_KEY gratuita dentro dos limites do serviço."
+          if [ -s output/production_failure.txt ]; then
+            reason=$(head -c 360 output/production_failure.txt)
+          else
+            reason="Falha na geração do áudio, da imagem ou do vídeo. Consulte o registro técnico."
+          fi
+          printf 'Não foi possível gerar este episódio. Motivo: %s. O pedido não foi substituído por outra história. Registro: https://github.com/%s/actions/runs/%s' "$reason" "${{ github.repository }}" "${{ github.run_id }}" > /tmp/allstars-production-failure-message.txt
+          gh issue comment "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --body-file /tmp/allstars-production-failure-message.txt
           gh issue close "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --reason "not planned"
 
       - name: Registrar resultado no pedido iniciado pelo site
