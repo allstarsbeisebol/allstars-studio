@@ -110,34 +110,61 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 .visual-toolbar label{flex:1;min-width:180px}
 .visual-toolbar button{min-height:44px}
 @media(max-width:680px){.visual-gallery{grid-template-columns:1fr}.visual-toolbar{flex-direction:column;align-items:stretch}.visual-toolbar label{width:100%}}
+
+/* Wizard ALLSTARS: uma etapa por vez, mantendo HTML/CSS/JS puros. */
+.wizard-hidden{display:none!important}
+.wizard-progress{background:#10284e;border:1px solid #5274a5;border-radius:15px;padding:15px 18px;margin:10px 0 20px}
+.wizard-progress-heading{display:flex;justify-content:space-between;gap:12px;margin-bottom:12px;font-weight:700}
+.wizard-progress-heading span{color:#c6d6f0;font-weight:500}
+.wizard-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));list-style:none;gap:7px;padding:0;margin:0}
+.wizard-steps li{border-top:5px solid #546b91;padding:8px 2px 0;text-align:center;color:#bdcde5;font-size:12px}
+.wizard-steps li.is-current{border-color:#F0C040;color:#fff;font-weight:800}
+.wizard-steps li.is-complete{border-color:#74b5dd;color:#dceaff}
+.wizard-nav{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+.wizard-nav button{flex:1;min-width:170px}
+.wizard-pane{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-column:1/-1;gap:14px 18px}
+.wizard-pane>.wide,.wizard-pane>.step-actions,.wizard-pane>.notice,.wizard-pane>#draft-status{grid-column:1/-1}
+.home-primary{display:flex;gap:12px;flex-wrap:wrap;padding:18px 4px 22px}
+.home-primary button{min-width:200px;flex:1}
+.wizard-status-note{font-size:13px;color:#c7d6ef}
+@media(max-width:680px){.wizard-pane{grid-template-columns:1fr}.wizard-steps li{font-size:10px;overflow-wrap:anywhere}.wizard-nav,.home-primary{flex-direction:column}.wizard-nav button,.home-primary button{width:100%}}
 </style></head><body>
 <header><div class="wrap"><div class="brand">⚾ ALLSTARS <span>STUDIO</span></div><div class="sub">ALÉM DO JOGO · HISTÓRIAS REAIS DO BEISEBOL</div></div></header>
 <nav class="section-nav" aria-label="Navegação no Studio">
   <button id="mobile-menu-toggle" class="mobile-menu-toggle" type="button" aria-controls="studio-nav-links" aria-expanded="false" aria-label="Abrir menu de navegação"><span class="mobile-menu-symbol" aria-hidden="true">☰</span><span>Menu</span></button>
   <div id="studio-nav-links" class="section-nav-links">
-    <a href="#options">Criar vídeo</a><a href="#progress">Andamento</a><a href="#downloads">Último Reel</a><a href="#library">Biblioteca</a><a href="#alert-settings">Avisos</a>
+    <a href="#overview" data-wizard-go="home">Início</a><a href="#options" data-wizard-go="content">Criar vídeo</a><a href="#progress" id="nav-pending" data-wizard-go="progress">Meu pedido</a><a href="#library" data-wizard-go="library">Biblioteca</a><a href="#alert-settings" data-wizard-go="alerts">Avisos</a>
   </div>
 </nav>
 <main>
-<div class="alert-settings top-alerts" id="alert-settings" role="region" aria-label="Avisos de conclusão de vídeos"><button type="button" id="notify-enable" class="btn outline" aria-pressed="false">🔔 Ativar avisos do navegador</button><span class="note" id="notify-explanation">Quando o vídeo terminar, mostraremos um aviso aqui. Para avisar também no navegador, ative a opção. Mantenha a página aberta.</span></div>
-<section class="hero"><div class="eyebrow">ESTÚDIO DE PRODUÇÃO</div><h1>Seu próximo Reel.<br><span style="color:var(--gold)">Você escolhe quando criar.</span></h1><p class="muted">Selecione uma das duas opções. O estúdio prepara a narração, o vídeo vertical, a capa e a legenda para você baixar. Nenhuma programação semanal obrigatória.</p></section>
-<section id="overview" class="studio-overview" aria-label="Visão geral">
+<div id="wizard-progress" class="wizard-progress wizard-hidden" aria-label="Progresso da criação">
+ <div class="wizard-progress-heading"><strong id="wizard-current-name">Escolher conteúdo</strong><span id="wizard-current-number">Etapa 1 de 5</span></div>
+ <ol class="wizard-steps" id="wizard-steps"><li>Conteúdo</li><li>Referências</li><li>Conferência</li><li>Imagem</li><li>Resultado</li></ol>
+ <p class="wizard-status-note" id="wizard-step-hint" role="status">Avance e volte sem perder o rascunho.</p>
+</div>
+<div class="alert-settings top-alerts" data-studio-screen="alerts" id="alert-settings" role="region" aria-label="Avisos de conclusão de vídeos"><button type="button" id="notify-enable" class="btn outline" aria-pressed="false">🔔 Ativar avisos do navegador</button><span class="note" id="notify-explanation">Quando o vídeo terminar, mostraremos um aviso aqui. Para avisar também no navegador, ative a opção. Mantenha a página aberta.</span></div>
+<section class="hero" data-studio-screen="home"><div class="eyebrow">ESTÚDIO DE PRODUÇÃO</div><h1>Seu próximo Reel.<br><span style="color:var(--gold)">Você escolhe quando criar.</span></h1><p class="muted">Selecione uma das duas opções. O estúdio prepara a narração, o vídeo vertical, a capa e a legenda para você baixar. Nenhuma programação semanal obrigatória.</p></section>
+<section id="overview" data-studio-screen="home" class="studio-overview" aria-label="Visão geral">
  <div class="overview-item"><span class="note">Última produção</span><strong id="overview-last">Consultando...</strong><span class="note">Vídeo disponível para revisão</span></div>
- <div class="overview-item"><span class="note">Pedido em andamento</span><strong id="overview-pending">Nenhum</strong><a class="note" href="#progress">Ver acompanhamento</a></div>
- <div class="overview-item"><span class="note">Minha biblioteca</span><strong id="overview-library">Faça login</strong><a class="note" href="#library">Buscar produções</a></div>
+ <div class="overview-item"><span class="note">Pedido em andamento</span><strong id="overview-pending">Nenhum</strong><a class="note" href="#progress" data-wizard-go="progress">Ver acompanhamento</a></div>
+ <div class="overview-item"><span class="note">Minha biblioteca</span><strong id="overview-library">Faça login</strong><a class="note" href="#library" data-wizard-go="library">Buscar produções</a></div>
+</section>
+<section class="home-primary" data-studio-screen="home" aria-label="Escolha o que deseja fazer">
+ <button id="home-create" type="button">＋ Criar novo vídeo</button>
+ <button id="home-continue" class="secondary hidden" type="button">▶ Continuar meu pedido</button>
+ <button id="home-library" class="outline" type="button">Minha biblioteca</button>
 </section>
 <section class="panel login hidden" id="login"><h2>Entrar no estúdio</h2><p class="muted">Acesso de produção reservado à administração ALLSTARS. Entre uma vez neste navegador.</p>
 <form id="login-form"><label for="password">Senha do estúdio</label><input id="password" type="password" autocomplete="current-password" required maxlength="300" placeholder="Sua senha de acesso"><button style="width:100%;margin-top:15px" type="submit">Entrar e continuar</button></form><p id="login-message" role="status" class="note"></p></section>
 <section id="setup" class="panel hidden"><h2>Conexão inicial pendente</h2><p class="muted">O aplicativo visual já está preparado. Falta configurar as credenciais seguras do serviço de produção uma única vez. Nenhum dado secreto deve ser colocado no código ou na página pública.</p><a href="https://vercel.com/allstars-beisebol/allstars-studio/settings/environment-variables" target="_blank" rel="noopener" class="btn secondary">Abrir configuração segura</a></section>
-<section class="panel" id="options" aria-labelledby="form-title">
+<section class="panel" data-studio-screen="editor" id="options" aria-labelledby="form-title">
   <div class="eyebrow">VOCÊ ESTÁ EM · CRIAR VÍDEO</div>
-  <h2 id="form-title">Vamos criar um vídeo?</h2>
+  <h2 id="form-title" tabindex="-1">O que vamos criar?</h2>
   <p class="muted">Você escolhe o assunto e pode acrescentar referências. Antes de começar a produção, mostraremos um resumo para você conferir.</p>
-  <div class="steps-overview" aria-label="Etapas para criar vídeo">
-    <span><strong>1.</strong> Escolher o conteúdo</span><span><strong>2.</strong> Adicionar referências (opcional)</span><span><strong>3.</strong> Conferir e enviar</span>
-  </div>
-  <div class="notice"><strong>Recomendamos começar por Automático.</strong> É o jeito mais simples: o Studio escolhe uma história de beisebol já cadastrada. Para pedir um assunto específico, selecione outra opção e escreva o tema.</div>
+  <p class="field-help" id="wizard-editor-help">Primeiro escolha o tipo de história. No automático, não é necessário informar um assunto.</p>
+  <div id="wizard-automatic-tip" class="notice"><strong>Para começar sem complicação:</strong> selecione Automático. O Studio escolherá uma história e você poderá conferir a capa antes do vídeo.</div>
   <div class="studio-form">
+    <div class="wizard-pane" id="wizard-pane-content">
     <div>
       <label for="content-type">1. Qual vídeo você quer criar?</label>
       <select id="content-type">
@@ -156,8 +183,14 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
         placeholder="Ex.: Como funciona um home run?">
       <p class="field-help" id="subject-help">Deixe em branco para o Studio escolher uma história no modo Automático. Nas demais opções, informe o tema ou acrescente uma referência.</p>
     </div>
+    <div class="wide wizard-nav">
+      <button type="button" id="wizard-content-home" class="secondary">← Início</button>
+      <button type="button" id="wizard-content-next">Avançar →</button>
+    </div>
+    </div>
+    <div class="wizard-pane wizard-hidden" id="wizard-pane-references">
     <div class="wide">
-      <label>2. Você tem links que ajudam a contar essa história? <span class="note">(opcional)</span></label>
+      <label>Você tem links que ajudam a contar essa história? <span class="note">(opcional)</span></label>
       <textarea id="reference-links-text" rows="5" spellcheck="false" aria-describedby="reference-count" placeholder="Cole vários links ao mesmo tempo, separados por espaços ou linhas. O Studio identifica e remove duplicados."></textarea>
       <p class="field-help" id="reference-count" role="status">0 links identificados. Cole tudo de uma vez.</p>
       <p class="note">Pode incluir notícias e publicações públicas do Instagram ou Facebook. Se a rede social impedir a leitura automática, cole a legenda abaixo. Conteúdo público não autoriza reutilizar fotos e vídeos de terceiros.</p>
@@ -172,14 +205,18 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
     <p id="draft-status" class="field-help" role="status">Seu rascunho será salvo automaticamente neste navegador.</p>
     <button id="clear-form" type="button" class="outline">Limpar formulário</button>
     <div class="wide step-actions">
-      <h3>3. Conferir antes de produzir</h3>
-      <p class="field-help">Ao continuar, nada será produzido ainda. Você verá um resumo do pedido e poderá voltar para corrigir.</p>
-      <button id="review" type="button" class="generate-primary">Conferir meu pedido →</button>
+      <p class="field-help">As referências são opcionais. Confira o resumo antes de solicitar a imagem.</p>
+      <div class="wizard-nav">
+       <button id="wizard-references-back" type="button" class="secondary">← Voltar</button>
+       <button id="wizard-references-skip" type="button" class="outline">Pular referências</button>
+       <button id="review" type="button" class="generate-primary">Conferir pedido →</button>
+      </div>
+    </div>
     </div>
   </div>
 </section>
-<section class="panel hidden" id="confirm-panel" tabindex="-1" aria-labelledby="confirm-title">
-  <div class="eyebrow">ETAPA FINAL · CONFIRA SEU PEDIDO</div>
+<section class="panel hidden" data-studio-screen="confirm" id="confirm-panel" tabindex="-1" aria-labelledby="confirm-title">
+  <div class="eyebrow">CONFERÊNCIA · ANTES DE ENVIAR</div>
   <h2 id="confirm-title">Está tudo certo?</h2>
   <p class="field-help">Cada Reel começa com um gancho histórico nos três primeiros segundos e usa uma direção de arte vinculada ao assunto. O material continua sujeito à revisão editorial.</p>
   <p class="muted">Após confirmar, o Studio pesquisará o assunto e criará primeiro a imagem. Você poderá visualizar, pedir correções, gerar outra versão ou aprová-la. <strong>O vídeo só será produzido depois da sua aprovação.</strong></p>
@@ -190,11 +227,12 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
     <button type="button" id="generate">✓ Preparar prévia da imagem</button>
   </div>
 </section>
-<section class="panel hidden" id="progress" aria-live="polite"><div class="eyebrow" id="progress-stage">ACOMPANHAR PEDIDO</div><h2 id="progress-title">Preparando sua imagem...</h2><p id="progress-message" class="muted">Pesquisando e preparando a primeira capa para aprovação.</p><p class="note">Você pode sair e voltar ao Studio: o pedido continuará identificado neste navegador. O áudio e o vídeo só serão criados após a imagem ser aprovada.</p><button class="secondary" id="refresh" type="button">↻ Atualizar situação</button></section>
-<section class="panel hidden" id="art-review" tabindex="-1" aria-labelledby="art-review-title">
- <div class="eyebrow">ETAPA 2 · APROVAR IMAGEM ANTES DO VÍDEO</div>
+<section class="panel hidden" data-studio-screen="progress" id="progress" aria-live="polite"><div class="eyebrow" id="progress-stage">ACOMPANHAR PEDIDO</div><h2 id="progress-title">Preparando sua imagem...</h2><p id="progress-message" class="muted">Pesquisando e preparando a primeira capa para aprovação.</p><p class="note">Você pode sair e voltar ao Studio: o pedido continuará identificado neste navegador. O áudio e o vídeo só serão criados após a imagem ser aprovada.</p><div class="wizard-nav"><button class="secondary" id="wizard-progress-home" type="button">← Início (sem cancelar pedido)</button><button class="secondary" id="refresh" type="button">↻ Atualizar situação</button></div></section>
+<section class="panel hidden" data-studio-screen="art" id="art-review" tabindex="-1" aria-labelledby="art-review-title">
+ <div class="eyebrow">ETAPA 4 · CONFERIR IMAGEM ANTES DO VÍDEO</div>
  <h2 id="art-review-title">Confira a capa do seu Reel</h2>
  <p id="art-review-message" class="muted">Veja a imagem e solicite ajustes, uma nova versão ou aprove para continuar.</p>
+ <div class="wizard-nav"><button id="wizard-art-home" class="secondary" type="button">← Início (guardar pedido)</button><button id="wizard-art-progress" class="outline" type="button">Ver andamento</button></div>
  <div class="art-review-gallery">
   <div><img id="art-preview-cover" alt="Prévia da capa gerada para este pedido" loading="lazy"><button id="art-enlarge" class="secondary" type="button" style="margin-top:10px">Ampliar imagem</button></div>
   <div>
@@ -242,7 +280,7 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
   <button id="external-image-send" type="button" disabled>Usar esta imagem e conferir a nova prévia</button>
  </details>
 </section>
-<section class="panel" id="downloads"><div class="eyebrow">ARQUIVOS PRODUZIDOS</div><h2 id="result-title">Último vídeo disponível</h2><p class="muted" id="result-message">Consultando os downloads...</p>
+<section class="panel" data-studio-screen="result" id="downloads"><div class="eyebrow">ARQUIVOS PRODUZIDOS</div><h2 id="result-title">Último vídeo disponível</h2><p class="muted" id="result-message">Consultando os downloads...</p>
 <div id="result" class="result hidden"><div><img id="cover" alt="Capa do vídeo ALLSTARS" loading="lazy"><button id="cover-preview-btn" class="secondary" type="button" style="margin-top:10px">Ampliar capa</button></div><div><video id="video" controls preload="none" playsinline aria-label="Assista ao Reel"></video><p class="note">Prévia editorial. Confira fatos históricos, voz e direitos das imagens antes de publicar.</p><div class="links" id="files"></div></div></div>
 <section class="panel file-text-preview hidden" id="file-text-preview" aria-labelledby="file-preview-title">
  <div class="eyebrow">PRÉVIA EDITORIAL · TEXTO</div><h2 id="file-preview-title">Arquivo</h2>
@@ -274,7 +312,7 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
   </div>
 </details>
 </section>
-<section class="panel" id="library">
+<section class="panel" data-studio-screen="library" id="library">
   <div class="eyebrow">BIBLIOTECA ALLSTARS</div>
   <h2>Vídeos anteriores</h2>
   <p class="field-help">Aqui você pode recuperar vídeos já produzidos, assistir novamente e baixar os arquivos. Ver um vídeo antigo não cria outro vídeo nem consome a cota do Gemini.</p>
@@ -319,6 +357,7 @@ button,.btn{border:0;border-radius:10px;padding:14px 19px;background:var(--gold)
 </main><footer>ALLSTARS Beisebol · Aqui você brilha! · Conteúdo para revisão antes da publicação</footer>
 <script type="module">
 import {PREF_KEY,browserAvailable,alertsEnabled,enableAlerts,announceIssue} from './notify.js';
+import {wizardSteps,wizardStep,panelForScreen,normalizeWizardScreen,routeWizardScreen,resumeDraftScreen} from './wizard.js';
 const $=id=>document.getElementById(id);
 // O menu hambúrguer aparece no mobile e fecha ao navegar, tocar fora ou apertar Esc.
 const menuToggle=$('mobile-menu-toggle'),navLinks=$('studio-nav-links');
@@ -345,8 +384,85 @@ document.addEventListener('keydown',event=>{
 window.addEventListener('resize',()=>{if(window.innerWidth>680)closeMobileMenu();});
 let authenticated=false,configured=false,pending=Number(localStorage.getItem('allstars-pending-issue')||0),timer=null;
 const DRAFT_KEY='allstars-studio-draft-v4';
+const WIZARD_VIEW_KEY='allstars-wizard-view-v1';
+let wizardView='home',draftStartScreen='content';
+function updateWizardHome(){
+ $('home-continue').classList.toggle('hidden',!pending);
+ $('home-create').classList.toggle('wizard-hidden',Boolean(pending));
+ $('nav-pending').textContent=pending?'Meu pedido':'Último Reel';
+}
+function showWizardScreen(requested,{focus=true,force=false}={}){
+ const view=force?normalizeWizardScreen(requested):routeWizardScreen(requested,pending);
+ wizardView=view;
+ const panel=panelForScreen(view);
+ document.querySelectorAll('[data-studio-screen]').forEach(el=>{
+  el.classList.toggle('wizard-hidden',el.dataset.studioScreen!==panel);
+ });
+ const references=view==='references';
+ $('wizard-pane-content').classList.toggle('wizard-hidden',references);
+ $('wizard-pane-references').classList.toggle('wizard-hidden',!references);
+ if(panel==='editor'){
+  $('form-title').textContent=references?'Deseja acrescentar referências?':'O que vamos criar?';
+  $('wizard-editor-help').textContent=references?'Opcional: cole links ou um texto. Você pode pular.':
+   'Escolha o tipo de história. No automático não é necessário escrever o assunto.';
+  $('wizard-automatic-tip').classList.toggle('wizard-hidden',references);
+  draftStartScreen=view;
+  saveDraft();
+ }
+ const step=wizardStep(view);
+ $('wizard-progress').classList.toggle('wizard-hidden',step<0);
+ if(step>=0){
+  $('wizard-current-number').textContent='Etapa '+(step+1)+' de 5';
+  $('wizard-current-name').textContent=view==='progress'?'Preparação e andamento':wizardSteps[step];
+  $('wizard-step-hint').textContent=view==='progress'?'Você pode voltar ao início sem cancelar o pedido.':
+   view==='art'?'Aprovar, revisar ou usar outra imagem: a escolha é sua.':
+   'Avance e volte sem perder seu rascunho. Nada é enviado sem confirmação.';
+  [...$('wizard-steps').children].forEach((el,i)=>{
+   el.classList.toggle('is-current',i===step);el.classList.toggle('is-complete',i<step);
+   if(i===step)el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');
+  });
+ }
+ if(view==='progress'){
+  $('progress').classList.remove('hidden');
+  $('wizard-progress-home').textContent=pending?'← Início (sem cancelar pedido)':'← Voltar ao formulário';
+ }
+ updateWizardHome();
+ try{localStorage.setItem(WIZARD_VIEW_KEY,view);}catch{}
+ if(focus){
+  const target=step>=0?$('wizard-progress'):panel==='home'?$('overview'):
+   panel==='library'?$('library'):panel==='alerts'?$('alert-settings'):$('options');
+  target?.scrollIntoView({behavior:'smooth',block:'start'});
+  if(panel==='editor')$('form-title').focus({preventScroll:true});
+  if(view==='confirm')$('confirm-panel').focus({preventScroll:true});
+  if(view==='art')$('art-review').focus({preventScroll:true});
+ }
+}
+function continuePending(){
+ if(!pending){showWizardScreen('home');return;}
+ showWizardScreen('progress');poll();
+}
+$('home-create').addEventListener('click',()=>pending?continuePending():showWizardScreen(draftStartScreen));
+$('home-continue').addEventListener('click',continuePending);
+$('home-library').addEventListener('click',()=>showWizardScreen('library'));
+$('wizard-content-home').addEventListener('click',()=>showWizardScreen('home'));
+$('wizard-content-next').addEventListener('click',()=>showWizardScreen('references'));
+$('wizard-references-back').addEventListener('click',()=>showWizardScreen('content'));
+$('wizard-references-skip').addEventListener('click',openReview);
+$('wizard-progress-home').addEventListener('click',()=>pending?showWizardScreen('home'):showWizardScreen('references'));
+$('wizard-art-home').addEventListener('click',()=>showWizardScreen('home'));
+$('wizard-art-progress').addEventListener('click',()=>showWizardScreen('progress'));
+document.addEventListener('click',event=>{
+ const link=event.target.closest('[data-wizard-go]');
+ if(!link)return;
+ event.preventDefault();
+ const target=link.dataset.wizardGo;
+ if(target==='progress'){if(pending)continuePending();else showWizardScreen('result');return;}
+ if(target==='content'){if(pending)continuePending();else showWizardScreen(draftStartScreen);return;}
+ showWizardScreen(target);
+});
 function saveDraft(){
- const value={content_type:$('content-type').value,subject:$('subject').value,urls:$('reference-links-text').value,reference_text:$('reference-text').value};
+ const value={content_type:$('content-type').value,subject:$('subject').value,urls:$('reference-links-text').value,reference_text:$('reference-text').value,
+  wizard_step:wizardView==='references'?'references':'content'};
  try{localStorage.setItem(DRAFT_KEY,JSON.stringify(value));$('draft-status').textContent='Rascunho salvo neste navegador.';}catch{}
 }
 function restoreDraft(){
@@ -354,10 +470,19 @@ function restoreDraft(){
   const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');if(!d||typeof d!=='object')return;
   for(const [key,id] of [['subject','subject'],['urls','reference-links-text'],['reference_text','reference-text']])if(typeof d[key]==='string')$(id).value=d[key];
   if(['auto','atleta','tema','noticia','lista','explicativo'].includes(d.content_type))$('content-type').value=d.content_type;
-  $('draft-status').textContent='Rascunho recuperado.';if(d.reference_text)$('extra-reference').open=true;updateFormHint();explainType();
+  $('draft-status').textContent='Rascunho recuperado.';if(d.reference_text)$('extra-reference').open=true;
+   draftStartScreen=resumeDraftScreen(d.wizard_step);updateFormHint();explainType();
  }catch{}
 }
-function clearDraft(){localStorage.removeItem(DRAFT_KEY);$('draft-status').textContent='Pedido enviado. Rascunho local limpo.';}
+function clearDraft(){
+ localStorage.removeItem(DRAFT_KEY);
+ draftStartScreen='content';
+ for(const id of ['subject','reference-links-text','reference-text'])$(id).value='';
+ $('content-type').value='auto';
+ $('extra-reference').open=false;
+ $('draft-status').textContent='Pedido enviado. Pronto para uma nova criação.';
+ updateFormHint();explainType();updateSkipReferences();
+}
 
 const ordinaryTitle=document.title;
 let artRevision=0,artAssets={};
@@ -503,7 +628,7 @@ $('external-image-send').addEventListener('click',async()=>{
   $('progress-stage').textContent='PREPARANDO IMAGEM EXTERNA';
   $('progress-title').textContent='Ajustando a imagem enviada';
   $('progress-message').textContent='A imagem está sendo adaptada ao formato vertical. Nenhum vídeo foi iniciado ainda. '+(result.library_message||'');
-  $('progress').scrollIntoView({behavior:'smooth',block:'start'});
+  showWizardScreen('progress');
   clearTimeout(timer);timer=setTimeout(poll,6000);
  }catch(e){
   $('external-image-status').textContent=e.message;
@@ -532,7 +657,7 @@ function showArtReview(data){
  $('progress-stage').textContent='AGUARDANDO APROVAÇÃO DA CAPA';
  $('progress-title').textContent='Imagem pronta para revisão';
  $('progress-message').textContent='Nenhum vídeo foi produzido ainda. Escolha o que fazer com esta imagem abaixo.';
- $('art-review').scrollIntoView({behavior:'smooth',block:'start'});
+ if(wizardView==='progress'||wizardView==='art')showWizardScreen('art',{focus:wizardView!=='art'});
 }
 async function submitArtAction(action){
  if(!pending||!artRevision)return;
@@ -549,7 +674,7 @@ async function submitArtAction(action){
   $('progress-title').textContent=action==='approve'?'Produzindo o seu vídeo...':'Preparando uma nova imagem...';
   $('progress-message').textContent=data.message;
   $('art-feedback').value='';
-  $('progress').scrollIntoView({behavior:'smooth',block:'start'});
+  showWizardScreen('progress');
   clearTimeout(timer);timer=setTimeout(poll,6000);
  }catch(e){$('art-action-message').textContent=e.message;}
  finally{for(const btn of buttons)btn.disabled=false;}
@@ -597,7 +722,8 @@ function showToast(kind,title,message,target='downloads'){
 $('toast-close').addEventListener('click',()=>$('completion-toast').classList.add('hidden'));
 $('toast-action').addEventListener('click',()=>{
  $('completion-toast').classList.add('hidden');
- $(toastTarget).scrollIntoView({behavior:'smooth',block:'start'});
+ showWizardScreen(toastTarget==='downloads'?'result':toastTarget==='alert-settings'?'alerts':'progress',
+  {force:toastTarget==='progress'&&!pending});
 });
 function syncNotifyButton(){
  const btn=$('notify-enable'),note=$('notify-explanation');
@@ -639,7 +765,7 @@ function announceEnd(issueId,kind,details){
   issueId,kind,title:'ALLSTARS Studio — '+(ready?'vídeo pronto':'atenção à produção'),body,
   onClick:()=>{
    window.focus();
-   (ready?$('downloads'):$('progress')).scrollIntoView({behavior:'smooth',block:'start'});
+   showWizardScreen(ready?'result':'progress',{force:!ready&&!pending});
   }
  });
 }
@@ -693,7 +819,8 @@ function explainType(){
 }
 function showFormProblem(message){
  $('form-hint').textContent=message;
- $('options').scrollIntoView({behavior:'smooth',block:'start'});
+ showWizardScreen('references');
+ $('form-hint').setAttribute('role','alert');
 }
 function validateDraft(){
  const rawLinks=$('reference-links-text').value;
@@ -722,10 +849,10 @@ function openReview(){
   ['Depois de confirmar','O Studio prepara o prompt e a primeira capa. Você também poderá criar a imagem em outra IA e colá-la antes de aprovar o MP4.']
  ];
  for(const [label,value] of lines){const p=document.createElement('p');const strong=document.createElement('strong');strong.textContent=label+': ';p.append(strong,document.createTextNode(value));summary.append(p);}
- $('confirm-panel').classList.remove('hidden');$('confirm-panel').scrollIntoView({behavior:'smooth',block:'start'});$('confirm-panel').focus();
+ $('confirm-panel').classList.remove('hidden');showWizardScreen('confirm');
 }
 $('review').addEventListener('click',openReview);
-$('review-back').addEventListener('click',()=>{$('confirm-panel').classList.add('hidden');$('options').scrollIntoView({behavior:'smooth',block:'start'});});
+$('review-back').addEventListener('click',()=>{$('confirm-panel').classList.add('hidden');showWizardScreen('references');});
 
 function updateFormHint(){
  const urls=getReferences(),text=$('reference-text').value.trim(),subject=$('subject').value.trim();
@@ -735,16 +862,29 @@ function updateFormHint(){
   'Sem assunto nem referências, o Studio escolhe uma história da biblioteca.';
  $('reference-count').textContent=urls.length+' link(s) identificados automaticamente, sem duplicados.';
 }
-$('reference-links-text').addEventListener('input',()=>{updateFormHint();saveDraft();$('confirm-panel').classList.add('hidden');});
-for(const id of ['content-type','subject','reference-text'])$(id).addEventListener('input',()=>{updateFormHint();if(id==='content-type')explainType();$('confirm-panel').classList.add('hidden');saveDraft();});
+$('reference-links-text').addEventListener('input',()=>{updateFormHint();saveDraft();$('confirm-panel').classList.add('hidden');updateSkipReferences();});
+for(const id of ['content-type','subject','reference-text'])$(id).addEventListener('input',()=>{updateFormHint();if(id==='content-type')explainType();$('confirm-panel').classList.add('hidden');saveDraft();updateSkipReferences();});
+function updateSkipReferences(){
+ const filled=Boolean(getReferences().length||$('reference-links-text').value.trim()||$('reference-text').value.trim());
+ $('wizard-references-skip').classList.toggle('wizard-hidden',filled);
+}
 explainType();
 restoreDraft();
+updateSkipReferences();
+const previouslyOpen=(()=>{try{return localStorage.getItem(WIZARD_VIEW_KEY)||'home';}catch{return 'home';}})();
+const initialScreen=pending?
+  (['art','progress'].includes(previouslyOpen)?'progress':'home'):
+  (['content','references'].includes(previouslyOpen)?previouslyOpen:
+   ['home','result','library','alerts'].includes(previouslyOpen)?previouslyOpen:'home');
+showWizardScreen(initialScreen,{focus:false});
 $('clear-form').addEventListener('click',()=>{
  if(!confirm('Limpar o formulário? O rascunho salvo neste navegador será apagado.'))return;
  for(const id of ['subject','reference-links-text','reference-text'])$(id).value='';
- $('content-type').value='auto';localStorage.removeItem(DRAFT_KEY);$('confirm-panel').classList.add('hidden');$('extra-reference').open=false;$('draft-status').textContent='Formulário limpo.';updateFormHint();explainType();
+ $('content-type').value='auto';localStorage.removeItem(DRAFT_KEY);$('confirm-panel').classList.add('hidden');$('extra-reference').open=false;$('draft-status').textContent='Formulário limpo.';draftStartScreen='content';updateFormHint();explainType();updateSkipReferences();showWizardScreen('content');
 });
 async function create(){
+ // Um pedido existente permanece vinculado ao usuário, inclusive após alternar apps.
+ if(pending){continuePending();return;}
  $('completion-toast').classList.add('hidden');
  document.title=ordinaryTitle;
  if(!authenticated){$('login').classList.remove('hidden');$('login').scrollIntoView({behavior:'smooth'});return;}
@@ -757,16 +897,16 @@ async function create(){
  $('progress-title').textContent='Enviando pedido...';
  $('progress-message').textContent='Seu pedido será pesquisado e a capa será criada primeiro, para sua aprovação.';
  $('art-review').classList.add('hidden');
- $('progress').scrollIntoView({behavior:'smooth'});
+ showWizardScreen('progress',{force:true});
  try{
   const data=await request('/api/generate',{method:'POST',body:JSON.stringify({
    mode:urls.length||reference_text?'link':'auto',content_type,subject,urls,reference_text
   })});
-  pending=data.request_id;localStorage.setItem('allstars-pending-issue',String(pending));$('overview-pending').textContent='Pedido #'+pending;clearDraft();
+  pending=data.request_id;localStorage.setItem('allstars-pending-issue',String(pending));$('overview-pending').textContent='Pedido #'+pending;clearDraft();updateWizardHome();
   $('progress-stage').textContent='PREPARANDO IMAGEM';
   $('progress-title').textContent='Prévia da imagem solicitada';
   await poll();
- }catch(e){errorMessage(e.message);}
+ }catch(e){errorMessage(e.message);showWizardScreen('progress',{force:true});}
  finally{$('generate').disabled=!configured;}
 }
 $('generate').addEventListener('click',create);
@@ -789,7 +929,8 @@ async function poll(){
    renderFiles(data.assets||{},data.athlete||'Novo vídeo');
    announceEnd(finishedIssue,'ready','');
    await loadLibrary();
-   $('downloads').scrollIntoView({behavior:'smooth'});
+   updateWizardHome();
+   if(wizardView==='progress'||wizardView==='art')showWizardScreen('result');
    return;
   }
   if(data.state==='error'){
@@ -800,9 +941,12 @@ async function poll(){
    $('progress-title').textContent='Não foi possível concluir o vídeo';
    $('progress-message').textContent=data.message;
    announceEnd(failedIssue,'error',data.message||'Confira os detalhes da produção.');
+   updateWizardHome();
+   if(wizardView==='progress'||wizardView==='art')showWizardScreen('progress',{force:true});
    return;
   }
   const creatingVideo=data.state==='rendering';
+  if(wizardView==='art')showWizardScreen('progress');
   $('progress-stage').textContent=creatingVideo?'VÍDEO EM PRODUÇÃO':'PREPARANDO IMAGEM';
   $('progress-title').textContent=creatingVideo?'Produzindo seu vídeo...':'Preparando a imagem para sua aprovação...';
   $('progress-message').textContent=data.message||(creatingVideo?'Montando os arquivos.':'Pesquisando e criando a capa.');
@@ -870,7 +1014,7 @@ function paintLibrary(){
    const date=document.createElement('p');date.className='note';date.textContent=item.date?new Date(item.date).toLocaleDateString('pt-BR'):'Produção salva';
    const actions=document.createElement('div');actions.className='library-actions';
    const open=document.createElement('button');open.className='secondary';open.type='button';open.textContent='Ver arquivos';open.title='Prévia, narração, roteiro e downloads';open.addEventListener('click',()=>{
-     renderFiles(item.assets,item.title);$('downloads').scrollIntoView({behavior:'smooth',block:'start'});
+     renderFiles(item.assets,item.title);showWizardScreen('result');
    });actions.append(open);
    if(item.assets?.['allstars_reel.mp4']){
      const video=document.createElement('a');video.href=item.assets['allstars_reel.mp4'];video.target='_blank';video.rel='noopener';video.className='btn secondary';video.textContent='Baixar MP4';actions.append(video);
