@@ -48,6 +48,25 @@ class BrowserSmoke(unittest.TestCase):
         finally:
             page.close()
 
+    def test_references_confirmation_and_return_without_generation(self):
+        """Conferência editorial real, sem criar Issue ou chamar serviços."""
+        page = self.browser.new_page(viewport={"width": 390, "height": 844},
+                                     reduced_motion="reduce")
+        try:
+            page.goto(self.url, wait_until="domcontentloaded")
+            page.locator("#home-create").click()
+            page.locator("#wizard-content-next").click()
+            self.assertTrue(page.locator("#wizard-pane-references").is_visible())
+            page.locator("#wizard-references-skip").click()
+            self.assertTrue(page.locator("#confirm-panel").is_visible())
+            self.assertTrue(page.locator("#confirm-summary").is_visible())
+            self.assertTrue(page.locator("#generate").is_visible())
+            page.locator("#review-back").click()
+            self.assertTrue(page.locator("#wizard-pane-references").is_visible())
+            self.assertFalse(page.locator("#confirm-panel").is_visible())
+        finally:
+            page.close()
+
     def test_viewports_and_navigation(self):
         for width, height in [(320, 740), (390, 844), (535, 780), (1280, 900)]:
             with self.subTest(width=width):
