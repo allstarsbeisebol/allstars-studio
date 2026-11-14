@@ -48,7 +48,7 @@ class BrowserSmoke(unittest.TestCase):
         finally:
             page.close()
 
-    def test_references_confirmation_and_return_without_generation(self):
+    def test_references_require_login_before_confirmation(self):
         """Conferência editorial real, sem criar Issue ou chamar serviços."""
         page = self.browser.new_page(viewport={"width": 390, "height": 844},
                                      reduced_motion="reduce")
@@ -58,12 +58,12 @@ class BrowserSmoke(unittest.TestCase):
             page.locator("#wizard-content-next").click()
             self.assertTrue(page.locator("#wizard-pane-references").is_visible())
             page.locator("#wizard-references-skip").click()
-            self.assertTrue(page.locator("#confirm-panel").is_visible())
-            self.assertTrue(page.locator("#confirm-summary").is_visible())
-            self.assertTrue(page.locator("#generate").is_visible())
-            page.locator("#review-back").click()
-            self.assertTrue(page.locator("#wizard-pane-references").is_visible())
+            # Conferência exige autenticação: sem senha não pode avançar
+            # nem criar um pedido de geração no GitHub.
             self.assertFalse(page.locator("#confirm-panel").is_visible())
+            self.assertTrue(page.locator("#login").is_visible())
+            self.assertIn("senha", page.locator("#login-message").inner_text().lower())
+            self.assertTrue(page.locator("#wizard-pane-references").is_visible())
         finally:
             page.close()
 
