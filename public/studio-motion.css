@@ -44,3 +44,28 @@
 @media (prefers-reduced-motion: reduce) {
   .as-interactive, .as-reveal { transition: none !important; animation: none !important; transform: none !important; }
 }
+
+/* Integração progressiva: somente superfícies e ações já existentes no assistente. */
+.wizard-nav button,
+.section-nav a,
+.mobile-menu-toggle {
+  transition: background-color var(--as-duration-fast) ease,
+              border-color var(--as-duration-fast) ease,
+              box-shadow var(--as-duration-fast) ease;
+}
+.wizard-nav button:focus-visible,
+.section-nav a:focus-visible,
+.mobile-menu-toggle:focus-visible {
+  outline: 3px solid var(--as-gold);
+  outline-offset: 3px;
+}
+@media (hover:hover) and (pointer:fine) {
+  .wizard-nav button:not(:disabled):hover {
+    box-shadow: 0 3px 14px rgba(0,0,0,.17);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wizard-nav button, .section-nav a, .mobile-menu-toggle {
+    transition: none !important;
+  }
+}
