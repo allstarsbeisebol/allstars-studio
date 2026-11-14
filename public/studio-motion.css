@@ -1,0 +1,106 @@
+/* ALLSTARS Studio — camada opt-in de tokens e microinterações.
+   Não altera a página enquanto não for importada e validada no Preview. */
+:root {
+  --as-navy: #1a3566;
+  --as-blue: #315fac;
+  --as-red: #ce233e;
+  --as-gold: #f0c040;
+  --as-surface: #10284e;
+  --as-ink: #ffffff;
+  --as-muted: #c1cee6;
+  --as-border: #49648e;
+  --as-radius-sm: 10px;
+  --as-radius-lg: 17px;
+  --as-space-1: 4px;
+  --as-space-2: 8px;
+  --as-space-3: 12px;
+  --as-space-4: 16px;
+  --as-space-6: 24px;
+  --as-space-8: 32px;
+  --as-duration-fast: 140ms;
+  --as-duration-normal: 220ms;
+  --as-ease: cubic-bezier(.2,.8,.2,1);
+}
+.as-focus-ring:focus-visible {
+  outline: 3px solid var(--as-gold);
+  outline-offset: 3px;
+}
+.as-interactive {
+  transition: background-color var(--as-duration-fast) ease,
+              border-color var(--as-duration-fast) ease,
+              box-shadow var(--as-duration-fast) ease,
+              transform var(--as-duration-fast) var(--as-ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .as-interactive:not(:disabled):hover { transform: translateY(-1px); }
+}
+.as-interactive:active:not(:disabled) { transform: translateY(0); }
+.as-interactive:disabled, .as-interactive[aria-disabled="true"] { cursor: not-allowed; opacity: .6; }
+.as-reveal { animation: as-reveal var(--as-duration-normal) var(--as-ease) both; }
+@keyframes as-reveal {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .as-interactive, .as-reveal { transition: none !important; animation: none !important; transform: none !important; }
+}
+
+/* Integração progressiva: somente superfícies e ações já existentes no assistente. */
+.wizard-nav button,
+.section-nav a,
+.mobile-menu-toggle {
+  transition: background-color var(--as-duration-fast) ease,
+              border-color var(--as-duration-fast) ease,
+              box-shadow var(--as-duration-fast) ease;
+}
+.wizard-nav button:focus-visible,
+.section-nav a:focus-visible,
+.mobile-menu-toggle:focus-visible {
+  outline: 3px solid var(--as-gold);
+  outline-offset: 3px;
+}
+@media (hover:hover) and (pointer:fine) {
+  .wizard-nav button:not(:disabled):hover {
+    box-shadow: 0 3px 14px rgba(0,0,0,.17);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wizard-nav button, .section-nav a, .mobile-menu-toggle {
+    transition: none !important;
+  }
+}
+
+
+/* Ajustes mobile após revisão visual de 14/11/2026: manter o hero legível
+   em telas estreitas sem alterar as etapas ou a identidade visual. */
+@media (max-width: 680px) {
+  header { padding: 13px 18px; }
+  .section-nav { min-height: 52px; padding: 7px 14px; }
+  main { padding-top: 22px; }
+  .hero { padding-top: 12px; }
+  .hero h1 {
+    font-size: clamp(34px, 8.5vw, 46px);
+    line-height: 1.12;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
+  .hero p { font-size: clamp(15px, 3.8vw, 18px); }
+}
+@media (max-width: 360px) {
+  .hero h1 { font-size: 33px; }
+}
+
+/* Segunda revisão: linha amarela precisa quebrar por palavras inteiras. */
+@media (max-width: 680px) {
+  .hero h1 {
+    font-size: clamp(31px, 7.5vw, 40px);
+    line-height: 1.14;
+    letter-spacing: 0;
+  }
+  .hero h1 span {
+    display: inline-block;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}

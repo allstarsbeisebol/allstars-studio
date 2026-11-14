@@ -40,6 +40,8 @@ jobs:
           Path('/tmp/allstars-ui.mjs').write_text(script,encoding='utf-8')
           PY
           node --check /tmp/allstars-ui.mjs
+      - name: Validar tokens, movimento reduzido e integração CSS
+        run: python -m unittest discover -s tests -p 'test_visual_foundation.py' -v
       - name: Validar telas guiadas, rascunho e acessibilidade estrutural
         run: python -m unittest discover -s tests -p 'test_wizard_ui.py' -v
       - name: Verificar menu mobile acessível e botão de avisos no topo
@@ -277,3 +279,27 @@ jobs:
             output/legendas.srt
             output/legendas_metadata.json
           retention-days: 3
+
+  browser-smoke:
+    name: "Chromium | Layout mobile e desktop"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar Playwright e Chromium
+        run: |
+          python -m pip install "playwright==1.58.0"
+          python -m playwright install --with-deps chromium
+      - name: Testar larguras 320/390/535/1280 e menu mobile
+        run: python -m unittest discover -s tests -p 'test_browser_smoke.py' -v
+      - name: Guardar capturas para revisão
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allstars-browser-smoke
+          path: /tmp/allstars-mobile-*.png
+          if-no-files-found: ignore
+          retention-days: 7
