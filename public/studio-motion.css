@@ -89,3 +89,18 @@
 @media (max-width: 360px) {
   .hero h1 { font-size: 33px; }
 }
+
+/* Segunda revisão: linha amarela precisa quebrar por palavras inteiras. */
+@media (max-width: 680px) {
+  .hero h1 {
+    font-size: clamp(31px, 7.5vw, 40px);
+    line-height: 1.14;
+    letter-spacing: 0;
+  }
+  .hero h1 span {
+    display: inline-block;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
