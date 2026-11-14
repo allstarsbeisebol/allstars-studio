@@ -40,6 +40,8 @@ jobs:
           Path('/tmp/allstars-ui.mjs').write_text(script,encoding='utf-8')
           PY
           node --check /tmp/allstars-ui.mjs
+      - name: Validar tokens, movimento reduzido e integração CSS
+        run: python -m unittest discover -s tests -p 'test_visual_foundation.py' -v
       - name: Validar telas guiadas, rascunho e acessibilidade estrutural
         run: python -m unittest discover -s tests -p 'test_wizard_ui.py' -v
       - name: Verificar menu mobile acessível e botão de avisos no topo
