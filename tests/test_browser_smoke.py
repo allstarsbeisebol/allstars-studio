@@ -30,6 +30,24 @@ class BrowserSmoke(unittest.TestCase):
         cls.server.shutdown()
         cls.server.server_close()
 
+    def test_wizard_content_references_back_and_home(self):
+        """Percurso funcional básico, sem disparar geração ou APIs externas."""
+        page = self.browser.new_page(viewport={"width": 390, "height": 844},
+                                     reduced_motion="reduce")
+        try:
+            page.goto(self.url, wait_until="domcontentloaded")
+            page.locator("#home-create").click()
+            self.assertTrue(page.locator("#wizard-pane-content").is_visible())
+            page.locator("#wizard-content-next").click()
+            self.assertTrue(page.locator("#wizard-pane-references").is_visible())
+            self.assertFalse(page.locator("#wizard-pane-content").is_visible())
+            page.locator("#wizard-references-back").click()
+            self.assertTrue(page.locator("#wizard-pane-content").is_visible())
+            page.locator("#wizard-content-home").click()
+            self.assertTrue(page.locator("#home-create").is_visible())
+        finally:
+            page.close()
+
     def test_viewports_and_navigation(self):
         for width, height in [(320, 740), (390, 844), (535, 780), (1280, 900)]:
             with self.subTest(width=width):
