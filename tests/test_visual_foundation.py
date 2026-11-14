@@ -39,6 +39,17 @@ class VisualFoundationTests(unittest.TestCase):
         self.assertNotIn("url(", CSS)
         self.assertNotIn("javascript:", CSS)
 
+    def test_mobile_and_desktop_layout_contract(self):
+        self.assertIn('name="viewport"', HTML)
+        self.assertIn("width=device-width", HTML)
+        self.assertIn(".wizard-nav", CSS)
+        self.assertIn(".mobile-menu-toggle", CSS)
+        self.assertIn(".section-nav a", CSS)
+        self.assertIn("@media (hover:hover) and (pointer:fine)", CSS)
+
+    def test_css_link_precedes_inline_theme(self):
+        self.assertLess(HTML.index('href="./studio-motion.css"'), HTML.index("<style>"))
+
     def test_wizard_not_removed(self):
         for element_id in ("wizard-steps", "wizard-content-next",
                            "wizard-references-back", "art-approve",
