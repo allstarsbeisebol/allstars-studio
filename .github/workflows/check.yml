@@ -25,6 +25,8 @@ jobs:
         run: npm run test:syntax
       - name: Testar login e geração sem utilizar tokens reais
         run: node --test tests/backend.test.js
+      - name: Testar recuperação da cota Gemini sem API real
+        run: python -m unittest discover -s tests -p 'test_gemini_quota.py' -v
       - name: Testar notificações e consentimento do navegador
         run: |
           node --check public/notify.js
