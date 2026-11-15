@@ -1,0 +1,46 @@
+/* ALLSTARS Studio — camada opt-in de tokens e microinterações.
+   Não altera a página enquanto não for importada e validada no Preview. */
+:root {
+  --as-navy: #1a3566;
+  --as-blue: #315fac;
+  --as-red: #ce233e;
+  --as-gold: #f0c040;
+  --as-surface: #10284e;
+  --as-ink: #ffffff;
+  --as-muted: #c1cee6;
+  --as-border: #49648e;
+  --as-radius-sm: 10px;
+  --as-radius-lg: 17px;
+  --as-space-1: 4px;
+  --as-space-2: 8px;
+  --as-space-3: 12px;
+  --as-space-4: 16px;
+  --as-space-6: 24px;
+  --as-space-8: 32px;
+  --as-duration-fast: 140ms;
+  --as-duration-normal: 220ms;
+  --as-ease: cubic-bezier(.2,.8,.2,1);
+}
+.as-focus-ring:focus-visible {
+  outline: 3px solid var(--as-gold);
+  outline-offset: 3px;
+}
+.as-interactive {
+  transition: background-color var(--as-duration-fast) ease,
+              border-color var(--as-duration-fast) ease,
+              box-shadow var(--as-duration-fast) ease,
+              transform var(--as-duration-fast) var(--as-ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .as-interactive:not(:disabled):hover { transform: translateY(-1px); }
+}
+.as-interactive:active:not(:disabled) { transform: translateY(0); }
+.as-interactive:disabled, .as-interactive[aria-disabled="true"] { cursor: not-allowed; opacity: .6; }
+.as-reveal { animation: as-reveal var(--as-duration-normal) var(--as-ease) both; }
+@keyframes as-reveal {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .as-interactive, .as-reveal { transition: none !important; animation: none !important; transform: none !important; }
+}
