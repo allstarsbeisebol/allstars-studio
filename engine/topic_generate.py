@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
 """Roteiro sob demanda por assunto, usando buscas com fontes rastreáveis."""
-import datetime,json,os,re,socket,sys,urllib.error,urllib.request
+import datetime,json,os,re,socket,sys,time,urllib.error,urllib.request
 from pathlib import Path
 from content_request import parse
 from from_link import ROOT, validate
+
+def quota_retry_seconds(headers):
+    """Only trust a short positive Retry-After interval; avoid quota-burning retries."""
+    value=str(headers.get("Retry-After","")).strip() if headers else ""
+    if not re.fullmatch(r"[0-9]{1,5}",value):
+        return None
+    seconds=int(value)
+    return seconds if 0 < seconds <= 12 else None
+
 
 def create_topic(request):
     kind=request["content_type"]
@@ -45,14 +54,31 @@ def create_topic(request):
     req=urllib.request.Request(api,data=payload,headers={
        "Content-Type":"application/json","x-goog-api-key":key
     },method="POST")
-    try:
-        with urllib.request.urlopen(req,timeout=55) as response:
-            result=json.load(response)
-    except urllib.error.HTTPError as error:
-        diagnoses={400:"modelo ou busca incompatíveis com esta chave",401:"chave inválida",403:"sem permissão",404:"modelo não disponível",429:"cota gratuita esgotada",503:"serviço indisponível"}
-        raise ValueError("Pesquisa Gemini HTTP "+str(error.code)+": "+diagnoses.get(error.code,"falha do serviço")+".") from None
-    except (TimeoutError,socket.timeout,urllib.error.URLError):
-        raise ValueError("A pesquisa Gemini demorou para responder; tente novamente.") from None
+    result=None
+    # Uma única nova tentativa para throttling temporário com Retry-After curto.
+    # Cota diária esgotada não é recuperada por repetição imediata.
+    for attempt in range(2):
+        try:
+            with urllib.request.urlopen(req,timeout=55) as response:
+                result=json.load(response)
+            break
+        except urllib.error.HTTPError as error:
+            if error.code == 429:
+                delay=quota_retry_seconds(error.headers)
+                if attempt == 0 and delay is not None and 0 < delay <= 12:
+                    print("Gemini limitou a pesquisa; respeitando Retry-After antes de UMA tentativa.",flush=True)
+                    time.sleep(delay)
+                    continue
+                raise ValueError(
+                    "Pesquisa Gemini HTTP 429: limite de requisições ou cota gratuita atingida. "
+                    "O pedido foi preservado; aguarde a liberação da cota ou forneça links públicos "
+                    "e tente novamente. Não foi criada história sem fontes."
+                ) from None
+            diagnoses={400:"modelo ou busca incompatíveis com esta chave",401:"chave inválida",
+                      403:"sem permissão",404:"modelo não disponível",503:"serviço indisponível"}
+            raise ValueError("Pesquisa Gemini HTTP "+str(error.code)+": "+diagnoses.get(error.code,"falha do serviço")+".") from None
+        except (TimeoutError,socket.timeout,urllib.error.URLError):
+            raise ValueError("A pesquisa Gemini demorou para responder; tente novamente.") from None
     candidates=result.get("candidates") or []
     if not candidates:raise ValueError("A IA não retornou conteúdo pesquisado.")
     candidate=candidates[0]
