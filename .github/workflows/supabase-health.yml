@@ -1,0 +1,34 @@
+name: "ALLSTARS | Saúde Supabase Free"
+on:
+  schedule:
+    - cron: "17 11 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Verificar banco por RPC somente leitura
+        env:
+          SUPABASE_URL: ${{ secrets.ALLSTARS_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.ALLSTARS_SUPABASE_ANON_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$SUPABASE_URL" || -z "$SUPABASE_ANON_KEY" ]]; then
+            echo "::warning::Configure ALLSTARS_SUPABASE_URL e ALLSTARS_SUPABASE_ANON_KEY nos Secrets do repositório."
+            exit 0
+          fi
+          url="${SUPABASE_URL%/}/rest/v1/rpc/allstars_health"
+          code=$(curl --silent --show-error --location --retry 2 --retry-delay 5 --max-time 20 \
+            -o /tmp/allstars-health.json -w '%{http_code}' \
+            -X POST "$url" -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "Content-Type: application/json" --data '{}')
+          if [[ "$code" != 200 ]] || ! grep -Eq '^true[[:space:]]*$' /tmp/allstars-health.json; then
+            echo "::error::Health check do banco falhou (HTTP $code). Confira disponibilidade, função RPC e permissões."
+            exit 1
+          fi
+          echo "Consulta SQL de leitura ao Supabase concluída."
